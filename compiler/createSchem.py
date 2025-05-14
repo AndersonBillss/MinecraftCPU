@@ -8,9 +8,6 @@ MEMORY_SPACING = [4,2,5]
 def createLine(schem, binLine, count):
     offsetX = count%MEMORY_DIMENSIONS[0]*MEMORY_SPACING[0]
     offsetZ = math.floor(count/MEMORY_DIMENSIONS[2])*MEMORY_SPACING[2]
-
-    width = MEMORY_DIMENSIONS[2]*MEMORY_SPACING[2]-1
-    height = MEMORY_DIMENSIONS[1]*MEMORY_SPACING[1]-1
     
     splitBinLine = binLine.split()
     binLine = ""
@@ -40,5 +37,4 @@ def createSchem(binList, schemOutput):
     if(not schemPath):
         raise SystemExit("No Schem Path specified")
 
-    print(schemPath)
     schem.save(schemPath, schemOutput, mcschematic.Version.JE_1_20_1)

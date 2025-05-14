@@ -48,7 +48,7 @@ while i < len(sys.argv):
             "  --schem-out <file>            Specify custom output filename for the schematic file\n"
             "\n"
             "Example:\n"
-            "  python compiler/cli.py examples/fib.mcasm --bin-out demo.mcexe --no-schem\n"
+            "  python compiler/cli.py examples/fib.mcasm --bin-out fib.mcexe --no-schem\n"
         )
         exit()
     elif(arg[0:2] == "--"):
@@ -61,13 +61,14 @@ while i < len(sys.argv):
 if not inFilePath:
     raise SystemExit("No input path provided")
 
+sourceCode = ""
 try:
-    inFile = open(inFilePath, "r")
+    with open(inFilePath, "r") as inFile:
+        sourceCode = inFile.read()
 except IOError:
     raise SystemExit(f"Cannot find {inFilePath}")
 
-programText = inFile.read()
-programLines = compile(programText)
+programLines = compile(sourceCode)
 
 if(outputMinecraft):
     if not os.getenv("MC_SCHEM_PATH"): 
@@ -82,15 +83,15 @@ for line in programLines:
     binFileText += line + '\n'
 binFileText = binFileText.strip()
 
-if(writeOutput):
+if writeOutput:
     try:
-        outFile = open(outFilePath, "w")
-    except IOError:
-        raise SystemExit(f"can't open {outFilePath}")
-    outFile.write(binFileText)
-    outFile.close()
+        os.makedirs(os.path.dirname(f"build/{outFilePath}"), exist_ok=True)
+        with open(f"build/{outFilePath}", "w") as outFile:
+            outFile.write(binFileText)
 
-inFile.close()
+    except IOError:
+        raise SystemExit(f"Can't open build/{outFilePath}")
+
 
 if(outputMinecraft):
     print("To paste this code into Minecraft, use the following commands:")

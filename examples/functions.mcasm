@@ -10,7 +10,6 @@
         SHOW    R2      //9
                 
 
-// If the screen shows 5,        4,        3,           the test passes
-//                     00000101  00000100  00000011 
-
-// Otherwise, the test fails
+// Expected Output
+// 5,        4,        3,
+// 00000101  00000100  00000011 

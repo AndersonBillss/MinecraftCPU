@@ -1,3 +1,5 @@
+import os
+
 class operation:
     bincode = ''
     operation = ''
@@ -83,11 +85,16 @@ def processSymbols(programText):
 
 def compile(programText):
     instructionRules = []
-    instructionTableText = open("compiler/instruction_table.txt", "r").read()
+    instructionTableText = ""
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    instruction_path = os.path.join(script_dir, "instruction_table.txt")
+    with open(instruction_path, "r") as instructionFile:
+        instructionTableText = instructionFile.read()
     instructionTableText = removeComments(instructionTableText)
     instructionLines = instructionTableText.split("\n")
     sanitizedLines = []
-    for i, line in enumerate(instructionLines):
+    for line in instructionLines:
         line = line.strip()
         if line != '':
             sanitizedLines += [line]
