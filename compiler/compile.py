@@ -83,7 +83,7 @@ def processSymbols(programText):
 
 def compile(programText):
     instructionRules = []
-    instructionTableText = open("src/compile/instruction_table.txt", "r").read()
+    instructionTableText = open("compiler/instruction_table.txt", "r").read()
     instructionTableText = removeComments(instructionTableText)
     instructionLines = instructionTableText.split("\n")
     sanitizedLines = []

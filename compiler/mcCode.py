@@ -1,5 +1,5 @@
-from compile.compile import compile
-from compile.createSchem import createSchem
+from compile import compile
+from createSchem import createSchem
 from dotenv import load_dotenv
 load_dotenv()
 
