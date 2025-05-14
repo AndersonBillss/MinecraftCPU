@@ -25,7 +25,7 @@ def createLine(schem, binLine, count):
         schem.setBlock((offsetX, (-i*MEMORY_SPACING[1]-1), -offsetZ), block)
 
 
-def createSchem(binList):
+def createSchem(binList, schemOutput):
     schem = mcschematic.MCSchematic()
     n=MEMORY_DIMENSIONS[0] * MEMORY_DIMENSIONS[2]
 
@@ -41,4 +41,4 @@ def createSchem(binList):
         raise SystemExit("No Schem Path specified")
 
     print(schemPath)
-    schem.save(schemPath, "bin", mcschematic.Version.JE_1_20_1)
+    schem.save(schemPath, schemOutput, mcschematic.Version.JE_1_20_1)
