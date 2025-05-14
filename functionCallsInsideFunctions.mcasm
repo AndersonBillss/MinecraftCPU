@@ -1,0 +1,30 @@
+        LDI     R1      10
+        LDI     R2      5
+        LDI     R3      2
+        SHOW    R3      // 2
+
+        CALL    .fn3
+        SHOW    R3      // 1
+
+        CALL    .fn2
+        SHOW    R2      // 4
+        SHOW    R3      // 0
+
+        CALL    .fn1
+        SHOW    R1      // 6
+        SHOW    R2      // 4
+        SHOW    R3      // 255
+
+.fn1    SUB     R1      R2
+        CALL    .fn2    
+        RET
+
+.fn2    SUB     R2      R3
+        CALL    .fn3
+        RET
+
+.fn3    SUB_IMM R3      1
+        RET
+
+// 2        1        4        0        6        4        255
+// 00000010 00000001 00000100 00000000 00000110 00000010 11111111

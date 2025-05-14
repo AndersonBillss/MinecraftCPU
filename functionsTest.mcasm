@@ -1,0 +1,16 @@
+        LDI     R1  5   //0
+        SHOW    R1      //1 
+        CALL    .sub    //2
+        SHOW    R1      //3 
+        CALL    .sub    //4
+        SHOW    R1      //5
+.sub    SUB_IMM R1  1   //6
+        RET             //7
+        LDI     R2  255 //8
+        SHOW    R2      //9
+                
+
+// If the screen shows 5,        4,        3,           the test passes
+//                     00000101  00000100  00000011 
+
+// Otherwise, the test fails

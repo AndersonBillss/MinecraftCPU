@@ -1,0 +1,10 @@
+        LDI     R1  0
+        LDI     R2  1
+        LDI     R3  0
+.fib    SHOW    R3
+        LDI     R3  0
+        ADD     R3  R1
+        ADD     R3  R2
+        COPY    R1  R2
+        COPY    R2  R3
+        JMP_IMM .fib
