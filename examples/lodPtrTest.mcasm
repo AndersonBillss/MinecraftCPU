@@ -1,0 +1,27 @@
+
+    // Load 1, 2, 4, 8 into RAM
+    LDI     R1  1
+    STR     M0  R1
+    LSHFT   R1 
+    STR     M1  R1
+    LSHFT   R1 
+    STR     M2  R1
+    LSHFT   R1 
+    STR     M3  R1
+
+    // Use a pointer to grab each memory location
+    LDI     R1  0
+    LOD_PTR R2  R1
+    SHOW    R2
+    ADD_IMM R1  1
+    LOD_PTR R2  R1
+    SHOW    R2
+    ADD_IMM R1  1
+    LOD_PTR R2  R1
+    SHOW    R2
+    ADD_IMM R1  1
+    LOD_PTR R2  R1
+    SHOW    R2
+
+// Expected Output
+// 1, 2, 4, 8
