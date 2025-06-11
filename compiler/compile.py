@@ -38,7 +38,9 @@ def processLine(line, instructionRules):
         return("")
     splitLines = line.split()
     opcode = splitLines[0]
+
     operands = splitLines[1:]
+
 
     operationInstruction = None
     for item in instructionRules:
@@ -48,7 +50,7 @@ def processLine(line, instructionRules):
     if operationInstruction == None:
         raise SyntaxError(f"operation {opcode} does not exist")
     
-    binaryLine = f"{operationInstruction.bincode}"
+    binaryEncodedOperations = [f"{operationInstruction.bincode}"]
 
     if len(operands) != len(operationInstruction.operands):
         raise SyntaxError(f"operation {opcode} has {len(operationInstruction.operands)} operands")
@@ -58,16 +60,27 @@ def processLine(line, instructionRules):
         if operand[0] == '.':
             operand = symbolMap[operand]
         if operandType == "REG":
-            if operand[0] != "R":
-                raise SyntaxError(f"Operand {i+1} of {opcode} should start with 'R'")
+            if operand[0] != "R": raise SyntaxError(f"Operand {i+1} of {opcode} should start with 'R'")
             regNum = int(operand[1:])
-            if regNum > 31:
-                raise SyntaxError(f"Register addresses can't be greater than 31")
-            binaryLine += f" {make8Bits(intToBin(regNum))}"
+            if regNum > 31: raise SyntaxError(f"Register addresses can't be greater than 31")
+            binaryEncodedOperations.append(f"{make8Bits(intToBin(regNum))}")
+        elif operandType == "RAM":
+            memNum = int(operand[1:])
+            if operand[0] != "M": raise SyntaxError(f"Operand {i+1} of {opcode} should start with 'R'")
+            if memNum > 255: raise SyntaxError(f"RAM addresses can't be greater than 255")
+            binaryEncodedOperations.append(f"{make8Bits(intToBin(memNum))}")
         elif operandType == "NUM":
-            binaryLine += f" {make8Bits(intToBin(operand))}"
-    while len(binaryLine.split()) < 3:
-        binaryLine += " 00000000"
+            binaryEncodedOperations.append(f"{make8Bits(intToBin(operand))}")
+    while len(binaryEncodedOperations) < 3:
+        binaryEncodedOperations.append("00000000")
+
+    if opcode == "STR" or opcode == "STR_PTR": # The operands for these operations are swapped to work with hardware
+        tmp = binaryEncodedOperations[1]
+        binaryEncodedOperations[1] = binaryEncodedOperations[2]
+        binaryEncodedOperations[2] = tmp
+
+    binaryLine = " ".join(binaryEncodedOperations).strip()
+        
     return(f"{binaryLine}")
 
 symbolMap = {}

@@ -1,0 +1,31 @@
+LDI     R2      2
+
+LDI     R1      1
+STR     M1      R1
+LDI     R1      12
+STR     M2      R1
+LDI     R1      33
+STR     M3      R1
+LDI     R1      99
+STR     M4      R1
+LDI     R1      67
+STR     M5      R1
+LDI     R1      83
+STR     M6      R1
+
+LOD     R2      M1
+SHOW    R2      // 1
+LOD     R2      M2
+SHOW    R2      // 12
+LOD     R2      M3
+SHOW    R2      // 33
+LOD     R2      M4
+SHOW    R2      // 99
+LOD     R2      M5
+SHOW    R2      // 67
+LOD     R2      M6
+SHOW    R2      // 83
+
+// Expected Output
+// 1,        12,       33,       99,       67,       83
+// 00000001  00001100  00100001  01100011  01000011  01010011

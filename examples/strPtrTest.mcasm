@@ -1,0 +1,39 @@
+            LDI         R1  0
+            LDI         R2  1
+            LDI         R3  10
+            
+.for        CMP         R1  R3
+            BGT_IMM     .for_end
+            CALL        .createList
+            JMP_IMM     .for
+
+.for_end    LOD         R4  M1 //2
+            SHOW        R4
+            LOD         R4  M2 //3
+            SHOW        R4
+            LOD         R4  M3 //4
+            SHOW        R4
+            LOD         R4  M4 //5
+            SHOW        R4
+            LOD         R4  M5 //6
+            SHOW        R4
+            LOD         R4  M6 //7
+            SHOW        R4
+            LOD         R4  M7 //8
+            SHOW        R4
+            LOD         R4  M8 //9
+            SHOW        R4
+            LOD         R4  M9 //10
+            SHOW        R4
+            LOD         R4  M10 //11
+            SHOW        R4
+            LOD         R4  M11 //12
+            SHOW        R4
+
+.createList ADD_IMM     R1  1
+            ADD_IMM     R2  1
+            STR_PTR     R1  R2
+            RET
+
+// Expected Output
+// 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
