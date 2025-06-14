@@ -136,4 +136,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-build/
+bin/
+obj/
+mcScriptBuild/
+.vscode/
