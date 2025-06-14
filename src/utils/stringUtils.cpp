@@ -46,3 +46,13 @@ std::vector<std::string> stringUtils::split(const std::string &text)
 
     return splitString;
 }
+
+std::string stringUtils::join(const std::vector<std::string> &text)
+{
+    std::string result;
+    for(int i = 0; i < text.size(); i++){
+        if(i != 0) result += " ";
+        result += text[i];
+    }
+    return result;
+}
