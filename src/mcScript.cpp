@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include "utils/stringUtils.hpp"
+#include "utils/binUtils.hpp"
 
 int main()
 {
