@@ -1,7 +1,8 @@
 #include <iostream>
+#include "assembler/assembler.hpp"
 
 int main()
 {
-    std::cout << "HELLO, WORLD!" << std::endl;
+    std::cout << Assembler::compile("") << std::endl;
     return 0;
 }
