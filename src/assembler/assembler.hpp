@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-class Assembler {
-    public:
-        static std::string compile(std::string sourceCode);
+namespace Assembler
+{
+    std::string compile(const std::string &sourceCode);
 };

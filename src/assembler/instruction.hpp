@@ -2,12 +2,12 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "../operand/IOperand.hpp"
-#include "../operand/Int8Operand.hpp"
-#include "../operand/RegOperand.hpp"
-#include "../operand/MemOperand.hpp"
+#include "operand/IOperand.hpp"
+#include "operand/Int8Operand.hpp"
+#include "operand/RegOperand.hpp"
+#include "operand/MemOperand.hpp"
 
-struct instruction
+struct Instruction
 {
     std::string operatorBin;
     std::vector<IOperand *> operands;
@@ -17,7 +17,7 @@ RegOperand *REG = new RegOperand();
 MemOperand *MEM = new MemOperand();
 Int8Operand *INT = new Int8Operand();
 
-std::unordered_map<std::string, instruction> instructionTable = {
+std::unordered_map<std::string, Instruction> instructionTable = {
     // 0 - 15: Register/Program Control
     // 00000000 - 00001111
     // ------------------------------------

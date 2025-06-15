@@ -5,20 +5,26 @@
 #include <string>
 #include "utils/stringUtils.hpp"
 #include "utils/binUtils.hpp"
+#include <fstream>
+#include <sstream>
+#include <string>
 
-int main()
-{
-    std::ifstream file("examples/strPtrTest.mcasm");
-    if (!file.is_open())
+std::string readFile(const std::string& filename) {
+    std::ifstream file(filename);
+        if (!file.is_open())
     {
         std::cerr << "Failed to open file";
     }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
 
-    std::string line;
-    while(std::getline(file, line)){
-        std::cout << line << std::endl;
-    }
-    std::cout << Assembler::compile("") << std::endl;
+int main()
+{
+    std::string sourceCode = readFile("examples/strPtrTest.mcasm");
+
+    std::cout << Assembler::compile(sourceCode) << std::endl;
 
     return 0;
 }
