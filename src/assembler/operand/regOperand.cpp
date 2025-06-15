@@ -1,7 +1,6 @@
 #include "regOperand.hpp"
 #include "../../utils/syntaxError.hpp"
 #include "../../utils/binUtils.hpp"
-#include <stdexcept>
 
 std::string RegOperand::toBin(const std::string &operandText)
 {

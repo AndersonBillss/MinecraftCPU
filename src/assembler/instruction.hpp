@@ -31,7 +31,7 @@ std::unordered_map<std::string, Instruction> instructionTable = {
     {"BEQ_IMM", {operatorBin : "00000111", operands : {INT}}},
     {"JMP_REG", {operatorBin : "00001000", operands : {REG}}},
     {"CALL", {operatorBin : "00001001", operands : {INT}}},
-    {"RET", {operatorBin : "00001010", operands : {INT}}},
+    {"RET", {operatorBin : "00001010", operands : {}}},
 
     // 16 - 31: ALU Operations
     // 00010000 - 00011111

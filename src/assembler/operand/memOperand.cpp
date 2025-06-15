@@ -1,7 +1,6 @@
 #include "memOperand.hpp"
 #include "../../utils/syntaxError.hpp"
 #include "../../utils/binUtils.hpp"
-#include <stdexcept>
 
 std::string MemOperand::toBin(const std::string &operandText)
 {

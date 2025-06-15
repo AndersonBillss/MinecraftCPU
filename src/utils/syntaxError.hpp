@@ -1,8 +1,11 @@
 #pragma once
 #include <string>
+#include <iostream>
+#include <cstdlib>
 
-class SyntaxError {
-public:
+class SyntaxError : public std::exception {
     std::string message;
-    SyntaxError(const std::string& msg) : message(msg) {}
+public:
+    SyntaxError(const std::string& msg) : message("Syntax Error: " + msg) {}
+    const char* what() const noexcept override { return message.c_str(); }
 };

@@ -8,10 +8,12 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "utils/syntaxError.hpp"
 
-std::string readFile(const std::string& filename) {
+std::string readFile(const std::string &filename)
+{
     std::ifstream file(filename);
-        if (!file.is_open())
+    if (!file.is_open())
     {
         std::cerr << "Failed to open file";
     }
@@ -24,7 +26,19 @@ int main()
 {
     std::string sourceCode = readFile("examples/strPtrTest.mcasm");
 
-    std::cout << Assembler::compile(sourceCode) << std::endl;
+    std::string assembled;
+
+    try
+    {
+        assembled = Assembler::compile(sourceCode);
+    }
+    catch (const SyntaxError &e)
+    {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << assembled << std::endl;
 
     return 0;
 }

@@ -1,7 +1,6 @@
 #include "int8Operand.hpp"
 #include "../../utils/syntaxError.hpp"
 #include "../../utils/binUtils.hpp"
-#include <stdexcept>
 
 std::string Int8Operand::toBin(const std::string &operandText)
 {
