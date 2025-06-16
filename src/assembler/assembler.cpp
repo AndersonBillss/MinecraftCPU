@@ -13,7 +13,7 @@ std::string Assembler::compile(const std::string &sourceCode)
     Tokenizer::SymbolMap symbols = std::get<0>(tokenized);
     Tokenizer::InstructionList instructions = std::get<1>(tokenized);
 
-    std::string compiled = "";
+    std::vector<std::string> compiled;
 
     for (std::vector<std::string> instruction : instructions)
     {
@@ -53,8 +53,8 @@ std::string Assembler::compile(const std::string &sourceCode)
             line.push_back("00000000");
         }
         
-        compiled += stringUtils::join(line, " ") + '\n';
+        compiled.push_back(stringUtils::join(line, " "));
     }
 
-    return compiled;
+    return stringUtils::join(compiled, "\n");
 }

@@ -138,5 +138,8 @@ cython_debug/
 
 bin/
 obj/
+test_bin/
+test_obj/
+
 mcScriptBuild/
 .vscode/
