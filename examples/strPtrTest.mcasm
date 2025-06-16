@@ -26,9 +26,9 @@
             LOD         R4  M9 //10
             SHOW        R4
             LOD         R4  M10 //11
-            SHOW        R4
+            SHOW        R4  
             LOD         R4  M11 //12
-            SHOW        R4  1
+            SHOW        R4
 
 .createList ADD_IMM     R1  1
             ADD_IMM     R2  1
