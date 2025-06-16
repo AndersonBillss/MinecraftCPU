@@ -5,7 +5,8 @@
 
 void removeComments(std::string &line)
 {
-    if(line.empty()) return;
+    if (line.empty())
+        return;
     for (int i = 0; i < line.size() - 1; i++)
     {
         if (line[i] == '/' && line[i + 1] == '/')
@@ -23,21 +24,31 @@ std::tuple<Tokenizer::SymbolMap, Tokenizer::InstructionList> Tokenizer::tokenize
 
     std::istringstream stream(source);
     std::string line;
-    
+
     int currLine = 0;
+    int fileLine = 0;
     while (std::getline(stream, line))
     {
         removeComments(line);
         std::string trimmed = stringUtils::trim(line);
-        if(trimmed.empty()) continue;
-        
+
+        fileLine++;
+        if (trimmed.empty())
+            continue;
+
         std::vector<std::string> splitLine = stringUtils::split(trimmed);
-        if(splitLine[0][0] == '.'){
+        if (splitLine[0][0] == '.')
+        {
             symbols[splitLine[0]] = currLine;
             splitLine.erase(splitLine.begin());
         }
-        
-        instructions.push_back(splitLine);
+
+        instructions.push_back(
+            {
+                fileLineNumber: fileLine,
+                tokens: splitLine,
+            }
+        );
         currLine++;
     }
 

@@ -24,7 +24,8 @@ std::string readFile(const std::string &filename)
 
 int main()
 {
-    std::string sourceCode = readFile("examples/strPtrTest.mcasm");
+    std::string fileName = "examples/strPtrTest.mcasm";
+    std::string sourceCode = readFile(fileName);
 
     std::string assembled;
 
@@ -34,7 +35,7 @@ int main()
     }
     catch (const SyntaxError &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "Compilation error found in '" + fileName + "'\n -> " + e.what() << std::endl;
         return 1;
     }
 

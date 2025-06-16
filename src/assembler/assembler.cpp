@@ -15,22 +15,22 @@ std::string Assembler::compile(const std::string &sourceCode)
 
     std::vector<std::string> compiled;
 
-    for (std::vector<std::string> instruction : instructions)
+    for (Tokenizer::InstructionLine instruction : instructions)
     {
-        std::string opCode = instruction[0];
-        std::vector<std::string> operands(instruction.begin() + 1, instruction.end());
+        std::string opCode = instruction.tokens[0];
+        std::vector<std::string> operands(instruction.tokens.begin() + 1, instruction.tokens.end());
 
         auto it = instructionTable.find(opCode);
         if (it == instructionTable.end())
         {
-            throw SyntaxError("Opcode " + opCode + " does not exist.");
+            throw SyntaxError("(line " + std::to_string(instruction.fileLineNumber) + ") Opcode " + opCode + " does not exist.");
         }
         const Instruction &currInstruction = it->second;
 
         std::vector<std::string> line = {currInstruction.operatorBin};
         if ((currInstruction.operands.size() != operands.size()))
         {
-            throw SyntaxError("Opcode " + opCode + " Supports " + std::to_string(currInstruction.operands.size()) + " operand(s). " + std::to_string(operands.size()) + " operand(s) were given.");
+            throw SyntaxError("(line " + std::to_string(instruction.fileLineNumber) + ") Opcode '" + opCode + "' Supports " + std::to_string(currInstruction.operands.size()) + " operand(s). " + std::to_string(operands.size()) + " operand(s) were given.");
         }
 
         for (int i = 0; i < operands.size(); i++)
@@ -41,18 +41,33 @@ std::string Assembler::compile(const std::string &sourceCode)
                 auto it = symbols.find(operand);
                 if (it == symbols.end())
                 {
-                    throw SyntaxError("Symbol " + operand + " does not exist.");
+                    throw SyntaxError("(line " + std::to_string(instruction.fileLineNumber) + ") Symbol '" + operand + "' does not exist.");
                 }
                 operand = std::to_string(symbols[operand]);
             }
-            std::string opBin = currInstruction.operands[i]->toBin(operand);
+
+            std::string opBin;
+            try
+            {
+                opBin = currInstruction.operands[i]->toBin(operand);
+            }
+            catch (const SyntaxError &e)
+            {
+                throw SyntaxError("(line " + std::to_string(instruction.fileLineNumber) + ") " + e.what());
+            }
             line.push_back(opBin);
         }
 
-        while(line.size() < 3) {
+        while (line.size() < 3)
+        {
             line.push_back("00000000");
         }
-        
+
+        if (opCode == "STR" || opCode == "STR_PTR")
+        { // In hardware, the opcodes are switched for these two
+            line = {line[0], line[2], line[1]};
+        }
+
         compiled.push_back(stringUtils::join(line, " "));
     }
 

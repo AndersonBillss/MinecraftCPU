@@ -85,8 +85,8 @@ binFileText = binFileText.strip()
 
 if writeOutput:
     try:
-        os.makedirs(os.path.dirname(f"build/{outFilePath}"), exist_ok=True)
-        with open(f"build/{outFilePath}", "w") as outFile:
+        os.makedirs(os.path.dirname(f"mcScriptBuild/{outFilePath}"), exist_ok=True)
+        with open(f"mcScriptBuild/{outFilePath}", "w") as outFile:
             outFile.write(binFileText)
 
     except IOError:

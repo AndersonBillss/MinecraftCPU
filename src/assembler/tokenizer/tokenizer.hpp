@@ -6,8 +6,13 @@
 
 namespace Tokenizer
 {
+    struct InstructionLine
+    {
+        int fileLineNumber; // This is used for more informative error messages
+        std::vector<std::string> tokens;
+    };
     using SymbolMap = std::unordered_map<std::string, int>;
-    using InstructionList = std::vector<std::vector<std::string>>;
+    using InstructionList = std::vector<InstructionLine>;
 
     std::tuple<SymbolMap, InstructionList> tokenize(const std::string &source);
 }
