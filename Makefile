@@ -1,3 +1,5 @@
+RUN_ARGS := examples/lodPtrTest.mcasm
+
 CXX := g++
 CXX_FLAGS := -Wall
 
@@ -20,11 +22,10 @@ TEST_SRC_FILES = $(shell find test -name '*.cpp')
 TEST_OBJ_FILES := $(patsubst $(TEST_SRC_DIR)/%.cpp, $(TEST_OBJ_DIR)/%.o, $(TEST_SRC_FILES))
 SRC_OBJ_FILES_WITHOUT_MAIN := $(filter-out $(OBJ_DIR)/$(TARGET).o, $(OBJ_FILES))
 
-
 all: run
 
 run: build
-	$(BIN_DIR)/$(TARGET)$(EXE_SUFFIX)
+	$(BIN_DIR)/$(TARGET)$(EXE_SUFFIX) $(RUN_ARGS)
 
 test: build build_test
 	$(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX)

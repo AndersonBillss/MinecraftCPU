@@ -15,20 +15,24 @@ std::string readFile(const std::string &filename)
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        std::cerr << "Failed to open file";
+        std::cerr << "Failed to open file: " + filename;
     }
     std::stringstream buffer;
     buffer << file.rdbuf();
     return buffer.str();
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    std::string fileName = "examples/strPtrTest.mcasm";
+    if (argc < 2)
+    {
+        std::cerr << "No file provided" << std::endl;
+        return 1;
+    }
+    std::string fileName = argv[1];
     std::string sourceCode = readFile(fileName);
 
     std::string assembled;
-
     try
     {
         assembled = Assembler::compile(sourceCode);
