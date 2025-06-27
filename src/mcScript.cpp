@@ -5,8 +5,8 @@
 #include "assembler/assembler.hpp"
 #include "utils/stringUtils.hpp"
 #include "utils/binUtils.hpp"
-#include "utils/syntaxError.hpp"
 #include "utils/fileUtils.hpp"
+#include "utils/syntaxError.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -29,18 +29,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // std::cout << assembled << std::endl;
-
-
-    fileUtils::writeToFile("sampleFile/hello/test.txt", "HELLO, WORLD!");
-/*     std::ofstream outfile(outFilePath);
-    if(!outfile.is_open()){
-        std::cerr << "Failed to write to output file" << std::endl;
+    std::string filePath = "sampleFile//hello/test.txt";
+    std::string contents = "HELLO, WORLD!";
+    try
+    {
+        fileUtils::writeToFile(filePath, contents);
+    }
+    catch (const SyntaxError &e)
+    {
+        std::cerr << std::string(e.what()) + std::string(":\n -> Provided file path: '") + stringUtils::trim(filePath) + "'" << std::endl;
         return 1;
     }
-    outfile << assembled;
- */
 
-    
     return 0;
 }

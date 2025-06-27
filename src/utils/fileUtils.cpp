@@ -1,14 +1,10 @@
 #include "fileUtils.hpp"
 #include "stringUtils.hpp"
+#include "syntaxError.hpp"
 #include <iostream>
 #include <sstream>
 #include <vector>
-
-// std::ofstream fileUtils::createFile(std::string outputPath)
-// {
-//     std::ofstream outFile("Test File");
-//     return outFile;
-// }
+#include <filesystem>
 
 std::string fileUtils::readFile(const std::string &filename)
 {
@@ -22,16 +18,32 @@ std::string fileUtils::readFile(const std::string &filename)
     return buffer.str();
 }
 
-void fileUtils::writeToFile(std::string outputPath, std::string contents)
+void fileUtils::writeToFile(const std::string &outputPath, const std::string &contents)
 {
-    std::cout << contents << std::endl;
-    std::cout << outputPath << std::endl;
-    std::vector<std::string> splitPath = stringUtils::split(outputPath, "/");
-    for (std::string item : splitPath)
+    std::string trimmedOutputPath = stringUtils::trim(outputPath);
+    if (trimmedOutputPath.empty())
     {
-        std::cout << item << std::endl; 
+        throw SyntaxError("File paths cannot be empty");
+    }
+    char lastCharacter = trimmedOutputPath[trimmedOutputPath.size() - 1];
+    if (lastCharacter == '/' || lastCharacter == '\\')
+    {
+        throw SyntaxError("File paths cannot end in a '/' or a '\\'");
     }
 
+    std::filesystem::path filePath = outputPath;
+    std::filesystem::path parentPath = filePath.parent_path();
+    if (!parentPath.empty())
+    {
+        std::filesystem::create_directories(parentPath);
+    }
+    std::filesystem::create_directories(filePath.parent_path());
     std::ofstream outFile(outputPath);
-    std::cout << (outFile.is_open() ? "File is open" : "File is closed") << std::endl;
+    if (!outFile.is_open())
+    {
+        std::cerr << "Failed to open file: " + outputPath;
+        return;
+    }
+    outFile << contents;
+    outFile.close();
 }
