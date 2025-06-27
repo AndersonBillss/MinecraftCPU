@@ -2,10 +2,10 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "operand/IOperand.hpp"
-#include "operand/Int8Operand.hpp"
-#include "operand/RegOperand.hpp"
-#include "operand/MemOperand.hpp"
+#include "operand/iOperand.hpp"
+#include "operand/int8Operand.hpp"
+#include "operand/regOperand.hpp"
+#include "operand/memOperand.hpp"
 
 struct Instruction
 {

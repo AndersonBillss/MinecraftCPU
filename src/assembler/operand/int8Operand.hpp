@@ -1,5 +1,5 @@
 #pragma once
-#include "IOperand.hpp"
+#include "iOperand.hpp"
 
 class Int8Operand : public IOperand
 {
