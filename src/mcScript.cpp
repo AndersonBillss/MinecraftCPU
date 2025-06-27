@@ -1,26 +1,12 @@
 #include <iostream>
-#include "assembler/assembler.hpp"
-#include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include "assembler/assembler.hpp"
 #include "utils/stringUtils.hpp"
 #include "utils/binUtils.hpp"
-#include <fstream>
-#include <sstream>
-#include <string>
 #include "utils/syntaxError.hpp"
-
-std::string readFile(const std::string &filename)
-{
-    std::ifstream file(filename);
-    if (!file.is_open())
-    {
-        std::cerr << "Failed to open file: " + filename;
-    }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
-}
+#include "utils/fileUtils.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +16,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     std::string fileName = argv[1];
-    std::string sourceCode = readFile(fileName);
+    std::string sourceCode = fileUtils::readFile(fileName);
 
     std::string assembled;
     try
@@ -43,7 +29,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::cout << assembled << std::endl;
+    // std::cout << assembled << std::endl;
 
+
+    fileUtils::writeToFile("sampleFile/hello/test.txt", "HELLO, WORLD!");
+/*     std::ofstream outfile(outFilePath);
+    if(!outfile.is_open()){
+        std::cerr << "Failed to write to output file" << std::endl;
+        return 1;
+    }
+    outfile << assembled;
+ */
+
+    
     return 0;
 }

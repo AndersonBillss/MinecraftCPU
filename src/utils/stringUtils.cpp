@@ -1,5 +1,6 @@
 #include "stringUtils.hpp"
 #include <cctype>
+#include <iostream>
 
 std::string stringUtils::trim(const std::string &text)
 {
@@ -47,11 +48,53 @@ std::vector<std::string> stringUtils::split(const std::string &text)
     return splitString;
 }
 
-std::string stringUtils::join(const std::vector<std::string> &text, const std::string & delimiter)
+bool subSectionEqual(const std::string &text, size_t startingIndex, const std::string &subSection)
+{
+    for (size_t subSectionIndex = 0; subSectionIndex < subSection.size(); subSectionIndex++)
+    {
+        size_t textIndex = subSectionIndex + startingIndex;
+        if (text[textIndex] != subSection[subSectionIndex])
+            return false;
+    }
+    return true;
+}
+
+std::vector<std::string> stringUtils::split(const std::string &text, const std::string &delimiter)
+{
+    std::vector<std::string> splitString;
+
+    std::string currWord = "";
+    for (size_t i = 0; i < text.size(); i++)
+    {
+        if (subSectionEqual(text, i, delimiter))
+        {
+            i += delimiter.size() - 1;
+            if (!std::empty(currWord))
+            {
+                splitString.push_back(currWord);
+                currWord = "";
+            }
+        }
+        else
+        {
+            currWord += text[i];
+        }
+    }
+    if (!std::empty(currWord))
+    {
+        splitString.push_back(currWord);
+        currWord = "";
+    }
+    return splitString;
+}
+
+std::string stringUtils::join(const std::vector<std::string> &text, const std::string &delimiter)
 {
     std::string result;
-    for(int i = 0; i < text.size(); i++){
-        if(i != 0) result += delimiter;
+    for (int i = 0; i < text.size(); i++)
+    {
+        if (i != 0)
+            result += delimiter;
         result += text[i];
     }
     return result;
