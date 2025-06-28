@@ -37,7 +37,6 @@ void fileUtils::writeToFile(const std::string &outputPath, const std::string &co
     {
         std::filesystem::create_directories(parentPath);
     }
-    std::filesystem::create_directories(filePath.parent_path());
     std::ofstream outFile(outputPath);
     if (!outFile.is_open())
     {
