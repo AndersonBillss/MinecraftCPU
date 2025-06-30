@@ -1,6 +1,6 @@
 #include "regOperand.hpp"
 #include "../../utils/syntaxError.hpp"
-#include "../../utils/binUtils.hpp"
+#include "../../utils/binStringUtils.hpp"
 
 std::string RegOperand::toBin(const std::string &operandText)
 {
@@ -29,5 +29,5 @@ std::string RegOperand::toBin(const std::string &operandText)
         throw SyntaxError("Syntax Error: Operand out of 8-bit range (0-15): " + operandText);
     }
 
-    return binUtils::toBin(value, 8);
+    return binStringUtils::toBin(value, 8);
 }

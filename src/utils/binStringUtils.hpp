@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace binUtils
+namespace binStringUtils
 {
     std::string toBin(int number, int bits);
 }

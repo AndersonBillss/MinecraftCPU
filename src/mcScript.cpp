@@ -4,8 +4,9 @@
 #include <sstream>
 #include <unordered_map>
 #include "assembler/assembler.hpp"
+#include "schematicBuilder/schematicBuilder.hpp"
 #include "utils/stringUtils.hpp"
-#include "utils/binUtils.hpp"
+#include "utils/binStringUtils.hpp"
 #include "utils/fileUtils.hpp"
 #include "utils/syntaxError.hpp"
 
@@ -98,7 +99,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        std::cout << "Default command is not implemented yet" << std::endl;
+        schematicBuilder::build("");
+        // std::cout << "Default command is not implemented yet" << std::endl;
         return 0;
     }
     return 0;

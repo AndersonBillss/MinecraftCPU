@@ -1,9 +1,9 @@
-#include "binUtils.hpp"
+#include "binStringUtils.hpp"
 #include "cmath"
 #include <string>
 #include <stdexcept>
 
-std::string binUtils::toBin(int number, int bits)
+std::string binStringUtils::toBin(int number, int bits)
 {
     if (number < 0 || number >= pow(2, bits))
     {
