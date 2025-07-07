@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdint>
+#include <zlib.h>
 #include "../utils/binUtils.hpp"
 
 #include "schematicBuilder.hpp"
@@ -50,6 +51,13 @@ void pushInt32(std::vector<uint8_t> &buffer, const int &n)
     buffer.push_back(b >> 24);
 }
 
+void write_gzip(const std::string& filename, const std::vector<uint8_t>& data) {
+    gzFile file = gzopen(filename.c_str(), "wb");
+    if (!file) throw std::runtime_error("Failed to open gzip file");
+    gzwrite(file, data.data(), data.size());
+    gzclose(file);
+}
+
 void schematicBuilder::build(std::string binary)
 {
     Schematic exampleSchem = {
@@ -93,15 +101,15 @@ void schematicBuilder::build(std::string binary)
     };
     std::string fileName = "example";
     std::string outputPath = "C:/Users/ander/AppData/Roaming/.minecraft/config/worldedit/schematics/" + fileName + ".schem";
-    // std::string outputPath = "C:/Users/ander/Downloads/" + fileName + ".schem";
     std::cout << "HELLO SCHEMATIC" << std::endl;
     std::vector<uint8_t> buffer;
 
+    std::string tagName = "Schematic";
     buffer.push_back(tag::tagCompound);
-    pushInt16(buffer, fileName.size());
-    buffer.insert(buffer.end(), fileName.begin(), fileName.end());
+    pushInt16(buffer, tagName.size());
+    buffer.insert(buffer.end(), tagName.begin(), tagName.end());
 
-    std::string tagName = "Version";
+    tagName = "Version";
     buffer.push_back(tag::tagInt);
     pushInt16(buffer, tagName.size());
     buffer.insert(buffer.end(), tagName.begin(), tagName.end());
@@ -162,7 +170,7 @@ void schematicBuilder::build(std::string binary)
     buffer.insert(buffer.end(), tagName.begin(), tagName.end());
     pushInt32(buffer, 3);
 
-    tagName = "Pallete";
+    tagName = "Palette";
     buffer.push_back(tagCompound);
     pushInt16(buffer, tagName.size());
     buffer.insert(buffer.end(), tagName.begin(), tagName.end());
@@ -199,13 +207,5 @@ void schematicBuilder::build(std::string binary)
 
     buffer.push_back(tag::tagEnd);
 
-    std::ofstream file(outputPath, std::ios::binary);
-    if (!file)
-        throw std::runtime_error("Failed to open file for writing");
-
-    file.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
-    if (!file)
-        throw std::runtime_error("Failed to write to file");
-
-    file.close();
+    write_gzip(outputPath, buffer);
 }
