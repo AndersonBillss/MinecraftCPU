@@ -91,7 +91,7 @@ std::vector<std::string> stringUtils::split(const std::string &text, const std::
 std::string stringUtils::join(const std::vector<std::string> &text, const std::string &delimiter)
 {
     std::string result;
-    for (int i = 0; i < text.size(); i++)
+    for (size_t i = 0; i < text.size(); i++)
     {
         if (i != 0)
             result += delimiter;

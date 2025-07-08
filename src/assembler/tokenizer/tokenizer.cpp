@@ -7,7 +7,7 @@ void removeComments(std::string &line)
 {
     if (line.empty())
         return;
-    for (int i = 0; i < line.size() - 1; i++)
+    for (size_t i = 0; i < line.size() - 1; i++)
     {
         if (line[i] == '/' && line[i + 1] == '/')
         {

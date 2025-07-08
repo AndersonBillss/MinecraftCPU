@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
-namespace schematicBuilder {
-    void build(std::string binary);
+namespace schematicBuilder
+{
+    void build(const std::string &binary);
 }

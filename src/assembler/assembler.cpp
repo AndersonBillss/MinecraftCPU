@@ -33,7 +33,7 @@ std::string Assembler::compile(const std::string &sourceCode)
             throw SyntaxError("(line " + std::to_string(instruction.fileLineNumber) + ") Opcode '" + opCode + "' Supports " + std::to_string(currInstruction.operands.size()) + " operand(s). " + std::to_string(operands.size()) + " operand(s) were given.");
         }
 
-        for (int i = 0; i < operands.size(); i++)
+        for (size_t i = 0; i < operands.size(); i++)
         {
             std::string operand = operands[i];
             if (operand[0] == '.')
