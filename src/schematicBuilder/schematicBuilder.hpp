@@ -3,5 +3,5 @@
 
 namespace schematicBuilder
 {
-    void build(const std::string &binary);
+    void writeToFile(const std::string &outputPath, const std::string &binary);
 }

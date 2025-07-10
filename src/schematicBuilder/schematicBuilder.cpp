@@ -2,11 +2,29 @@
 #include "exportSchematic.hpp"
 #include "schematicBuilder.hpp"
 #include "schematic.hpp"
+#include "../utils/stringUtils.hpp"
 
-Schematic createSchem(const std::string binary)
+material getMaterial(int x, int y, int z, const std::vector<int> &dimensions, const std::string &bin)
 {
-    const int memoryDimensions[] = {16, 24, 16};
-    const int memorySpacing[] = {4, 2, 5};
+    // Z and Y go from back to front
+    z = dimensions[2] - z - 1;
+    y = dimensions[1] - y - 1;
+    
+    size_t yIndex = y;
+    size_t xIndex = x * dimensions[1];
+    size_t zIndex = z * dimensions[0] * dimensions[1];
+    size_t index = yIndex + xIndex + zIndex;
+
+    if(index > bin.size()) return material::glass;
+    return bin[index] == '1' ? material::redstoneBlock : material::glass;
+}
+
+Schematic createSchem(const std::string &binary)
+{
+    std::string trimmed = stringUtils::join(stringUtils::split(binary), "");
+
+    const std::vector<int> memoryDimensions = {16, 24, 16};
+    const std::vector<int> memorySpacing = {4, 2, 5};
 
     Schematic schem = {
         width : memoryDimensions[0] * memorySpacing[0],
@@ -17,18 +35,23 @@ Schematic createSchem(const std::string binary)
         originZ : 0,
         blocks : {}
     };
-     schem.originY = -schem.height;
-     schem.originZ = -schem.width;
- 
-    for (int x = 0; x < schem.width; x++)
+    schem.originY = -schem.height + 1;
+    schem.originZ = -schem.length + memorySpacing[2];
+
+    for (int y = 0; y < schem.height; y++)
     {
-        for (int y = 0; y < schem.height; y++)
+        for (int z = 0; z < schem.length; z++)
         {
-            for (int z = 0; z < schem.length; z++)
+            for (int x = 0; x < schem.width; x++)
             {
-                if (x % memorySpacing[0] == 0 && y % memorySpacing[1] == 0 && z % memorySpacing[2] == 0)
+                if ((x % memorySpacing[0] == 0) && (y % memorySpacing[1] == 0) && (z % memorySpacing[2] == 0))
                 {
-                    schem.blocks.push_back(material::glass);
+                    schem.blocks.push_back(getMaterial(
+                        x / memorySpacing[0],
+                        y / memorySpacing[1],
+                        z / memorySpacing[2],
+                        memoryDimensions,
+                        trimmed));
                 }
                 else
                 {
@@ -40,12 +63,8 @@ Schematic createSchem(const std::string binary)
     return schem;
 }
 
-void schematicBuilder::build(const std::string &binary)
+void schematicBuilder::writeToFile(const std::string &outputPath, const std::string &binary)
 {
     Schematic schem = createSchem(binary);
-    std::string fileName = "example";
-    std::string outputPath = "C:/Users/ander/AppData/Roaming/.minecraft/config/worldedit/schematics/" + fileName + ".schem";
-    // std::string outputPath = "C:/Users/ander/Downloads/" + fileName + ".schem";
-
     ExportSchematic(schem, outputPath);
 }

@@ -99,7 +99,17 @@ int main(int argc, char *argv[])
     }
     else
     {
-        schematicBuilder::build("");
+        std::string sourceCode = fileUtils::readFile("examples/ramTest.mcasm");
+        std::string assembled = Assembler::compile(sourceCode);
+
+        std::string schemName = "bin";
+        std::string schemOutput = "C:/Users/ander/AppData/Roaming/.minecraft/config/worldedit/schematics/" + schemName + ".schem";
+
+        std::string binName = "bin";
+        std::string binOutput = "mcScriptBuild/" + binName + ".mcexe";
+
+        schematicBuilder::writeToFile(schemOutput, assembled);
+        fileUtils::writeToFile(binOutput, assembled);
         // std::cout << "Default command is not implemented yet" << std::endl;
         return 0;
     }
