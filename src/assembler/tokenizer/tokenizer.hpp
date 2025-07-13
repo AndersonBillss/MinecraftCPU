@@ -12,7 +12,8 @@ namespace Tokenizer
         std::vector<std::string> tokens;
     };
     using SymbolMap = std::unordered_map<std::string, int>;
+    using ConstMap = std::unordered_map<std::string, std::string>;
     using InstructionList = std::vector<InstructionLine>;
 
-    std::tuple<SymbolMap, InstructionList> tokenize(const std::string &source);
+    std::tuple<SymbolMap, ConstMap, InstructionList> tokenize(const std::string &source);
 }

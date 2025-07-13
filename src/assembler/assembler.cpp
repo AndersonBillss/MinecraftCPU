@@ -9,9 +9,10 @@
 
 std::string Assembler::compile(const std::string &sourceCode)
 {
-    std::tuple<Tokenizer::SymbolMap, Tokenizer::InstructionList> tokenized = Tokenizer::tokenize(sourceCode);
+    std::tuple<Tokenizer::SymbolMap, Tokenizer::ConstMap, Tokenizer::InstructionList> tokenized = Tokenizer::tokenize(sourceCode);
     Tokenizer::SymbolMap symbols = std::get<0>(tokenized);
-    Tokenizer::InstructionList instructions = std::get<1>(tokenized);
+    Tokenizer::ConstMap constants = std::get<1>(tokenized);
+    Tokenizer::InstructionList instructions = std::get<2>(tokenized);
 
     std::vector<std::string> compiled;
 
