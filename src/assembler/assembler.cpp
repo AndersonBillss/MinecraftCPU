@@ -46,6 +46,15 @@ std::string Assembler::compile(const std::string &sourceCode)
                 }
                 operand = std::to_string(symbols[operand]);
             }
+            if (operand[0] == ':')
+            {
+                auto it = constants.find(operand);
+                if (it == constants.end())
+                {
+                    throw SyntaxError("(line " + std::to_string(instruction.fileLineNumber) + ") constant '" + operand + "' does not exist.");
+                }
+                operand = std::to_string(symbols[operand]);
+            }
 
             std::string opBin;
             try
