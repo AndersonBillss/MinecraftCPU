@@ -220,8 +220,6 @@ TEST_CASE("Assembler compilers assembly with RAM instructions")
 01000000 00000010 00000000)";
     REQUIRE(Assembler::compile(program) == compiled);
 
-
-
     program = R"(
 
 LDI     R2      2
@@ -283,9 +281,6 @@ SHOW    R2      // 83
 00110001 00000010 00000110
 01000000 00000010 00000000)";
     REQUIRE(Assembler::compile(program) == compiled);
-
-
-
 
     program = R"(
             LDI         R1  0
@@ -397,7 +392,6 @@ TEST_CASE("Symbols can be placed on their own lines")
     REQUIRE(Assembler::compile(program) == compiled);
 }
 
-
 TEST_CASE("Constants can be used")
 {
     std::string program = R"(
@@ -414,5 +408,47 @@ TEST_CASE("Constants can be used")
 00000001 00000010 00000011
 00010001 00000001 00000010
 01000000 00000001 00000000)";
+    REQUIRE(Assembler::compile(program) == compiled);
+}
+
+TEST_CASE("# comments can be used as well as // comments")
+{
+    std::string program = R"(
+        LDI     R1      5
+        LDI     R2      1
+        LDI     R3      1   # This is a compiler-generate comment
+        LDI     R4      255
+        CMP     R1      R2
+        BGT_IMM .next1
+        JMP_IMM .fail
+
+# This is a compiler-generated comment about what this symbol means
+.next1  CMP     R2      R1
+        BGT_IMM .fail
+        BLT_IMM .next2
+        JMP_IMM .fail
+.next2  CMP     R1      R2  # This is another compiler-generated comment
+        BLT_IMM .fail
+        SHOW    R2
+
+.fail   SHOW    R4  # This shows that the tests failed
+)";
+
+    std::string compiled = R"(00000001 00000001 00000101
+00000001 00000010 00000001
+00000001 00000011 00000001
+00000001 00000100 11111111
+00011100 00000001 00000010
+00000101 00000111 00000000
+00000100 00001110 00000000
+00011100 00000010 00000001
+00000101 00001110 00000000
+00000110 00001011 00000000
+00000100 00001110 00000000
+00011100 00000001 00000010
+00000110 00001110 00000000
+01000000 00000010 00000000
+01000000 00000100 00000000)";
+
     REQUIRE(Assembler::compile(program) == compiled);
 }

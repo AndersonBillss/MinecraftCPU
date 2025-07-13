@@ -10,6 +10,14 @@ void removeComments(std::string &line)
         return;
     for (size_t i = 0; i < line.size() - 1; i++)
     {
+        if (line[i] == '#')
+        {
+            line.erase(i);
+            break;
+        }
+
+        if (i + 1 >= line.size())
+            break; // Avoid segfaults by breaking early
         if (line[i] == '/' && line[i + 1] == '/')
         {
             line.erase(i);
@@ -50,8 +58,7 @@ std::tuple<Tokenizer::SymbolMap, Tokenizer::ConstMap, Tokenizer::InstructionList
             if (splitLine.size() < 2)
             {
                 throw SyntaxError(
-                    "(line " + std::to_string(fileLine) + ") undefined constant (" + splitLine[0] + ")"
-                );
+                    "(line " + std::to_string(fileLine) + ") undefined constant (" + splitLine[0] + ")");
             }
             constants[splitLine[0]] = splitLine[1];
             splitLine.erase(splitLine.begin());
