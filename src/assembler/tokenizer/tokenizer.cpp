@@ -42,6 +42,9 @@ std::tuple<Tokenizer::SymbolMap, Tokenizer::InstructionList> Tokenizer::tokenize
             symbols[splitLine[0]] = currLine;
             splitLine.erase(splitLine.begin());
         }
+        
+        if (splitLine.size() == 0)
+            continue;
 
         instructions.push_back(
             {

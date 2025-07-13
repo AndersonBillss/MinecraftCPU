@@ -364,3 +364,35 @@ SHOW    R2      // 83
 00001010 00000000 00000000)";
     REQUIRE(Assembler::compile(program) == compiled);
 };
+
+TEST_CASE("Symbols can be placed on their own lines")
+{
+    std::string program = R"(
+        LDI R1 1 
+        LDI R1 1 
+        LDI R1 1 
+        LDI R1 1 
+        LDI R1 1 
+        LDI R1 1 
+
+        .test<float>(int,int):<vector<float>>
+        LDI R1 1
+        LDI R1 1
+        RET
+
+        CALL .test<float>(int,int):<vector<float>>
+        SHOW R1
+    )";
+    std::string compiled = R"(00000001 00000001 00000001
+00000001 00000001 00000001
+00000001 00000001 00000001
+00000001 00000001 00000001
+00000001 00000001 00000001
+00000001 00000001 00000001
+00000001 00000001 00000001
+00000001 00000001 00000001
+00001010 00000000 00000000
+00001001 00000110 00000000
+01000000 00000001 00000000)";
+    REQUIRE(Assembler::compile(program) == compiled);
+}
