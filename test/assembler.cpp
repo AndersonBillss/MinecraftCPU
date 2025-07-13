@@ -396,3 +396,23 @@ TEST_CASE("Symbols can be placed on their own lines")
 01000000 00000001 00000000)";
     REQUIRE(Assembler::compile(program) == compiled);
 }
+
+
+TEST_CASE("Constants can be used")
+{
+    std::string program = R"(
+        :ten 10     
+        :feetPerYard 3     
+
+        LDI R1 :ten 
+        LDI R2 :feetPerYard
+        ADD R1 R2
+
+        SHOW R1
+    )";
+    std::string compiled = R"(00000001 00000001 00001010
+00000001 00000010 00000011
+00010001 00000001 00000010
+01000000 00000001 00000000)";
+    REQUIRE(Assembler::compile(program) == compiled);
+}

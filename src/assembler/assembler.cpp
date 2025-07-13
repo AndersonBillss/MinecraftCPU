@@ -53,7 +53,7 @@ std::string Assembler::compile(const std::string &sourceCode)
                 {
                     throw SyntaxError("(line " + std::to_string(instruction.fileLineNumber) + ") constant '" + operand + "' does not exist.");
                 }
-                operand = std::to_string(symbols[operand]);
+                operand = constants[operand];
             }
 
             std::string opBin;
