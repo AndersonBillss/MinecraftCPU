@@ -53,15 +53,12 @@ std::tuple<Tokenizer::SymbolMap, Tokenizer::ConstMap, Tokenizer::InstructionList
             splitLine.erase(splitLine.begin());
         }
 
-        if (splitLine[0][0] == ':')
+        if (splitLine[0][0] == '$')
         {
-            if (splitLine.size() < 2)
-            {
-                throw SyntaxError(
-                    "(line " + std::to_string(fileLine) + ") undefined constant (" + splitLine[0] + ")");
-            }
-            constants[splitLine[0]] = splitLine[1];
-            splitLine.erase(splitLine.begin());
+            std::vector<std::string> equalSplit = stringUtils::split(trimmed, "=");
+            std::string label = stringUtils::trim(equalSplit[0]);
+            std::string value = stringUtils::trim(equalSplit[1]);
+            constants[label] = value;
             continue;
         }
 

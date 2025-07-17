@@ -395,11 +395,11 @@ TEST_CASE("Symbols can be placed on their own lines")
 TEST_CASE("Constants can be used")
 {
     std::string program = R"(
-        :ten 10     
-        :feetPerYard 3     
+        $ten = 10     
+        $feetPerYard=3     
 
-        LDI R1 :ten 
-        LDI R2 :feetPerYard
+        LDI R1 $ten 
+        LDI R2 $feetPerYard
         ADD R1 R2
 
         SHOW R1

@@ -46,7 +46,7 @@ std::string Assembler::compile(const std::string &sourceCode)
                 }
                 operand = std::to_string(symbols[operand]);
             }
-            if (operand[0] == ':')
+            if (operand[0] == '$')
             {
                 auto it = constants.find(operand);
                 if (it == constants.end())
