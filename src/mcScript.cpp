@@ -10,6 +10,10 @@
 #include "utils/fileUtils.hpp"
 #include "utils/syntaxError.hpp"
 
+const std::string defaultOutputFolder = "mcScriptBuild/";
+const std::string defaultOutputFileName = "bin";
+const std::string defaultExecutableExtension = ".mcasm";
+
 void handleAssembleArg(const int &argc, char *argv[])
 {
     if (argc < 3)
@@ -44,8 +48,7 @@ void handleAssembleArg(const int &argc, char *argv[])
     }
     if (outFileName.empty())
     {
-        std::cerr << "No output file path provided" << std::endl;
-        exit(1);
+        outFileName = defaultOutputFolder + defaultOutputFileName + defaultExecutableExtension;
     }
     std::string sourceCode = fileUtils::readFile(inFileName);
     std::string assembled;

@@ -1,4 +1,4 @@
-RUN_ARGS := examples/lodPtrTest.mcasm
+RUN_ARGS := -assemble examples/lodPtrTest.mcasm
 
 CXX := g++
 CXX_FLAGS := -Wall -lz
