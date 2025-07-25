@@ -1,7 +1,7 @@
 RUN_ARGS := -assemble examples/lodPtrTest.mcasm
 
 CXX := g++
-CXX_FLAGS := -Wall -lz
+CXX_FLAGS := -Wall -lz -Iinclude
 
 TARGET := mcScript
 TEST_TARGET := tests
