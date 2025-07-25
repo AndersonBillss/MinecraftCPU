@@ -5,7 +5,12 @@ CXX_FLAGS := -Wall -lz
 
 TARGET := mcScript
 TEST_TARGET := tests
-EXE_SUFFIX := .exe
+
+ifeq ($(shell uname -s), Windows_NT)
+	EXE_SUFFIX := .exe 
+else 
+	EXE_SUFFIX := 
+endif
 
 SRC_DIR := src
 BIN_DIR := bin
