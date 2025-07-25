@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        std::cerr << "No Aguments provided\nUse the -help flag to see available commands" << std::endl;
+        std::cerr << "No Arguments provided\nUse the -help flag to see available commands" << std::endl;
         return 1;
     }
 
