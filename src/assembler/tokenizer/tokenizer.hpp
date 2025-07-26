@@ -13,5 +13,5 @@ namespace Tokenizer
     };
     using InstructionList = std::vector<InstructionLine>;
 
-    std::tuple<InstructionLocationMap, VariableMap, InstructionList> tokenize(const std::string &source);
+    std::tuple<SymbolMap, VariableMap, InstructionList> tokenize(const std::string &source);
 }
