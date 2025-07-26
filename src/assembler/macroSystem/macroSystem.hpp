@@ -23,12 +23,11 @@ public:
     void popStack();
 
 private:
-    SymbolMap _labels;
-    std::unordered_map<std::string, std::string> _macros; 
-    std::vector<SymbolMap> _values;
-    size_t _currentStack;
-
-
     int _getValueHelper(std::string symbol, size_t stackIndex = 0);
-    void _setValueHelper(std::string symbol, int value, size_t stackIndex = 0);
+    std::string _getMacroHelper(std::string symbol, size_t stackIndex = 0);
+    
+    SymbolMap _labels;
+    std::vector<SymbolMap> _values;
+    std::vector<VariableMap> _macros;
+    size_t _currentStack;
 };

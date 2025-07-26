@@ -3,7 +3,7 @@
 
 MacroSystem::MacroSystem()
 {
-    _currentStack = -1;
+    _currentStack = -1; // pushStack automatically increments this
     pushStack();   
 }
 
@@ -33,21 +33,22 @@ void MacroSystem::setValue(std::string symbol, int value)
 
 std::string MacroSystem::getMacro(std::string symbol)
 {
-    auto it = _macros.find(symbol);
-    if (it != _macros.end())
-    {
-        std::string value = it->second;
-        return value;
-    }
-    else
-    {
-        throw RuntimeError("Macro not found: " + symbol);
-    }
+    return _getMacroHelper(symbol, _currentStack);
 }
 
 void MacroSystem::setMacro(std::string symbol, std::string value)
 {
-    _macros[symbol] = value;
+    VariableMap &selectedScope = _macros[0];
+
+    auto it = selectedScope.find(symbol);
+    if (it != selectedScope.end())
+    {
+        selectedScope[symbol] = value;
+    }
+    else
+    {
+        _macros[_currentStack][symbol] = value;
+    }
 }
 
 int MacroSystem::getLabel(std::string symbol)
@@ -71,8 +72,10 @@ void MacroSystem::setLabel(std::string symbol, int value)
 
 void MacroSystem::pushStack()
 {
-    SymbolMap map;
-    _values.push_back(map);
+    SymbolMap symbols;
+    _values.push_back(symbols);
+    VariableMap variables;
+    _macros.push_back(variables);
     _currentStack++;
 }
 
@@ -82,6 +85,7 @@ void MacroSystem::popStack()
         throw RuntimeError("Cannot pop a stack that doesn't exist");
     }
     _values.pop_back();
+    _macros.pop_back();
     _currentStack--;
 }
 
@@ -98,11 +102,25 @@ int MacroSystem::_getValueHelper(std::string symbol, size_t stackIndex)
     else
     {
         if (stackIndex != 0)
-            return getValue(symbol);
+            return _getValueHelper(symbol);
         throw RuntimeError("Variable not found: " + symbol);
     }
 }
 
-void MacroSystem::_setValueHelper(std::string symbol, int value, size_t stackIndex)
+std::string MacroSystem::_getMacroHelper(std::string symbol, size_t stackIndex)
 {
+    VariableMap &scope = _macros[stackIndex];
+
+    auto it = scope.find(symbol);
+    if (it != scope.end())
+    {
+        std::string value = it->second;
+        return value;
+    }
+    else
+    {
+        if (stackIndex != 0)
+            return _getMacroHelper(symbol);
+        throw RuntimeError("Variable not found: " + symbol);
+    }
 }
