@@ -1,8 +1,8 @@
 #pragma once
-#include <unordered_map>
 #include <vector>
 #include <tuple>
 #include <string>
+#include "../macroSystem/macroSystem.hpp"
 
 namespace Tokenizer
 {
@@ -11,9 +11,7 @@ namespace Tokenizer
         int fileLineNumber; // This is used for more informative error messages
         std::vector<std::string> tokens;
     };
-    using SymbolMap = std::unordered_map<std::string, int>;
-    using ConstMap = std::unordered_map<std::string, std::string>;
     using InstructionList = std::vector<InstructionLine>;
 
-    std::tuple<SymbolMap, ConstMap, InstructionList> tokenize(const std::string &source);
+    std::tuple<InstructionLocationMap, VariableMap, InstructionList> tokenize(const std::string &source);
 }
