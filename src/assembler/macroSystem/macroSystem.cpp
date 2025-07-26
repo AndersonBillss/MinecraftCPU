@@ -1,16 +1,22 @@
 #include "macroSystem.hpp"
 #include "../../utils/runtimeError.hpp"
 
+MacroSystem::MacroSystem()
+{
+    SymbolMap map;
+    _values.push_back(map);
+}
+
 void MacroSystem::evaluate(std::string block)
 {
 }
 
-int MacroSystem::getValue(std::string symbol, size_t stackIndex = 0)
+int MacroSystem::getValue(std::string symbol, size_t stackIndex)
 {
-    SymbolMap top = _values[stackIndex];
+    SymbolMap &scope = _values[stackIndex];
 
-    auto it = top.find(symbol);
-    if (it != top.end())
+    auto it = scope.find(symbol);
+    if (it != scope.end())
     {
         int value = it->second;
         return value;
@@ -23,9 +29,11 @@ int MacroSystem::getValue(std::string symbol, size_t stackIndex = 0)
     }
 }
 
-void MacroSystem::setValue(std::string symbol, int value, size_t stackIndex = 0)
+void MacroSystem::setValue(std::string symbol, int value, size_t stackIndex)
 {
-    _values[stackIndex][symbol] = value;
+    SymbolMap &selectedFrame = _values[stackIndex];
+    selectedFrame[symbol] = value;
+    std::cout << selectedFrame[symbol] << std::endl;
 }
 
 std::string MacroSystem::getMacro(std::string symbol)

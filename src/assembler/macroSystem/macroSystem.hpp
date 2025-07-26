@@ -7,6 +7,7 @@ using VariableMap = std::unordered_map<std::string, std::string>;
 
 class MacroSystem
 {
+public:
     MacroSystem();
     void evaluate(std::string block);
     
@@ -23,6 +24,5 @@ class MacroSystem
 private:
     SymbolMap _labels;
     std::unordered_map<std::string, std::string> _macros; 
-
     std::vector<SymbolMap> _values;
 };

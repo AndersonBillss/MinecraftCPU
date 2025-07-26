@@ -2,10 +2,13 @@
 #include <vector>
 #include <tuple>
 #include <string>
-#include "../macroSystem/macroSystem.hpp"
+#include <unordered_map>
 
 namespace Tokenizer
 {
+
+    using SymbolMap = std::unordered_map<std::string, int>;
+    using ConstMap = std::unordered_map<std::string, std::string>;
     struct InstructionLine
     {
         int fileLineNumber; // This is used for more informative error messages
@@ -13,5 +16,5 @@ namespace Tokenizer
     };
     using InstructionList = std::vector<InstructionLine>;
 
-    std::tuple<SymbolMap, VariableMap, InstructionList> tokenize(const std::string &source);
+    std::tuple<SymbolMap, ConstMap, InstructionList> tokenize(const std::string &source);
 }
