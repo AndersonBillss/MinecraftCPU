@@ -1,33 +1,39 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <variant>
 
-using SymbolMap = std::unordered_map<std::string, int>;
-using VariableMap = std::unordered_map<std::string, std::string>;
+enum VariableType
+{
+    label,
+    number,
+    macro,
+};
+struct Variable
+{
+    VariableType type;
+    std::variant<int, std::string> value;
+};
+using VariableMap = std::unordered_map<std::string, Variable>;
 
 class MacroSystem
 {
 public:
     MacroSystem();
     void evaluate(std::string block);
-    
-    int getValue(std::string symbol);
-    void setValue(std::string symbol, int value);
 
-    std::string getMacro(std::string symbol);
+    void setNumber(std::string symbol, int value);
     void setMacro(std::string symbol, std::string value);
-
-    int getLabel(std::string symbol);
     void setLabel(std::string symbol, int value);
+    Variable getVariable(std::string symbol);
+
     void pushStack();
     void popStack();
 
 private:
-    int _getValueHelper(std::string symbol, size_t stackIndex = 0);
-    std::string _getMacroHelper(std::string symbol, size_t stackIndex = 0);
-    
-    SymbolMap _labels;
-    std::vector<SymbolMap> _values;
-    std::vector<VariableMap> _macros;
+    void setVariableHelper(std::string symbol, Variable value, size_t stackIndex = 0);
+    Variable _getVariableHelper(std::string symbol, size_t stackIndex = 0);
+
+    std::vector<VariableMap> _variables;
     size_t _currentStack;
 };
