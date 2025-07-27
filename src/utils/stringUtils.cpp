@@ -99,3 +99,30 @@ std::string stringUtils::join(const std::vector<std::string> &text, const std::s
     }
     return result;
 }
+
+std::string stringUtils::getBlock(const std::string &text, int index, const std::string &opening, const std::string &closing)
+{
+    std::string result;
+    bool insideBlock = false;
+    int depth = 0;
+    for (size_t i = index; i < text.size(); i++)
+    {
+        if (subSectionEqual(text, i, opening))
+        {
+            insideBlock = true;
+            depth++;
+        }
+        if (insideBlock)
+        {
+            result += text[i];
+        }
+        if (subSectionEqual(text, i, closing))
+        {
+            depth--;
+        }
+        if (insideBlock && depth == 0){
+            return result;
+        }
+    }
+    throw std::runtime_error("Unclosed block: missing matching closing string '" + closing + "'");
+}

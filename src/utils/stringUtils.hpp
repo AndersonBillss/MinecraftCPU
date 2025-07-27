@@ -9,4 +9,5 @@ namespace stringUtils
     std::vector<std::string> split(const std::string &text);
     std::vector<std::string> split(const std::string &text, const std::string &delimiter);
     std::string join(const std::vector<std::string> &text, const std::string &delimiter);
+    std::string getBlock(const std::string &text, int index = 0, const std::string& opening, const std::string& closing);
 }

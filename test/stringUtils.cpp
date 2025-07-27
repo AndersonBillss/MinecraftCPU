@@ -112,4 +112,9 @@ TEST_CASE("StringUtils Split (delimiter)")
     delimiter = "123";
     expected = {"This", "is", "a", "sample", "string"};
     REQUIRE(stringUtils::split(testString, delimiter) == expected);
+
+    testString = "123This123123is123a123123sample123123123string12312312";
+    delimiter = "123";
+    expected = {"This", "is", "a", "sample", "string", "12"};
+    REQUIRE(stringUtils::split(testString, delimiter) == expected);
 }
