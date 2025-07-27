@@ -20,7 +20,7 @@ class MacroSystem
 {
 public:
     MacroSystem();
-    void evaluate(std::string block);
+    std::string evaluate(const std::string &block);
 
     void setNumber(std::string symbol, int value);
     void setMacro(std::string symbol, std::string value);
