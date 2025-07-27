@@ -51,9 +51,6 @@ Variable MacroSystem::getVariable(std::string symbol)
 Variable MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
 {
     VariableMap &scope = _variables[stackIndex];
-    if(symbol == "$test2"){
-        std::cout << "CALL getVariable\n";
-    }
     auto it = scope.find(symbol);
     if (it != scope.end())
     {
