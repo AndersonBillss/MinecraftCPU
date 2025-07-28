@@ -118,3 +118,21 @@ TEST_CASE("StringUtils Split (delimiter)")
     expected = {"This", "is", "a", "sample", "string", "12"};
     REQUIRE(stringUtils::split(testString, delimiter) == expected);
 }
+
+TEST_CASE("StringUtils getBlock")
+{
+    std::string testString = "Hello, (this is a test string) in parentheses";
+    std::string expected = "(this is a test string)";
+    REQUIRE(stringUtils::getBlock(testString, "(", ")") == expected);
+
+    testString = "Hello, (this is a test string (with nested blocks)) in parentheses";
+    expected = "(this is a test string (with nested blocks))";
+    REQUIRE(stringUtils::getBlock(testString, "(", ")") == expected);
+
+    expected = "(with nested blocks)";
+    REQUIRE(stringUtils::getBlock(testString, "(", ")", 30) == expected);
+
+    testString = "This is a block {With nested blocks {and some more {nested} blocks inside}}";
+    expected = "{and some more {nested} blocks inside}";
+    REQUIRE(stringUtils::getBlock(testString, "{", "}", 36) == expected);
+}

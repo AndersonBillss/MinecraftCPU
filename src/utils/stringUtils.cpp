@@ -100,7 +100,7 @@ std::string stringUtils::join(const std::vector<std::string> &text, const std::s
     return result;
 }
 
-std::string stringUtils::getBlock(const std::string &text, int index, const std::string &opening, const std::string &closing)
+std::string stringUtils::getBlock(const std::string &text, const std::string &opening, const std::string &closing, int index)
 {
     std::string result;
     bool insideBlock = false;
