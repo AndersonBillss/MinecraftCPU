@@ -110,6 +110,7 @@ std::string stringUtils::getBlock(const std::string &text, const std::string &op
         if (subSectionEqual(text, i, opening))
         {
             insideBlock = true;
+            i += opening.size() - 1;
             depth++;
         }
         if (insideBlock)
@@ -118,9 +119,11 @@ std::string stringUtils::getBlock(const std::string &text, const std::string &op
         }
         if (subSectionEqual(text, i, closing))
         {
+            i += opening.size() - 1;
             depth--;
         }
-        if (insideBlock && depth == 0){
+        if (insideBlock && depth == 0)
+        {
             return result;
         }
     }
