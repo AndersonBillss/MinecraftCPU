@@ -2,37 +2,6 @@
 #include "../../utils/runtimeError.hpp"
 #include "../../utils/stringUtils.hpp"
 
-std::vector<std::string> _tokenize(std::string &block)
-{
-    std::vector<std::string> tokens;
-    for (size_t i = 0; i < block.size(); i++)
-    {
-        if (block[i] == '$')
-        {
-        }
-    }
-}
-void _getAssignmentTokens(std::string block, std::vector<std::string> &tokens, int &index)
-{
-    std::string token = "";
-    bool beforeEqual = true;
-    for (size_t i = index; i < block.size(); i++)
-    {
-        if (block[i] == '=' && beforeEqual)
-        {
-            beforeEqual = false;
-            tokens.push_back(stringUtils::trim(token));
-            token = "";
-            tokens.push_back("=");
-        }
-        else if (beforeEqual) {
-            token += block[i];
-        } else {
-            
-        }
-    }
-}
-
 MacroSystem::MacroSystem()
 {
     _currentStack = -1; // pushStack automatically increments this
@@ -49,17 +18,17 @@ std::string MacroSystem::evaluate(const std::string &block)
 
 void MacroSystem::setNumber(std::string symbol, int value)
 {
-    setVariableHelper(symbol, {type : number, value : value}, _currentStack);
+    _setVariableHelper(symbol, {type : number, value : value}, _currentStack);
 }
 
 void MacroSystem::setMacro(std::string symbol, std::string value)
 {
-    setVariableHelper(symbol, {type : macro, value : value}, _currentStack);
+    _setVariableHelper(symbol, {type : macro, value : value}, _currentStack);
 }
 
 void MacroSystem::setLabel(std::string symbol, int value)
 {
-    setVariableHelper(symbol, {type : label, value : value});
+    _setVariableHelper(symbol, {type : label, value : value});
 }
 
 void MacroSystem::pushStack()
@@ -102,7 +71,7 @@ Variable MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
     }
 }
 
-void MacroSystem::setVariableHelper(std::string symbol, Variable value, size_t stackIndex)
+void MacroSystem::_setVariableHelper(std::string symbol, Variable value, size_t stackIndex)
 {
     VariableMap &scope = _variables[0];
 

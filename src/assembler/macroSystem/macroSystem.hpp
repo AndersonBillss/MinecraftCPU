@@ -1,7 +1,10 @@
+#pragma once
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <variant>
+#include <set>
+
 
 enum VariableType
 {
@@ -31,8 +34,12 @@ public:
     void popStack();
 
 private:
-    void setVariableHelper(std::string symbol, Variable value, size_t stackIndex = 0);
+    void _setVariableHelper(std::string symbol, Variable value, size_t stackIndex = 0);
     Variable _getVariableHelper(std::string symbol, size_t stackIndex = 0);
+
+    std::vector<std::string> _tokenize(std::string &block);
+    int _handleBlock(std::vector<std::string> &tokens, std::string &text, int index);
+    int _handleVariable(std::vector<std::string> &tokens, std::string &text, int index);
 
     std::vector<VariableMap> _variables;
     size_t _currentStack;
