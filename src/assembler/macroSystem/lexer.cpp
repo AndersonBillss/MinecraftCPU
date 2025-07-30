@@ -23,7 +23,6 @@ int handleOperator(std::vector<std::string> &tokens, std::string &text, size_t i
     std::string fullOperator = "";
     while (index < text.size())
     {
-        index++;
         if (
             (std::isspace(text[index])) ||
             (index == text.size() - 1) ||
@@ -33,6 +32,7 @@ int handleOperator(std::vector<std::string> &tokens, std::string &text, size_t i
             return fullOperator.size();
         }
         fullOperator += text[index];
+        index++;
     }
     tokens.push_back(fullOperator);
     return fullOperator.size();
@@ -93,7 +93,7 @@ std::vector<std::string> AsmMacroLexer::tokenize(std::string &block)
             {
                 index++;
             }
-            else if (tokens[index - 1] == "\n")
+            else if (tokens[tokens.size()-1] == "\n")
             {
                 index++;
             }
@@ -110,7 +110,6 @@ std::vector<std::string> AsmMacroLexer::tokenize(std::string &block)
         else
         {
             index += handleFullWord(tokens, block, index);
-            index++;
         }
     }
     if (tokens[tokens.size() - 1] == "\n")
