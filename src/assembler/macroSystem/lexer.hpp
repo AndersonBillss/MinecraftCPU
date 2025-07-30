@@ -3,19 +3,7 @@
 #include <vector>
 #include <iostream>
 
-std::set<char> operatorTokens {
-    '+',
-    '-',
-    '*',
-    '/',
-    '=',
-    '|',
-    '&',
-    '^',
-    '<',
-    '>',
-    ',',
-    '.',
-};
-
-std::vector<std::string> tokenize(std::string &block);
+namespace AsmMacroLexer {
+    extern std::set<char> operatorTokens;  
+    std::vector<std::string> tokenize(std::string &block);
+}
