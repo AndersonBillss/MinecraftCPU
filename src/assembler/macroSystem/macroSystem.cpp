@@ -10,10 +10,7 @@ MacroSystem::MacroSystem()
 
 std::string MacroSystem::evaluate(const std::string &block)
 {
-    if (block[0] == '$')
-    {
-        std::vector<std::string> splitBlock = stringUtils::split(block, "=");
-    }
+    return "";
 }
 
 void MacroSystem::setNumber(std::string symbol, int value)

@@ -12,6 +12,10 @@ std::set<char> operatorTokens {
     '|',
     '&',
     '^',
+    '<',
+    '>',
+    ',',
+    '.',
 };
 
 std::vector<std::string> tokenize(std::string &block);
