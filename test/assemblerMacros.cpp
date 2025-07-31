@@ -103,4 +103,38 @@ TEST_CASE("Tokenization logic works correctly")
         "NOP"
     };
     REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
+
+
+    sourceCode = R"(
+        $test=10 +
+        LDI R1 1
+
+        $test2 = (LDI R1 ($test * 2))
+        NOP
+
+    .specialFunction:
+        NOP
+
+    )";
+    expected = {
+        "$test",
+        "=",
+        "10",
+        "+",
+        "\n",
+        "LDI",
+        "R1",
+        "1",
+        "\n",
+        "$test2",
+        "=",
+        "(LDI R1 ($test * 2))",
+        "\n",
+        "NOP",
+        "\n",
+        ".specialFunction:",
+        "\n",
+        "NOP"
+    };
+    REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
 }

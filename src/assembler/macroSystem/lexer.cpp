@@ -15,7 +15,6 @@ std::set<char> AsmMacroLexer::operatorTokens = {
     '<',
     '>',
     ',',
-    '.',
 };
 
 int handleOperator(std::vector<std::string> &tokens, std::string &text, size_t index)
