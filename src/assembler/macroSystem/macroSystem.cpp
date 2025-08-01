@@ -1,16 +1,12 @@
 #include "macroSystem.hpp"
 #include "../../utils/runtimeError.hpp"
 #include "../../utils/stringUtils.hpp"
+#include "./lexer.hpp"
 
 MacroSystem::MacroSystem()
 {
     _currentStack = -1; // pushStack automatically increments this
     pushStack();
-}
-
-std::string MacroSystem::evaluate(const std::string &block)
-{
-    return "";
 }
 
 void MacroSystem::setNumber(std::string symbol, int value)
@@ -81,4 +77,32 @@ void MacroSystem::_setVariableHelper(std::string symbol, Variable value, size_t 
     {
         _variables[_currentStack][symbol] = value;
     }
+}
+
+std::string MacroSystem::evaluate(const std::string &block)
+{
+    std::vector<std::string> tokens = AsmMacroLexer::tokenize(block);
+    size_t index = 0;
+    while (index < block.size())
+    {
+        if (tokens[index][0] == '.')
+        {
+            setLabel(tokens[index], _currLineNum);
+            index++;
+        }
+        else if ((index + 1 >= tokens.size()) && (tokens[index + 1] == "="))
+        {
+            index++;
+        }
+    }
+    return "";
+}
+
+void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, int &index)
+{
+}
+
+std::string MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, int &index)
+{
+    return std::string();
 }

@@ -37,9 +37,10 @@ private:
     void _setVariableHelper(std::string symbol, Variable value, size_t stackIndex = 0);
     Variable _getVariableHelper(std::string symbol, size_t stackIndex = 0);
 
-    std::vector<std::string> _tokenize(std::string &block);
-    int _handleBlock(std::vector<std::string> &tokens, std::string &text, int index);
-    int _handleVariable(std::vector<std::string> &tokens, std::string &text, int index);
+    void _handleAssignment(std::vector<std::string> &tokens, int& index);
+    std::string _handleEvaluation(std::vector<std::string> &tokens, int& index);
+
+    size_t _currLineNum;
 
     std::vector<VariableMap> _variables;
     size_t _currentStack;

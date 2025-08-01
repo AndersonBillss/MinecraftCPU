@@ -17,7 +17,7 @@ std::set<char> AsmMacroLexer::operatorTokens = {
     ',',
 };
 
-int handleOperator(std::vector<std::string> &tokens, std::string &text, size_t index)
+int handleOperator(std::vector<std::string> &tokens, const std::string &text, size_t index)
 {
     std::string fullOperator = "";
     while (index < text.size())
@@ -37,7 +37,7 @@ int handleOperator(std::vector<std::string> &tokens, std::string &text, size_t i
     return fullOperator.size();
 }
 
-int handleFullWord(std::vector<std::string> &tokens, std::string &text, size_t index)
+int handleFullWord(std::vector<std::string> &tokens, const std::string &text, size_t index)
 {
     std::string fullWord = "";
     while (index < text.size())
@@ -57,7 +57,7 @@ int handleFullWord(std::vector<std::string> &tokens, std::string &text, size_t i
     return fullWord.size();
 }
 
-int handleBlock(std::vector<std::string> &tokens, std::string &text, size_t index)
+int handleBlock(std::vector<std::string> &tokens, const std::string &text, size_t index)
 {
     std::string subBlock;
     try
@@ -72,7 +72,7 @@ int handleBlock(std::vector<std::string> &tokens, std::string &text, size_t inde
     return subBlock.size();
 }
 
-std::vector<std::string> AsmMacroLexer::tokenize(std::string &block)
+std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block)
 {
     std::vector<std::string> tokens;
     size_t index = 0;

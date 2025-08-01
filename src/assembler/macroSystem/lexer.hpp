@@ -5,5 +5,5 @@
 
 namespace AsmMacroLexer {
     extern std::set<char> operatorTokens;  
-    std::vector<std::string> tokenize(std::string &block);
+    std::vector<std::string> tokenize(const std::string &block);
 }
