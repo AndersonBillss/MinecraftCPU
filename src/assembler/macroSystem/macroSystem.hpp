@@ -4,20 +4,17 @@
 #include <vector>
 #include <variant>
 #include <set>
-
+#include <functional>
 
 enum VariableType
 {
-    label,
     number,
     macro,
 };
-struct Variable
-{
-    VariableType type;
-    std::variant<int, std::string> value;
-};
-using VariableMap = std::unordered_map<std::string, Variable>;
+
+using Operand = std::variant<unsigned int, std::string>; 
+using VariableMap = std::unordered_map<std::string, Operand>;
+extern std::unordered_map<std::string, std::function<Operand(Operand, Operand)>> operations;
 
 class MacroSystem
 {
@@ -25,20 +22,20 @@ public:
     MacroSystem();
     std::string evaluate(const std::string &block);
 
-    void setNumber(std::string symbol, int value);
+    void setNumber(std::string symbol, unsigned int value);
     void setMacro(std::string symbol, std::string value);
-    void setLabel(std::string symbol, int value);
-    Variable getVariable(std::string symbol);
+    void setLabel(std::string symbol, unsigned int value);
+    Operand getVariable(std::string symbol);
 
     void pushStack();
     void popStack();
 
 private:
-    void _setVariableHelper(std::string symbol, Variable value, size_t stackIndex = 0);
-    Variable _getVariableHelper(std::string symbol, size_t stackIndex = 0);
+    void _setVariableHelper(std::string symbol, Operand value, size_t stackIndex = 0);
+    Operand _getVariableHelper(std::string symbol, size_t stackIndex = 0);
 
-    void _handleAssignment(std::vector<std::string> &tokens, int& index);
-    std::string _handleEvaluation(std::vector<std::string> &tokens, int& index);
+    void _handleAssignment(std::vector<std::string> &tokens, size_t &index);
+    Operand _handleEvaluation(std::vector<std::string> &tokens, size_t &index);
 
     size_t _currLineNum;
 

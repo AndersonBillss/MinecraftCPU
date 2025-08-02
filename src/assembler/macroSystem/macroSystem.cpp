@@ -9,19 +9,19 @@ MacroSystem::MacroSystem()
     pushStack();
 }
 
-void MacroSystem::setNumber(std::string symbol, int value)
+void MacroSystem::setNumber(std::string symbol, unsigned int value)
 {
-    _setVariableHelper(symbol, {type : number, value : value}, _currentStack);
+    _setVariableHelper(symbol, value, _currentStack);
 }
 
 void MacroSystem::setMacro(std::string symbol, std::string value)
 {
-    _setVariableHelper(symbol, {type : macro, value : value}, _currentStack);
+    _setVariableHelper(symbol, value, _currentStack);
 }
 
-void MacroSystem::setLabel(std::string symbol, int value)
+void MacroSystem::setLabel(std::string symbol, unsigned int value)
 {
-    _setVariableHelper(symbol, {type : label, value : value});
+    _setVariableHelper(symbol, value);
 }
 
 void MacroSystem::pushStack()
@@ -41,12 +41,12 @@ void MacroSystem::popStack()
     _currentStack--;
 }
 
-Variable MacroSystem::getVariable(std::string symbol)
+Operand MacroSystem::getVariable(std::string symbol)
 {
     return _getVariableHelper(symbol, _currentStack);
 }
 
-Variable MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
+Operand MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
 {
     VariableMap &scope = _variables[stackIndex];
     auto it = scope.find(symbol);
@@ -64,7 +64,7 @@ Variable MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
     }
 }
 
-void MacroSystem::_setVariableHelper(std::string symbol, Variable value, size_t stackIndex)
+void MacroSystem::_setVariableHelper(std::string symbol, Operand value, size_t stackIndex)
 {
     VariableMap &scope = _variables[0];
 
@@ -92,17 +92,29 @@ std::string MacroSystem::evaluate(const std::string &block)
         }
         else if ((index + 1 >= tokens.size()) && (tokens[index + 1] == "="))
         {
+            _handleAssignment(tokens, index);
+        }
+        else if (tokens[index] == "\n")
+        {
             index++;
+        }
+        else
+        {
+            _handleEvaluation(tokens, index);
         }
     }
     return "";
 }
 
-void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, int &index)
+void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, size_t &index)
 {
+    std::string variableKey;
+    index += 2; // Move the index past the equal sign
+    Operand variableValue = _handleEvaluation(tokens, index);
+    _setVariableHelper(variableKey, variableValue);
 }
 
-std::string MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, int &index)
+Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t &index)
 {
-    return std::string();
+    return (unsigned int)0;
 }
