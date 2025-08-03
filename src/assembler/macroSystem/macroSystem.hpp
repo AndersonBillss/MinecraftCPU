@@ -14,7 +14,6 @@ enum VariableType
 
 using Operand = std::variant<unsigned int, std::string>; 
 using VariableMap = std::unordered_map<std::string, Operand>;
-extern std::unordered_map<std::string, std::function<Operand(Operand, Operand)>> operations;
 
 class MacroSystem
 {
