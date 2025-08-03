@@ -138,3 +138,14 @@ TEST_CASE("Tokenization logic works correctly")
     };
     REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
 }
+
+TEST_CASE("Evaluate variables and symbols")
+{
+    MacroSystem m;
+    std::string sourceCode = R"(
+        $sample = 10
+        $sample
+    )";
+    std::string expected = "10\n";
+    REQUIRE(m.evaluate(sourceCode) == expected);
+}

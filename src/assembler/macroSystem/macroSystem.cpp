@@ -45,7 +45,8 @@ void MacroSystem::popStack()
 
 Operand MacroSystem::getVariable(std::string symbol)
 {
-    return _getVariableHelper(symbol, _currentStack);
+    unsigned int val = std::get<unsigned int>(_getVariableHelper(symbol, _currentStack));
+    return val;
 }
 
 Operand MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
@@ -83,10 +84,10 @@ void MacroSystem::_setVariableHelper(std::string symbol, Operand value, size_t s
 
 void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, size_t &index)
 {
-    std::string variableKey;
+    std::string variableKey = tokens[index];
     index += 2; // Move the index past the equal sign
     Operand variableValue = _handleEvaluation(tokens, index);
-    _setVariableHelper(variableKey, variableValue);
+    _setVariableHelper(variableKey, variableValue, _currentStack);
 }
 
 bool isInteger(const std::string &str)
@@ -118,7 +119,7 @@ Operand MacroSystem::_parseOperand(std::string token)
         int n = std::stoi(token);
         while (n < 0)
         {
-            n = 256 - n;
+            n += 256;
         }
         return (unsigned int)n;
     }
@@ -133,7 +134,7 @@ Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t 
     }
     Operand evaluation = _parseOperand(tokens[index]);
     index++;
-    while (tokens[index] != "\n" && index < tokens.size())
+    while (index < tokens.size() && tokens[index] != "\n")
     {
         auto it = operations.find(tokens[index]);
         if (it != operations.end())
@@ -164,11 +165,10 @@ std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex
     size_t end;
     if (endingIndex > startingIndex)
     {
-        end = endingIndex;
     }
     else
     {
-        end = block.size();
+        end = tokens.size();
     }
     while (index < end)
     {
@@ -177,7 +177,7 @@ std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex
             setLabel(tokens[index], _currLineNum);
             index++;
         }
-        if ((index + 1 >= tokens.size()) && (tokens[index + 1] == "="))
+        if ((index + 1 < tokens.size()) && (tokens[index + 1] == "="))
         {
             _handleAssignment(tokens, index);
         }
@@ -199,5 +199,5 @@ std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex
             evaluation += "\n";
         }
     }
-    return "";
+    return evaluation;
 }
