@@ -109,6 +109,10 @@ Operand MacroSystem::_parseOperand(std::string token)
     {
         return MacroSystem::getVariable(token);
     }
+    else if (token[0] == '(')
+    {
+        return _parseOperand(evaluate(token, 1, token.size() - 1));
+    }
     else if (isInteger(token))
     {
         int n = std::stoi(token);
@@ -152,12 +156,21 @@ Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t 
     return evaluation;
 }
 
-std::string MacroSystem::evaluate(const std::string &block)
+std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex, size_t endingIndex)
 {
     std::vector<std::string> tokens = AsmMacroLexer::tokenize(block);
     std::string evaluation = "";
-    size_t index = 0;
-    while (index < block.size())
+    size_t index = startingIndex;
+    size_t end;
+    if (endingIndex > startingIndex)
+    {
+        end = endingIndex;
+    }
+    else
+    {
+        end = block.size();
+    }
+    while (index < end)
     {
         if (tokens[index][0] == '.')
         {
@@ -175,10 +188,12 @@ std::string MacroSystem::evaluate(const std::string &block)
         else
         {
             Operand eval = _handleEvaluation(tokens, index);
-            if(std::holds_alternative<unsigned int>(eval))
+            if (std::holds_alternative<unsigned int>(eval))
             {
                 evaluation += std::to_string(std::get<unsigned int>(eval));
-            } else {
+            }
+            else
+            {
                 evaluation += std::get<std::string>(eval);
             }
             evaluation += "\n";

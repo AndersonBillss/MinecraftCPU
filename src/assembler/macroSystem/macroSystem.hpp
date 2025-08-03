@@ -19,7 +19,7 @@ class MacroSystem
 {
 public:
     MacroSystem();
-    std::string evaluate(const std::string &block);
+    std::string evaluate(const std::string &block, size_t startingIndex = 0, size_t endingIndex = 0);
 
     void setNumber(std::string symbol, unsigned int value);
     void setMacro(std::string symbol, std::string value);
