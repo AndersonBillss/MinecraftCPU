@@ -1,7 +1,6 @@
 #include "macroSystem.hpp"
 #include "../../utils/runtimeError.hpp"
 #include "../../utils/stringUtils.hpp"
-#include "../instruction.hpp"
 #include "./lexer.hpp"
 
 MacroSystem::MacroSystem()
