@@ -62,7 +62,7 @@ Operand subOperation(Operand a, Operand b)
         int result = std::get<unsigned int>(a) - std::get<unsigned int>(b);
         while (result < 0)
         {
-            result = 256 - result;
+            result = 256 + result;
         }
         return (unsigned int)result;
     }

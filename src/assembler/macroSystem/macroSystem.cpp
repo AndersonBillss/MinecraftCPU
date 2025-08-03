@@ -1,6 +1,7 @@
 #include "macroSystem.hpp"
 #include "../../utils/runtimeError.hpp"
 #include "../../utils/stringUtils.hpp"
+#include "../instruction.hpp"
 #include "./lexer.hpp"
 
 MacroSystem::MacroSystem()
@@ -112,6 +113,38 @@ void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, size_t &in
     index += 2; // Move the index past the equal sign
     Operand variableValue = _handleEvaluation(tokens, index);
     _setVariableHelper(variableKey, variableValue);
+}
+
+bool isInteger(const std::string &str)
+{
+    try
+    {
+        size_t pos;
+        std::stoi(str, &pos);
+        return pos == str.size();
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+
+Operand MacroSystem::_parseOperand(std::string token)
+{
+    if ((token[0] == '.') || (token[0] == '$'))
+    {
+        return MacroSystem::getVariable(token);
+    }
+    else if (isInteger(token))
+    {
+        int n = std::stoi(token);
+        while (n < 0)
+        {
+            n = 256 - n;
+        }
+        return (unsigned int)n;
+    }
+    return token;
 }
 
 Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t &index)

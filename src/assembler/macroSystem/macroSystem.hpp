@@ -35,6 +35,7 @@ private:
 
     void _handleAssignment(std::vector<std::string> &tokens, size_t &index);
     Operand _handleEvaluation(std::vector<std::string> &tokens, size_t &index);
+    Operand _parseOperand(std::string operand);
 
     size_t _currLineNum;
 
