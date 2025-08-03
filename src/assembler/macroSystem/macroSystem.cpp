@@ -1,7 +1,9 @@
 #include "macroSystem.hpp"
 #include "../../utils/runtimeError.hpp"
+#include "../../utils/syntaxError.hpp"
 #include "../../utils/stringUtils.hpp"
-#include "./lexer.hpp"
+#include "lexer.hpp"
+#include "operations.hpp"
 
 MacroSystem::MacroSystem()
 {
@@ -79,33 +81,6 @@ void MacroSystem::_setVariableHelper(std::string symbol, Operand value, size_t s
     }
 }
 
-std::string MacroSystem::evaluate(const std::string &block)
-{
-    std::vector<std::string> tokens = AsmMacroLexer::tokenize(block);
-    size_t index = 0;
-    while (index < block.size())
-    {
-        if (tokens[index][0] == '.')
-        {
-            setLabel(tokens[index], _currLineNum);
-            index++;
-        }
-        else if ((index + 1 >= tokens.size()) && (tokens[index + 1] == "="))
-        {
-            _handleAssignment(tokens, index);
-        }
-        else if (tokens[index] == "\n")
-        {
-            index++;
-        }
-        else
-        {
-            _handleEvaluation(tokens, index);
-        }
-    }
-    return "";
-}
-
 void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, size_t &index)
 {
     std::string variableKey;
@@ -148,5 +123,66 @@ Operand MacroSystem::_parseOperand(std::string token)
 
 Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t &index)
 {
-    return (unsigned int)0;
+    if (tokens[index] == "\n")
+    {
+        return "";
+    }
+    Operand evaluation = _parseOperand(tokens[index]);
+    index++;
+    while (tokens[index] != "\n" && index < tokens.size())
+    {
+        auto it = operations.find(tokens[index]);
+        if (it != operations.end())
+        {
+            index++;
+            if ((tokens[index] == "\n") || (tokens.size() < index))
+            {
+                throw SyntaxError("Line cannot end in operation");
+            }
+            auto op = it->second;
+            evaluation = op(evaluation, _parseOperand(tokens[index]));
+        }
+        else
+        {
+            evaluation = addOperation(evaluation, " ");
+            evaluation = addOperation(evaluation, _parseOperand(tokens[index]));
+        }
+        index++;
+    }
+    return evaluation;
+}
+
+std::string MacroSystem::evaluate(const std::string &block)
+{
+    std::vector<std::string> tokens = AsmMacroLexer::tokenize(block);
+    std::string evaluation = "";
+    size_t index = 0;
+    while (index < block.size())
+    {
+        if (tokens[index][0] == '.')
+        {
+            setLabel(tokens[index], _currLineNum);
+            index++;
+        }
+        if ((index + 1 >= tokens.size()) && (tokens[index + 1] == "="))
+        {
+            _handleAssignment(tokens, index);
+        }
+        else if (tokens[index] == "\n")
+        {
+            index++;
+        }
+        else
+        {
+            Operand eval = _handleEvaluation(tokens, index);
+            if(std::holds_alternative<unsigned int>(eval))
+            {
+                evaluation += std::to_string(std::get<unsigned int>(eval));
+            } else {
+                evaluation += std::get<std::string>(eval);
+            }
+            evaluation += "\n";
+        }
+    }
+    return "";
 }
