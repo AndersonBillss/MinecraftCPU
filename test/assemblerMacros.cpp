@@ -141,11 +141,20 @@ TEST_CASE("Tokenization logic works correctly")
 
 TEST_CASE("Evaluate variables and symbols")
 {
-    MacroSystem m;
+    MacroSystem* m = new MacroSystem();
     std::string sourceCode = R"(
-        $sample = 10
-        $sample
+        $test = 10
+        $test
     )";
     std::string expected = "10\n";
-    REQUIRE(m.evaluate(sourceCode) == expected);
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+        $test = hello there
+        $test   
+    )";
+    expected = "hello there\n";
+    REQUIRE(m->evaluate(sourceCode) == expected);
 }

@@ -52,7 +52,7 @@ Operand addOperation(Operand a, Operand b)
     {
         return std::get<std::string>(a) + std::to_string(std::get<unsigned int>(b));
     }
-    return std::get<std::string>(b) + std::get<std::string>(a);
+    return std::get<std::string>(a) + std::get<std::string>(b);
 }
 
 Operand subOperation(Operand a, Operand b)

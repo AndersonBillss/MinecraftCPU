@@ -45,8 +45,7 @@ void MacroSystem::popStack()
 
 Operand MacroSystem::getVariable(std::string symbol)
 {
-    unsigned int val = std::get<unsigned int>(_getVariableHelper(symbol, _currentStack));
-    return val;
+    return _getVariableHelper(symbol, _currentStack);
 }
 
 Operand MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
@@ -163,10 +162,7 @@ std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex
     std::string evaluation = "";
     size_t index = startingIndex;
     size_t end;
-    if (endingIndex > startingIndex)
-    {
-    }
-    else
+    if (endingIndex <= startingIndex)
     {
         end = tokens.size();
     }
