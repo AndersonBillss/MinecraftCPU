@@ -72,11 +72,17 @@ int handleBlock(std::vector<std::string> &tokens, const std::string &text, size_
     return subBlock.size();
 }
 
-std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block)
+std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block, size_t startingIndex, size_t endingIndex)
 {
+
+    size_t index = startingIndex;
+    size_t end = endingIndex;
+    if (endingIndex <= startingIndex)
+    {
+        end = block.size();
+    }
     std::vector<std::string> tokens;
-    size_t index = 0;
-    while (index < block.size())
+    while (index < end)
     {
         if (block[index] == '(')
         {

@@ -111,7 +111,7 @@ Operand MacroSystem::_parseOperand(std::string token)
     }
     else if (token[0] == '(')
     {
-        return _parseOperand(evaluate(token, 1, token.size() - 1));
+        return _parseOperand(stringUtils::trim(evaluate(token, 1, token.size() - 1)));
     }
     else if (isInteger(token))
     {
@@ -158,15 +158,10 @@ Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t 
 
 std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex, size_t endingIndex)
 {
-    std::vector<std::string> tokens = AsmMacroLexer::tokenize(block);
+    std::vector<std::string> tokens = AsmMacroLexer::tokenize(block, startingIndex, endingIndex);
     std::string evaluation = "";
-    size_t index = startingIndex;
-    size_t end;
-    if (endingIndex <= startingIndex)
-    {
-        end = tokens.size();
-    }
-    while (index < end)
+    size_t index = 0;
+    while (index < tokens.size())
     {
         if (tokens[index][0] == '.')
         {
