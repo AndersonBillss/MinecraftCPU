@@ -48,10 +48,8 @@ TEST_CASE("Tokenization logic works correctly")
     std::vector<std::string> expected = {
         "LDI",
         "R1",
-        "1"
-    };
+        "1"};
     REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
-
 
     sourceCode = R"(
         $test = 10
@@ -69,10 +67,8 @@ TEST_CASE("Tokenization logic works correctly")
         "\n",
         "$test2",
         "=",
-        "(LDI R1 $test)"
-    };
+        "(LDI R1 $test)"};
     REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
-
 
     sourceCode = R"(
         $test=10 +
@@ -100,10 +96,8 @@ TEST_CASE("Tokenization logic works correctly")
         "\n",
         "NOP",
         "\n",
-        "NOP"
-    };
+        "NOP"};
     REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
-
 
     sourceCode = R"(
         $test=10 +
@@ -134,19 +128,18 @@ TEST_CASE("Tokenization logic works correctly")
         "\n",
         ".specialFunction:",
         "\n",
-        "NOP"
-    };
+        "NOP"};
     REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
 }
 
 TEST_CASE("Evaluate variables and symbols")
 {
-    MacroSystem* m = new MacroSystem();
+    MacroSystem *m = new MacroSystem();
     std::string sourceCode = R"(
         $test = 10
         $test
     )";
-    std::string expected = "10\n";
+    std::string expected = "10";
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
@@ -155,6 +148,156 @@ TEST_CASE("Evaluate variables and symbols")
         $test = hello there
         $test   
     )";
-    expected = "hello there\n";
+    expected = "hello there";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+        $test1 = hello
+        $test2 = world 
+        $test1 $test2
+    )";
+    expected = "hello world";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+        $test1 = hello
+        $test2 = 1 
+        $test1 $test2
+    )";
+    expected = "hello 1";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+        $test1 = hello
+        $test2 = world 
+        $test3 = $test1 $test2
+        $test3 wow
+    )";
+    expected = "hello world wow";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+}
+
+TEST_CASE("Evaluate variables with expressions")
+{
+    MacroSystem *m = new MacroSystem();
+    std::string sourceCode = R"(
+        3 + 4
+    )";
+    std::string expected = "7";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+       $three = 3
+       $three + 8 
+    )";
+    expected = "11";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+       $five = 5
+       $eleven = 11
+       $five + $eleven 
+    )";
+    expected = "16";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+       $thrirteen = 13
+       $four = 4
+       $seventeen = $four + $thrirteen 
+       hello $seventeen
+    )";
+    expected = "hello 17";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+}
+
+TEST_CASE("Evaluate parentheses")
+{
+    MacroSystem *m = new MacroSystem();
+    std::string sourceCode = R"(
+        $test = (4 + 5)
+        $test
+    )";
+    std::string expected = "9";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+    $test = (
+        4 + 8
+    )
+    $test
+    )";
+    expected = "12";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+    (
+        4 + 8
+    )
+    )";
+    expected = "12";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+    (2 + 3) * 7
+    )";
+    expected = "35";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+    2 + (3 * 7)
+    )";
+    expected = "23";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+    $test = 2 + (3 * 7)
+    $test2 = (($test + 1) * 4) / 5
+    (HELLO $test2)
+    )";
+    expected = "HELLO 19";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+}
+
+TEST_CASE("Evaluate functions")
+{
+    MacroSystem *m = new MacroSystem();
+    std::string sourceCode = R"(
+        $testFn = $a => Hello $a
+        $testFn 4
+    )";
+    std::string expected = "Hello 4";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+        $testFn = $a $b => $a + $b
+        $test = $testFn 1 4
+        $test
+    )";
+    expected = "5";
     REQUIRE(m->evaluate(sourceCode) == expected);
 }

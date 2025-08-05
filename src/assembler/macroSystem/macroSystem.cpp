@@ -69,7 +69,6 @@ Operand MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
 void MacroSystem::_setVariableHelper(std::string symbol, Operand value, size_t stackIndex)
 {
     VariableMap &scope = _variables[0];
-
     auto it = scope.find(symbol);
     if (it != scope.end())
     {
@@ -81,11 +80,48 @@ void MacroSystem::_setVariableHelper(std::string symbol, Operand value, size_t s
     }
 }
 
+std::string getUntilNewLine(std::vector<std::string> &tokens, size_t &index)
+{
+    std::string result = "";
+    size_t firstIndex = index;
+    while (tokens[index] != "\n")
+    {
+        if (firstIndex != index)
+        {
+            result += " ";
+        }
+        result += tokens[index];
+        index++;
+    }
+    return result;
+}
+
+bool isFunctionAssignment(const std::vector<std::string> &tokens, size_t index)
+{
+    for (size_t i = index; i < tokens.size(); i++)
+    {
+        std::string token = tokens[i];
+        if (token == "=>")
+            return true;
+        if (token == "\n")
+            return false;
+    }
+    return false;
+}
+
 void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, size_t &index)
 {
     std::string variableKey = tokens[index];
     index += 2; // Move the index past the equal sign
-    Operand variableValue = _handleEvaluation(tokens, index);
+    Operand variableValue;
+    if (isFunctionAssignment(tokens, index))
+    {
+        variableValue = getUntilNewLine(tokens, index);
+    }
+    else
+    {
+        variableValue = _handleEvaluation(tokens, index);
+    }
     _setVariableHelper(variableKey, variableValue, _currentStack);
 }
 
@@ -103,15 +139,26 @@ bool isInteger(const std::string &str)
     }
 }
 
-Operand MacroSystem::_parseOperand(std::string token)
+Operand MacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &index)
 {
+    std::string token = tokens[index];
     if ((token[0] == '.') || (token[0] == '$'))
     {
-        return MacroSystem::getVariable(token);
+        Operand result = MacroSystem::getVariable(token);
+        if (std::holds_alternative<std::string>(result))
+        {
+            std::string &strResult = std::get<std::string>(result);
+            if ((strResult[0] == '$') || (strResult[0] == '=')){
+                return _evaluateFunction(strResult, tokens, index);
+            }
+        }
+        return result;
     }
     else if (token[0] == '(')
     {
-        return _parseOperand(stringUtils::trim(evaluate(token, 1, token.size() - 1)));
+        size_t zero = 0;
+        std::vector<std::string> parsed = {stringUtils::trim(evaluate(token, 1, token.size() - 1))};
+        return _parseOperand(parsed, zero);
     }
     else if (isInteger(token))
     {
@@ -125,13 +172,42 @@ Operand MacroSystem::_parseOperand(std::string token)
     return token;
 }
 
+Operand MacroSystem::_evaluateFunction(std::string function, std::vector<std::string> &tokens, size_t &index)
+{
+    pushStack();
+    std::vector<std::string> split = stringUtils::split(function, "=>");
+    if(split.size() > 2) {
+        throw RuntimeError("Function has multiple '=>' symbols");
+    }
+    std::vector<std::string> args = stringUtils::split(split[0]);
+    for (size_t i = 0; i < args.size(); i++)
+    {
+        index++;
+        std::string arg = args[i];
+        if(arg[0] != '$'){
+            throw SyntaxError("Variables must start with '$'");
+        }
+        if ((tokens.size() < index) || (tokens[index] == "\n"))
+        {
+            throw RuntimeError("Function has too few arguments");
+        }
+        Operand value = _parseOperand(tokens, index);
+        _setVariableHelper(arg, value, _currentStack);
+    }
+    std::vector<std::string> evaluated = {evaluate(split[1])};
+    size_t zero = 0;
+    Operand result = _parseOperand(evaluated, zero);
+    popStack();
+    return result;
+}
+
 Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t &index)
 {
     if (tokens[index] == "\n")
     {
         return "";
     }
-    Operand evaluation = _parseOperand(tokens[index]);
+    Operand evaluation = _parseOperand(tokens, index);
     index++;
     while (index < tokens.size() && tokens[index] != "\n")
     {
@@ -144,12 +220,12 @@ Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t 
                 throw SyntaxError("Line cannot end in operation");
             }
             auto op = it->second;
-            evaluation = op(evaluation, _parseOperand(tokens[index]));
+            evaluation = op(evaluation, _parseOperand(tokens, index));
         }
         else
         {
             evaluation = addOperation(evaluation, " ");
-            evaluation = addOperation(evaluation, _parseOperand(tokens[index]));
+            evaluation = addOperation(evaluation, _parseOperand(tokens, index));
         }
         index++;
     }
@@ -190,5 +266,5 @@ std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex
             evaluation += "\n";
         }
     }
-    return evaluation;
+    return stringUtils::trim(evaluation);
 }

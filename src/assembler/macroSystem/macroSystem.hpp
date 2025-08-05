@@ -34,9 +34,10 @@ private:
     Operand _getVariableHelper(std::string symbol, size_t stackIndex = 0);
 
     void _handleAssignment(std::vector<std::string> &tokens, size_t &index);
+    Operand _evaluateFunction(std::string function, std::vector<std::string> &tokens, size_t &index);
     Operand _handleEvaluation(std::vector<std::string> &tokens, size_t &index);
-    Operand _parseOperand(std::string operand);
-
+    Operand _parseOperand(std::vector<std::string> &tokens, size_t &index);
+    
     size_t _currLineNum;
 
     std::vector<VariableMap> _variables;

@@ -44,8 +44,10 @@ int handleFullWord(std::vector<std::string> &tokens, const std::string &text, si
     {
         if (
             (std::isspace(text[index])) ||
-            (index == text.size() - 1) ||
-            (AsmMacroLexer::operatorTokens.find(text[index]) != AsmMacroLexer::operatorTokens.end()))
+            (index >= text.size()) ||
+            (AsmMacroLexer::operatorTokens.find(text[index]) != AsmMacroLexer::operatorTokens.end()) ||
+            (text[index] == ')') ||
+            (text[index] == '('))
         {
             tokens.push_back(fullWord);
             return fullWord.size();
@@ -98,7 +100,7 @@ std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block, size_
             {
                 index++;
             }
-            else if (tokens[tokens.size()-1] == "\n")
+            else if (tokens[tokens.size() - 1] == "\n")
             {
                 index++;
             }
