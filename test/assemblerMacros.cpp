@@ -300,4 +300,30 @@ TEST_CASE("Evaluate functions")
     )";
     expected = "5";
     REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+        $testFn = $a $b => (
+            $three = 3
+            ($a + $b) * 3
+        )
+        $test = $testFn 1 4
+        $test
+    )";
+    expected = "15";
+    REQUIRE(m->evaluate(sourceCode) == expected);
+
+    delete m;
+    m = new MacroSystem();
+    sourceCode = R"(
+        $testFn = $a $b $c => (
+            ($a + $b) * $c
+        )
+        $mul = 8
+        $test = $testFn 3 7 $mul
+        $test
+    )";
+    expected = "80";
+    REQUIRE(m->evaluate(sourceCode) == expected);
 }
