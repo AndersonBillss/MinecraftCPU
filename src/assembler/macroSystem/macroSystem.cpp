@@ -121,7 +121,7 @@ void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, size_t &in
     }
     else
     {
-        variableValue = _handleEvaluation(tokens, index);
+        variableValue = _handleEvaluation(tokens, index, false);
     }
     _setVariableHelper(variableKey, variableValue, _currentStack);
 }
@@ -140,7 +140,7 @@ bool isInteger(const std::string &str)
     }
 }
 
-Operand MacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &index)
+Operand MacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &index, bool incrementCurrLine)
 {
     std::string token = tokens[index];
     if ((token[0] == '.') || (token[0] == '$'))
@@ -158,8 +158,8 @@ Operand MacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &ind
     else if (token[0] == '(')
     {
         size_t zero = 0;
-        std::vector<std::string> parsed = {stringUtils::trim(evaluate(token, 1, token.size() - 1))};
-        return _parseOperand(parsed, zero);
+        std::vector<std::string> parsed = {stringUtils::trim(_evaluateHelper(token, 1, token.size() - 1, true))};
+        return _parseOperand(parsed, zero, incrementCurrLine);
     }
     else if (isInteger(token))
     {
@@ -173,67 +173,7 @@ Operand MacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &ind
     return token;
 }
 
-Operand MacroSystem::_evaluateFunction(std::string function, std::vector<std::string> &tokens, size_t &index)
-{
-    pushStack();
-    std::vector<std::string> split = stringUtils::split(function, "=>");
-    if(split.size() > 2) {
-        throw RuntimeError("Function has multiple '=>' symbols");
-    }
-    std::vector<std::string> args = stringUtils::split(split[0]);
-    for (size_t i = 0; i < args.size(); i++)
-    {
-        index++;
-        std::string arg = args[i];
-        if(arg[0] != '$'){
-            throw SyntaxError("Variables must start with '$'");
-        }
-        if ((tokens.size() < index) || (tokens[index] == "\n"))
-        {
-            throw RuntimeError("Function has too few arguments");
-        }
-        Operand value = _parseOperand(tokens, index);
-        _setVariableHelper(arg, value, _currentStack);
-    }
-    std::vector<std::string> evaluated = {evaluate(split[1])};
-    size_t zero = 0;
-    Operand result = _parseOperand(evaluated, zero);
-    popStack();
-    return result;
-}
-
-Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t &index)
-{
-    if (tokens[index] == "\n")
-    {
-        return "";
-    }
-    Operand evaluation = _parseOperand(tokens, index);
-    index++;
-    while (index < tokens.size() && tokens[index] != "\n")
-    {
-        auto it = operations.find(tokens[index]);
-        if (it != operations.end())
-        {
-            index++;
-            if ((tokens[index] == "\n") || (tokens.size() < index))
-            {
-                throw SyntaxError("Line cannot end in operation");
-            }
-            auto op = it->second;
-            evaluation = op(evaluation, _parseOperand(tokens, index));
-        }
-        else
-        {
-            evaluation = addOperation(evaluation, " ");
-            evaluation = addOperation(evaluation, _parseOperand(tokens, index));
-        }
-        index++;
-    }
-    return evaluation;
-}
-
-std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex, size_t endingIndex)
+std::string MacroSystem::_evaluateHelper(const std::string &block, size_t startingIndex, size_t endingIndex, bool incrementCurrLine)
 {
     std::vector<std::string> tokens = AsmMacroLexer::tokenize(block, startingIndex, endingIndex);
     std::string evaluation = "";
@@ -255,17 +195,83 @@ std::string MacroSystem::evaluate(const std::string &block, size_t startingIndex
         }
         else
         {
-            Operand eval = _handleEvaluation(tokens, index);
+            Operand eval = _handleEvaluation(tokens, index, incrementCurrLine);
             if (std::holds_alternative<unsigned int>(eval))
             {
                 evaluation += std::to_string(std::get<unsigned int>(eval));
             }
             else
             {
-                evaluation += std::get<std::string>(eval);
+                std::string stringEval = std::get<std::string>(eval);
+                evaluation += stringEval;
             }
             evaluation += "\n";
         }
     }
     return stringUtils::trim(evaluation);
+}
+
+Operand MacroSystem::_evaluateFunction(std::string function, std::vector<std::string> &tokens, size_t &index)
+{
+    pushStack();
+    std::vector<std::string> split = stringUtils::split(function, "=>");
+    if(split.size() > 2) {
+        throw RuntimeError("Function has multiple '=>' symbols");
+    }
+    std::vector<std::string> args = stringUtils::split(split[0]);
+    for (size_t i = 0; i < args.size(); i++)
+    {
+        index++;
+        std::string arg = args[i];
+        if((arg[0] != '$') && (arg[0] != '.')){
+            throw SyntaxError("Variables must start with '$' or '.'");
+        }
+        if ((tokens.size() < index) || (tokens[index] == "\n"))
+        {
+            throw RuntimeError("Function has too few arguments");
+        }
+        Operand value = _parseOperand(tokens, index, true);
+        _setVariableHelper(arg, value, _currentStack);
+    }
+    std::vector<std::string> evaluated = {evaluate(split[1])};
+    size_t zero = 0;
+    Operand result = _parseOperand(evaluated, zero, true);
+    popStack();
+    return result;
+}
+
+Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t &index, bool incrementCurrLine)
+{
+    if (tokens[index] == "\n")
+    {
+        return "";
+    }
+    Operand evaluation = _parseOperand(tokens, index, incrementCurrLine);
+    index++;
+    while (index < tokens.size() && tokens[index] != "\n")
+    {
+        auto it = operations.find(tokens[index]);
+        if (it != operations.end())
+        {
+            index++;
+            if ((tokens[index] == "\n") || (tokens.size() < index))
+            {
+                throw SyntaxError("Line cannot end in operation");
+            }
+            auto op = it->second;
+            evaluation = op(evaluation, _parseOperand(tokens, index, incrementCurrLine));
+        }
+        else
+        {
+            evaluation = addOperation(evaluation, " ");
+            evaluation = addOperation(evaluation, _parseOperand(tokens, index, incrementCurrLine));
+        }
+        index++;
+    }
+    return evaluation;
+}
+
+std::string MacroSystem::evaluate(const std::string &block)
+{
+    return _evaluateHelper(block, 0, block.size(), true);
 }
