@@ -130,7 +130,7 @@ std::string stringUtils::getBlock(const std::string &text, const std::string &op
     throw std::runtime_error("Unclosed block: missing matching closing string '" + closing + "'");
 }
 
-size_t stringUtils::getCount(const std::string &text, const std::string &section)
+size_t stringUtils::getOccurrences(const std::string &text, const std::string &section)
 {
     size_t index = 0;
     size_t count = 0;

@@ -10,5 +10,5 @@ namespace stringUtils
     std::vector<std::string> split(const std::string &text, const std::string &delimiter);
     std::string join(const std::vector<std::string> &text, const std::string &delimiter);
     std::string getBlock(const std::string &text, const std::string& opening, const std::string& closing, int index = 0);
-    size_t getCount(const std::string &text, const std::string& section);
+    size_t getOccurrences(const std::string &text, const std::string& section);
 }
