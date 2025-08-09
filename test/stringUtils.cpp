@@ -136,3 +136,17 @@ TEST_CASE("StringUtils getBlock")
     expected = "{and some more {nested} blocks inside}";
     REQUIRE(stringUtils::getBlock(testString, "{", "}", 36) == expected);
 }
+
+TEST_CASE("StringUtils getOccurrences")
+{
+    std::string testString = "Hello, this is a test string with some letters";
+    std::string subSection = " ";
+    size_t expected = 8;
+    REQUIRE(stringUtils::getOccurrences(testString, subSection) == expected);
+
+
+    testString = "ababa aba abaaba a ba ab a b";
+    subSection = "aba";
+    expected = 4;
+    REQUIRE(stringUtils::getOccurrences(testString, subSection) == expected);
+}
