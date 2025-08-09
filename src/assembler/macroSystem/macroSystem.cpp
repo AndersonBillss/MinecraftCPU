@@ -9,6 +9,7 @@ MacroSystem::MacroSystem()
 {
     _currentStack = -1; // pushStack automatically increments this
     pushStack();
+    _currLineNum = 0;
 }
 
 void MacroSystem::setNumber(std::string symbol, unsigned int value)
