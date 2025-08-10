@@ -149,7 +149,8 @@ Operand MacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &ind
         if (std::holds_alternative<std::string>(result))
         {
             std::string &strResult = std::get<std::string>(result);
-            if ((strResult[0] == '$') || (strResult[0] == '=')){
+            if ((strResult[0] == '$') || (strResult[0] == '='))
+            {
                 return _evaluateFunction(strResult, tokens, index);
             }
         }
@@ -204,8 +205,16 @@ std::string MacroSystem::_evaluateHelper(const std::string &block, size_t starti
             {
                 std::string stringEval = std::get<std::string>(eval);
                 evaluation += stringEval;
+                if (incrementCurrLine)
+                {
+                    _currLineNum += stringUtils::getOccurrences(stringEval, "\n");
+                }
             }
             evaluation += "\n";
+            if (incrementCurrLine)
+            {
+                _currLineNum++;
+            }
         }
     }
     return stringUtils::trim(evaluation);
@@ -215,7 +224,8 @@ Operand MacroSystem::_evaluateFunction(std::string function, std::vector<std::st
 {
     pushStack();
     std::vector<std::string> split = stringUtils::split(function, "=>");
-    if(split.size() > 2) {
+    if (split.size() > 2)
+    {
         throw RuntimeError("Function has multiple '=>' symbols");
     }
     std::vector<std::string> args = stringUtils::split(split[0]);
@@ -223,7 +233,8 @@ Operand MacroSystem::_evaluateFunction(std::string function, std::vector<std::st
     {
         index++;
         std::string arg = args[i];
-        if((arg[0] != '$') && (arg[0] != '.')){
+        if ((arg[0] != '$') && (arg[0] != '.'))
+        {
             throw SyntaxError("Variables must start with '$' or '.'");
         }
         if ((tokens.size() < index) || (tokens[index] == "\n"))
