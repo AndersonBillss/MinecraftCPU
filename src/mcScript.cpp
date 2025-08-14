@@ -73,6 +73,11 @@ void handleAssembleArg(const int &argc, char *argv[])
     }
 }
 
+void handleSchemPathArg(const int &argc, char *argv[])
+{
+    
+}
+
 // no flags (empty)
 //      -o
 //      -o-schem
@@ -99,6 +104,10 @@ int main(int argc, char *argv[])
     else if (std::string(argv[1]) == "-assemble")
     {
         handleAssembleArg(argc, argv);
+    }
+    else if (std::string(argv[1]) == "-set-schem-path")
+    {
+        handleSchemPathArg(argc, argv);
     }
     else
     {
