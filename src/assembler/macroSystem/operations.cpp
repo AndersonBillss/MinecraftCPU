@@ -2,12 +2,16 @@
 #include "../../utils/typeError.hpp"
 #include <variant>
 
-Operand mulSrtInt(std::string a, unsigned int b)
+Operand mulStrInt(std::string a, unsigned int b)
 {
     std::string result = "";
     for (size_t i = 0; i < b; i++)
     {
-        result += a + "/n";
+        if (i != 0)
+        {
+            result += "\n";
+        }
+        result += a;
     }
     return result;
 }
@@ -19,18 +23,19 @@ Operand mulOperation(Operand a, Operand b)
     }
     else if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<std::string>(b))
     {
-        return mulSrtInt(std::get<std::string>(b), std::get<unsigned int>(a));
+        return mulStrInt(std::get<std::string>(b), std::get<unsigned int>(a));
     }
     else if (std::holds_alternative<std::string>(a) && std::holds_alternative<unsigned int>(b))
     {
-        return mulSrtInt(std::get<std::string>(a), std::get<unsigned int>(b));
+        return mulStrInt(std::get<std::string>(a), std::get<unsigned int>(b));
     }
     throw TypeError("Cannot multiply two strings together");
 
     return (unsigned int)0;
 }
 
-Operand divOperation(Operand a, Operand b) {
+Operand divOperation(Operand a, Operand b)
+{
     if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<unsigned int>(b))
     {
         return std::get<unsigned int>(a) / std::get<unsigned int>(b);
