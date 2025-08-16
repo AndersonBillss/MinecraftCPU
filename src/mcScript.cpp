@@ -123,22 +123,31 @@ int main(int argc, char *argv[])
         ("c,compile", "Compile .mcscript code into assembly (not implemented yet)")
         ("a,assemble", "Assemble .mcasm assembly code")
         ("x,execute", "Execute .mcexe binary via an emulator (not implemented yet)")
+        ("set-schem-path", "Set a default schematic ouput path", cxxopts::value<std::string>())
+        ("set-executable-path", "Set a default mcexe ouput path", cxxopts::value<std::string>())
         ("h,help", "Print usage")
         ("o,output-file", "Filepath for the output binary", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
         ("s,output-schematic", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
     ;
     // clang-format on
     cxxopts::ParseResult parsed;
-    try{
+    try
+    {
         parsed = options.parse(argc, argv);
-    } catch(const cxxopts::exceptions::no_such_option &e){
+    }
+    catch (const cxxopts::exceptions::no_such_option &e)
+    {
         std::cerr << e.what() << std::endl;
         exit(1);
     }
 
-    std::cout << "HELLO WORLD 6" << std::endl;
-
-    const std::vector<std::string> commandTypes = {"compile", "assemble", "execute", "help"};
+    const std::vector<std::string> commandTypes = {
+        "compile",
+        "assemble",
+        "execute",
+        "help",
+        "set-schem-path",
+        "set-executable-path"};
 
     checkExclusive(parsed, commandTypes);
 
@@ -147,24 +156,21 @@ int main(int argc, char *argv[])
         std::cout << options.help() << std::endl;
         exit(0);
     }
-
-    if (std::string(argv[1]) == "-compile")
+    if (parsed.count("compile"))
     {
         std::cout << "Compile is not implemented yet" << std::endl;
-        return 0;
+        exit(0);
     }
-    else if (std::string(argv[1]) == "-assemble")
+    if (parsed.count("assemble"))
     {
         handleAssembleArg(argc, argv);
+        exit(0);
     }
-    else if (std::string(argv[1]) == "-set-schem-path")
+    if (parsed.count("-set-schem-path"))
     {
         handleSchemPathArg(argc, argv);
+        exit(0);
     }
-    else
-    {
-        std::cout << "Default command is not implemented yet" << std::endl;
-        return 0;
-    }
+    std::cout << "Default command is not implemented yet" << std::endl;
     return 0;
 }
