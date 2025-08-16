@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 #include <unordered_map>
+
+#include "cxxopts.hpp"
 #include "assembler/assembler.hpp"
 #include "schematicBuilder/schematicBuilder.hpp"
 #include "utils/stringUtils.hpp"
@@ -75,19 +77,35 @@ void handleAssembleArg(const int &argc, char *argv[])
 
 void handleSchemPathArg(const int &argc, char *argv[])
 {
-    
 }
 
-// no flags (empty)
-//      -o
-//      -o-schem
-//
-// -compile
-//      -o
-//
-// -assemble
-//      -o
-//      -o-schem
+void checkExclusive(const cxxopts::ParseResult &result, const std::vector<std::string> &opts)
+{
+    std::vector<std::string> selectedFlags;
+    for (auto &opt : opts)
+    {
+        if (result.count(opt))
+            selectedFlags.push_back(opt);
+    }
+    if (selectedFlags.size() > 1)
+    {
+        std::cerr << "Error: options ";
+        for(size_t i = 0; i < selectedFlags.size(); i++){
+            std::string& flag = selectedFlags[i];
+            std::string textFormat = ",";
+            if(selectedFlags.size() == 2 || i == 0){
+                textFormat = "";
+            }
+            if(i == selectedFlags.size()-1){
+                textFormat += "and ";
+            }
+            std::cerr << textFormat << "--" << flag << " ";
+        }
+        std::cerr << "are mutually exclusive.\n";
+        std::exit(1);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -95,6 +113,20 @@ int main(int argc, char *argv[])
         std::cerr << "No Arguments provided\nUse the -help flag to see available commands" << std::endl;
         return 1;
     }
+
+    cxxopts::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
+    options.add_options()
+        ("c,compile", "Compile .mcscript code into assembly (not implemented yet)")
+        ("a,assemble", "Assemble .mcasm assembly code")
+        ("x,execute", "Execute .mcexe binary via an emulator (not implemented yet)")
+        ("h,help", "Print usage")
+        ("of,output-file", "Filepath for the output binary", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
+        ("os,output-schematic", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
+    ;
+    auto parsed = options.parse(argc, argv);
+
+    const std::vector<std::string> commandTypes = {"compile", "assemble", "execute", "help"};
+    checkExclusive(parsed, commandTypes);
 
     if (std::string(argv[1]) == "-compile")
     {
