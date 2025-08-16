@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    std::cout << "HELLO WORLD" << std::endl;
+    std::cout << "HELLO WORLD 6" << std::endl;
 
     const std::vector<std::string> commandTypes = {"compile", "assemble", "execute", "help"};
 

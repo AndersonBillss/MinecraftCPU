@@ -11,7 +11,8 @@ TEST_BIN_DIR := test_bin
 TEST_OBJ_DIR := test_obj
 
 CXX := g++
-CXX_FLAGS := -Wall -lz -I$(LIB_DIR)
+CXX_FLAGS := -Wall
+CXX_INCLUDE_FLAGS := -I$(LIB_DIR) -lz
 
 TARGET := mcScript
 TEST_TARGET := tests
@@ -41,16 +42,16 @@ test: build build_test
 	$(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX)
 
 build: build_lib $(BIN_DIR) $(OBJ_FILES)
-	$(CXX) -o $(BIN_DIR)/$(TARGET)$(EXE_SUFFIX) $(OBJ_FILES) $(CXX_FLAGS)
+	$(CXX) -o $(BIN_DIR)/$(TARGET)$(EXE_SUFFIX) $(OBJ_FILES) $(CXX_FLAGS) $(CXX_INCLUDE_FLAGS)
 
 build_test: $(TEST_BIN_DIR) $(TEST_OBJ_FILES)
-	$(CXX) -o $(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX) $(TEST_OBJ_FILES) $(SRC_OBJ_FILES_WITHOUT_MAIN) $(CXX_FLAGS)
+	$(CXX) -o $(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX) $(TEST_OBJ_FILES) $(SRC_OBJ_FILES_WITHOUT_MAIN) $(CXX_FLAGS) $(CXX_INCLUDE_FLAGS)
 
 build_lib: $(LIB_OBJ_FILES)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -c $< -o $@ $(CXX_FLAGS)
+	$(CXX) -c $< -o $@ $(CXX_FLAGS) $(CXX_INCLUDE_FLAGS)
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
@@ -58,7 +59,7 @@ $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp
 
 $(LIB_DIR)/%.hpp.gch: $(LIB_DIR)/%.hpp
 	@mkdir -p $(dir $@)
-	$(CXX) $< -o $@
+	$(CXX) -x c++-header $< -o $@ $(CXX_FLAGS)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
