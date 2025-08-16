@@ -90,13 +90,16 @@ void checkExclusive(const cxxopts::ParseResult &result, const std::vector<std::s
     if (selectedFlags.size() > 1)
     {
         std::cerr << "Error: options ";
-        for(size_t i = 0; i < selectedFlags.size(); i++){
-            std::string& flag = selectedFlags[i];
+        for (size_t i = 0; i < selectedFlags.size(); i++)
+        {
+            std::string &flag = selectedFlags[i];
             std::string textFormat = ",";
-            if(selectedFlags.size() == 2 || i == 0){
+            if (selectedFlags.size() == 2 || i == 0)
+            {
                 textFormat = "";
             }
-            if(i == selectedFlags.size()-1){
+            if (i == selectedFlags.size() - 1)
+            {
                 textFormat += "and ";
             }
             std::cerr << textFormat << "--" << flag << " ";
@@ -115,6 +118,7 @@ int main(int argc, char *argv[])
     }
 
     cxxopts::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
+    // clang-format off
     options.add_options()
         ("c,compile", "Compile .mcscript code into assembly (not implemented yet)")
         ("a,assemble", "Assemble .mcasm assembly code")
@@ -123,6 +127,7 @@ int main(int argc, char *argv[])
         ("of,output-file", "Filepath for the output binary", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
         ("os,output-schematic", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
     ;
+    // clang-format on
     auto parsed = options.parse(argc, argv);
 
     const std::vector<std::string> commandTypes = {"compile", "assemble", "execute", "help"};
