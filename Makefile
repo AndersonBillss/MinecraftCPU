@@ -1,7 +1,17 @@
 RUN_ARGS := -assemble examples/lodPtrTest.mcasm
 
+LIB_DIR := include
+
+SRC_DIR := src
+BIN_DIR := bin
+OBJ_DIR := obj
+
+TEST_SRC_DIR := test
+TEST_BIN_DIR := test_bin
+TEST_OBJ_DIR := test_obj
+
 CXX := g++
-CXX_FLAGS := -Wall -lz -Iinclude
+CXX_FLAGS := -Wall -lz -I$(LIB_DIR)
 
 TARGET := mcScript
 TEST_TARGET := tests
@@ -12,20 +22,15 @@ else
 	EXE_SUFFIX := 
 endif
 
-SRC_DIR := src
-BIN_DIR := bin
-OBJ_DIR := obj
-
-TEST_SRC_DIR := test
-TEST_BIN_DIR := test_bin
-TEST_OBJ_DIR := test_obj
-
-SRC_FILES = $(shell find src -name '*.cpp')
+SRC_FILES := $(shell find src -name '*.cpp')
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_FILES))
 
-TEST_SRC_FILES = $(shell find test -name '*.cpp')
+TEST_SRC_FILES := $(shell find test -name '*.cpp')
 TEST_OBJ_FILES := $(patsubst $(TEST_SRC_DIR)/%.cpp, $(TEST_OBJ_DIR)/%.o, $(TEST_SRC_FILES))
 SRC_OBJ_FILES_WITHOUT_MAIN := $(filter-out $(OBJ_DIR)/$(TARGET).o, $(OBJ_FILES))
+
+LIB_SRC_FILES := $(shell find include -name '*.hpp')
+LIB_OBJ_FILES := $(patsubst $(LIB_DIR)/%.hpp, $(LIB_DIR)/%.hpp.gch, $(LIB_SRC_FILES))
 
 all: run
 
@@ -35,11 +40,13 @@ run: build
 test: build build_test
 	$(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX)
 
-build: $(BIN_DIR) $(OBJ_FILES)
+build: build_lib $(BIN_DIR) $(OBJ_FILES)
 	$(CXX) -o $(BIN_DIR)/$(TARGET)$(EXE_SUFFIX) $(OBJ_FILES) $(CXX_FLAGS)
 
 build_test: $(TEST_BIN_DIR) $(TEST_OBJ_FILES)
 	$(CXX) -o $(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX) $(TEST_OBJ_FILES) $(SRC_OBJ_FILES_WITHOUT_MAIN) $(CXX_FLAGS)
+
+build_lib: $(LIB_OBJ_FILES)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
@@ -47,7 +54,11 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -Iinclude -Itest -c $< -o $@
+	$(CXX) -I$(LIB_DIR) -Itest -c $< -o $@
+
+$(LIB_DIR)/%.hpp.gch: $(LIB_DIR)/%.hpp
+	@mkdir -p $(dir $@)
+	$(CXX) $< -o $@
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)

@@ -124,14 +124,29 @@ int main(int argc, char *argv[])
         ("a,assemble", "Assemble .mcasm assembly code")
         ("x,execute", "Execute .mcexe binary via an emulator (not implemented yet)")
         ("h,help", "Print usage")
-        ("of,output-file", "Filepath for the output binary", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
-        ("os,output-schematic", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
+        ("o,output-file", "Filepath for the output binary", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
+        ("s,output-schematic", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
     ;
     // clang-format on
-    auto parsed = options.parse(argc, argv);
+    cxxopts::ParseResult parsed;
+    try{
+        parsed = options.parse(argc, argv);
+    } catch(const cxxopts::exceptions::no_such_option &e){
+        std::cerr << e.what() << std::endl;
+        exit(1);
+    }
+
+    std::cout << "HELLO WORLD" << std::endl;
 
     const std::vector<std::string> commandTypes = {"compile", "assemble", "execute", "help"};
+
     checkExclusive(parsed, commandTypes);
+
+    if (parsed.count("help"))
+    {
+        std::cout << options.help() << std::endl;
+        exit(0);
+    }
 
     if (std::string(argv[1]) == "-compile")
     {
