@@ -3,7 +3,7 @@ obj/
 test_bin/
 test_obj/
 mcScriptBuild/
-*.ghc
+*.gch
 
 .idea/
 .vscode/
