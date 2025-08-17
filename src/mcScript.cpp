@@ -13,47 +13,32 @@
 #include "utils/fileUtils.hpp"
 #include "utils/syntaxError.hpp"
 
-const std::string defaultOutputFolder = "mcScriptBuild/";
-const std::string defaultOutputFileName = "bin";
-const std::string defaultExecutableExtension = ".mcexe";
-
-void handleAssembleArg(const int &argc, char *argv[])
+void handleAssembleArg(cxxopts::ParseResult parsed)
 {
-    if (argc < 3)
+    if (!parsed.count("assemble"))
     {
-        std::cerr << "No input file path provided" << std::endl;
+        std::cerr << "No input filepath provided" << std::endl;
         exit(1);
     }
-    std::string inFileName = argv[2];
-    std::string outFileName;
-    size_t startingIndex = 3;
-    for (int i = startingIndex; i < argc; i++)
+    std::string inFilePath = parsed["assemble"].as<std::string>();
+    bool shouldOutputMcexe = parsed.count("output-mcexe");
+    bool shouldOutputSchem = parsed.count("output-schem");
+    std::string outMcexePath;
+    std::string outSchemPath;
+    if (shouldOutputMcexe)
     {
-        if (std::string(argv[i]) == "-o")
-        {
-            if (i + 1 < argc - 1)
-            {
-                std::cerr << "There must be an argument after '-o'" << std::endl;
-                exit(1);
-            }
-            outFileName = argv[i + 1];
-            if (outFileName[0] == '-')
-            {
-                std::cerr << "file input cannot start with '-'" << std::endl;
-                exit(1);
-            }
-        }
+        outMcexePath = parsed["output-mcexe"].as<std::string>();
     }
-    if (inFileName.empty())
+    if (shouldOutputSchem)
     {
-        std::cerr << "No input file path provided" << std::endl;
-        exit(1);
+        outSchemPath = parsed["output-schem"].as<std::string>();
     }
-    if (outFileName.empty())
+    if (!shouldOutputMcexe && !shouldOutputSchem)
     {
-        outFileName = defaultOutputFolder + defaultOutputFileName + defaultExecutableExtension;
+        std::cout << "No output option provided" << std::endl;
     }
-    std::string sourceCode = fileUtils::readFile(inFileName);
+
+    std::string sourceCode = fileUtils::readFile(inFilePath);
     std::string assembled;
     try
     {
@@ -61,18 +46,17 @@ void handleAssembleArg(const int &argc, char *argv[])
     }
     catch (const SyntaxError &e)
     {
-        std::cerr << "Compilation error found in '" + outFileName + "'\n -> " + e.what() << std::endl;
+        std::cerr << "Compilation error found in '" + outMcexePath + "'\n -> " + e.what() << std::endl;
         exit(1);
     }
 
-    try
+    if (shouldOutputMcexe)
     {
-        fileUtils::writeToFile(outFileName, assembled);
+        fileUtils::writeToFile(outMcexePath, assembled);
     }
-    catch (const SyntaxError &e)
+    if (shouldOutputSchem)
     {
-        std::cerr << std::string(e.what()) + std::string(":\n -> Provided file path: '") + stringUtils::trim(outFileName) + "'" << std::endl;
-        exit(1);
+        schematicBuilder::writeToFile(outSchemPath, assembled);
     }
 }
 
@@ -128,14 +112,14 @@ int main(int argc, char *argv[])
     cxxopts::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
     // clang-format off
     options.add_options()
-        ("c,compile", "Compile .mcscript code into assembly (not implemented yet)")
-        ("a,assemble", "Assemble .mcasm assembly code")
+        ("c,compile", "Compile .mcscript code into assembly (not implemented yet)", cxxopts::value<std::string>())
+        ("a,assemble", "Assemble .mcasm assembly code", cxxopts::value<std::string>())
         ("x,execute", "Execute .mcexe binary via an emulator (not implemented yet)")
         ("set-schem-path", "Set a default schematic ouput path", cxxopts::value<std::string>())
         ("set-mcexe-path", "Set a default mcexe ouput path", cxxopts::value<std::string>())
         ("h,help", "Print usage")
-        ("o,output-file", "Filepath for the output binary", cxxopts::value<std::string>()->implicit_value(defaultSchemPath))
-        ("s,output-schematic", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value(defaultMcexePath))
+        ("o,output-mcexe", "Filepath for the output .mcexe file", cxxopts::value<std::string>()->implicit_value(defaultMcexePath))
+        ("s,output-schem", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value(defaultSchemPath))
     ;
     // clang-format on
     cxxopts::ParseResult parsed;
@@ -176,7 +160,7 @@ int main(int argc, char *argv[])
     }
     if (parsed.count("assemble"))
     {
-        handleAssembleArg(argc, argv);
+        handleAssembleArg(parsed);
         exit(0);
     }
     if (parsed.count("set-schem-path"))
