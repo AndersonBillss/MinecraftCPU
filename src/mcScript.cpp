@@ -7,6 +7,7 @@
 #include "cxxopts.hpp"
 #include "assembler/assembler.hpp"
 #include "schematicBuilder/schematicBuilder.hpp"
+#include "configManager/configManager.hpp"
 #include "utils/stringUtils.hpp"
 #include "utils/binStringUtils.hpp"
 #include "utils/fileUtils.hpp"
@@ -14,7 +15,7 @@
 
 const std::string defaultOutputFolder = "mcScriptBuild/";
 const std::string defaultOutputFileName = "bin";
-const std::string defaultExecutableExtension = ".mcasm";
+const std::string defaultExecutableExtension = ".mcexe";
 
 void handleAssembleArg(const int &argc, char *argv[])
 {
@@ -75,10 +76,6 @@ void handleAssembleArg(const int &argc, char *argv[])
     }
 }
 
-void handleSchemPathArg(const int &argc, char *argv[])
-{
-}
-
 void checkExclusive(const cxxopts::ParseResult &result, const std::vector<std::string> &opts)
 {
     std::vector<std::string> selectedFlags;
@@ -117,6 +114,17 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Load config
+    std::string defaultSchemPath = "mcScriptBuild/bin.schem";
+    std::string defaultMcexePath = "mcScriptBuild/bin.mcexe";
+    auto config = configManager::loadConfig();
+    auto it = config.find("schem-path");
+    if (it != config.end())
+        defaultSchemPath = config["schem-path"];
+    it = config.find("mcexe-path");
+    if (it != config.end())
+        defaultMcexePath = config["mcexe-path"];
+
     cxxopts::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
     // clang-format off
     options.add_options()
@@ -124,10 +132,10 @@ int main(int argc, char *argv[])
         ("a,assemble", "Assemble .mcasm assembly code")
         ("x,execute", "Execute .mcexe binary via an emulator (not implemented yet)")
         ("set-schem-path", "Set a default schematic ouput path", cxxopts::value<std::string>())
-        ("set-executable-path", "Set a default mcexe ouput path", cxxopts::value<std::string>())
+        ("set-mcexe-path", "Set a default mcexe ouput path", cxxopts::value<std::string>())
         ("h,help", "Print usage")
-        ("o,output-file", "Filepath for the output binary", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
-        ("s,output-schematic", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value("bin.mcexe"))
+        ("o,output-file", "Filepath for the output binary", cxxopts::value<std::string>()->implicit_value(defaultSchemPath))
+        ("s,output-schematic", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value(defaultMcexePath))
     ;
     // clang-format on
     cxxopts::ParseResult parsed;
@@ -140,6 +148,11 @@ int main(int argc, char *argv[])
         std::cerr << e.what() << std::endl;
         exit(1);
     }
+    catch (cxxopts::exceptions::missing_argument &e)
+    {
+        std::cerr << e.what() << std::endl;
+        exit(1);
+    }
 
     const std::vector<std::string> commandTypes = {
         "compile",
@@ -147,7 +160,7 @@ int main(int argc, char *argv[])
         "execute",
         "help",
         "set-schem-path",
-        "set-executable-path"};
+        "set-mcexe-path"};
 
     checkExclusive(parsed, commandTypes);
 
@@ -166,9 +179,20 @@ int main(int argc, char *argv[])
         handleAssembleArg(argc, argv);
         exit(0);
     }
-    if (parsed.count("-set-schem-path"))
+    if (parsed.count("set-schem-path"))
     {
-        handleSchemPathArg(argc, argv);
+        std::string path = parsed["set-schem-path"].as<std::string>();
+        config["schem-path"] = path;
+        configManager::saveConfig(config);
+        std::cout << "Schematic path is now set to \"" + path + "\"";
+        exit(0);
+    }
+    if (parsed.count("set-mcexe-path"))
+    {
+        std::string path = parsed["set-mcexe-path"].as<std::string>();
+        config["mcexe-path"] = path;
+        configManager::saveConfig(config);
+        std::cout << "mcexe path is now set to \"" + path + "\"";
         exit(0);
     }
     std::cout << "Default command is not implemented yet" << std::endl;

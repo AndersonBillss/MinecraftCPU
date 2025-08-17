@@ -135,6 +135,10 @@ TEST_CASE("StringUtils getBlock")
     testString = "This is a block {With nested blocks {and some more {nested} blocks inside}}";
     expected = "{and some more {nested} blocks inside}";
     REQUIRE(stringUtils::getBlock(testString, "{", "}", 36) == expected);
+
+    testString = "\"This is wrapped in quotes\" a b c";
+    expected = "\"This is wrapped in quotes\"";
+    REQUIRE(stringUtils::getBlock(testString, "\"", "\"") == expected);
 }
 
 TEST_CASE("StringUtils getOccurrences")
@@ -144,9 +148,16 @@ TEST_CASE("StringUtils getOccurrences")
     size_t expected = 8;
     REQUIRE(stringUtils::getOccurrences(testString, subSection) == expected);
 
-
     testString = "ababa aba abaaba a ba ab a b";
     subSection = "aba";
     expected = 4;
     REQUIRE(stringUtils::getOccurrences(testString, subSection) == expected);
+}
+
+TEST_CASE("StringUtils indexOfFirst")
+{
+    std::string testString = "hello 123 543 = 123435 = 2";
+    std::string section = "=";
+    int expected = 14;
+    REQUIRE(stringUtils::indexOfFirst(testString, section) == expected);
 }

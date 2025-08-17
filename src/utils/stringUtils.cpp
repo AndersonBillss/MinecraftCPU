@@ -107,7 +107,12 @@ std::string stringUtils::getBlock(const std::string &text, const std::string &op
     int depth = 0;
     for (size_t i = index; i < text.size(); i++)
     {
-        if (subSectionEqual(text, i, opening))
+        if (insideBlock && subSectionEqual(text, i, closing))
+        {
+            i += opening.size() - 1;
+            depth--;
+        }
+        else if (subSectionEqual(text, i, opening))
         {
             insideBlock = true;
             i += opening.size() - 1;
@@ -116,11 +121,6 @@ std::string stringUtils::getBlock(const std::string &text, const std::string &op
         if (insideBlock)
         {
             result += text[i];
-        }
-        if (subSectionEqual(text, i, closing))
-        {
-            i += opening.size() - 1;
-            depth--;
         }
         if (insideBlock && depth == 0)
         {
@@ -140,9 +140,25 @@ size_t stringUtils::getOccurrences(const std::string &text, const std::string &s
         {
             count++;
             index += section.size();
-        } else {
+        }
+        else
+        {
             index++;
         }
     }
     return count;
+}
+
+size_t stringUtils::indexOfFirst(const std::string &text, const std::string &section)
+{
+    size_t foundIndex = 0;
+    while (foundIndex < text.size())
+    {
+        if (subSectionEqual(text, foundIndex, section))
+        {
+            return foundIndex;
+        }
+        foundIndex++;
+    }
+    return -1;
 }
