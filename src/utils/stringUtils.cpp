@@ -166,6 +166,9 @@ size_t stringUtils::indexOfFirst(const std::string &text, const std::string &sec
 void decodeEscape(const std::string &text, std::string &parsed, size_t &i)
 {
     i++;
+    if(i < parsed.size()){
+        throw std::runtime_error("Unmatched escape at the end of the string");
+    }
     char esc = text[i];
     switch (esc)
     {

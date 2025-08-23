@@ -161,3 +161,14 @@ TEST_CASE("StringUtils indexOfFirst")
     int expected = 14;
     REQUIRE(stringUtils::indexOfFirst(testString, section) == expected);
 }
+
+TEST_CASE("StringUtils parseEsc")
+{
+    std::string src = "Hello \\n world!";
+    std::string expected = "Hello \n world!";
+    REQUIRE(stringUtils::parseEsc(src) == expected);
+
+    src = "This \\t\\n is \\r a test \\n string \\n";
+    expected = "This \t\n is \r a test \n string \n";
+    REQUIRE(stringUtils::parseEsc(src) == expected);
+}
