@@ -162,3 +162,59 @@ size_t stringUtils::indexOfFirst(const std::string &text, const std::string &sec
     }
     return -1;
 }
+
+void decodeEscape(const std::string &text, std::string &parsed, size_t &i)
+{
+    i++;
+    char esc = text[i];
+    switch (esc)
+    {
+    case 'n':
+        parsed.push_back('\n');
+        break;
+    case 't':
+        parsed.push_back('\t');
+        break;
+    case 'r':
+        parsed.push_back('\r');
+        break;
+    case 'b':
+        parsed.push_back('\b');
+        break;
+    case 'v':
+        parsed.push_back('\v');
+        break;
+    case '\\':
+        parsed.push_back('\\');
+        break;
+    case '\'':
+        parsed.push_back('\'');
+        break;
+    case '"':
+        parsed.push_back('"');
+        break;
+    case '?':
+        parsed.push_back('?');
+        break;
+    default:
+        throw std::runtime_error(std::string("Unknown escape: \\") + esc);
+    }
+}
+std::string stringUtils::parseEsc(const std::string &text)
+{
+    std::string parsed = "";
+    size_t i = 0;
+    while (i < text.size())
+    {
+        if (text[i] == '\\')
+        {
+            decodeEscape(text, parsed, i);
+        }
+        else
+        {
+            parsed.push_back(text[i]);
+        }
+        i++;
+    }
+    return parsed;
+}

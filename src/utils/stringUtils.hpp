@@ -12,4 +12,5 @@ namespace stringUtils
     std::string getBlock(const std::string &text, const std::string &opening, const std::string &closing, int index = 0);
     size_t getOccurrences(const std::string &text, const std::string &section);
     size_t indexOfFirst(const std::string &text, const std::string &section);
+    std::string parseEsc(const std::string &text);
 }
