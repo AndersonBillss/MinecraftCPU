@@ -3,53 +3,122 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 #include "cliError.hpp"
 #include "../utils/stringUtils.hpp"
 
 class CliOptions
 {
-public:
 private:
-    template <typename T,
-              typename = std::enable_if_t<
-                  std::is_same_v<T, bool> || std::is_same_v<T, std::string>>>
-    class Option
+    using optionValue = std::variant<std::string, bool>;
+    struct Option
+    {
+        bool hasDefault;
+        optionValue defaultValue;
+        bool hasImplicit;
+        optionValue implicitValue;
+        std::string shortFlag;
+        std::string longFlag;
+        std::string helpText;
+    };
+    class StringOption
     {
     private:
-        bool _hasDefault;
-        T _defaultValue;
-        bool _hasImplicit;
-        T _implicitValue;
-        std::string _helpString;
-        std::string _shortFlag;
-        std::string _longFlag;
+        Option *_data;
 
     public:
-        Option(const std::string &longFlag, const std::string &shortFlag = "")
+        StringOption(Option *data)
         {
-            _valueType = type;
-            if (stringUtils::trim(longFlag) == "")
-            {
-                throw CliError("Long flag must be provided");
-            }
+            _data = data;
         }
-
-        Option<T> addDefault(T value)
+        StringOption &addDefault(const std::string &value)
         {
-            _hasDefault = true;
-            _defaultValue = value;
-        };
-        Option<T> addImplicit(T value)
+            _data->hasDefault = true;
+            _data->defaultValue = value;
+            return *this;
+        }
+        StringOption &addImplicit(const std::string &value)
         {
-            _hasImplicit = true;
-            _implicitValue = value;
-        };
-        Option<T> addHelp(std::string help)
+            _data->hasImplicit = true;
+            _data->implicitValue = value;
+            return *this;
+        }
+        StringOption &addHelp(const std::string &help)
         {
-            help = help
+            _data->helpText = help;
+            return *this;
         }
     };
-    std::vector<Option<bool>> _boolOptions;
-    std::vector<Option<std::string>> _stringOptions;
+    class BoolOption
+    {
+    private:
+        Option *_data;
+
+    public:
+        BoolOption(Option *data)
+        {
+            _data = data;
+        }
+        BoolOption &addHelp(std::string help)
+        {
+            _data->helpText = help;
+            return *this;
+        }
+    };
+
+    std::map<std::string, std::unique_ptr<Option>> _longOptions;
+    std::map<std::string, Option *> _shortOptions;
+
+public:
+    StringOption addStringOption(const std::string &longFlag, const std::string &shortFlag = "")
+    {
+        std::string trimmedLongFlag = stringUtils::trim(longFlag);
+        std::string trimmedShortFlag = stringUtils::trim(shortFlag);
+        if (trimmedLongFlag.empty())
+        {
+            throw CliError("Long flag must be provided");
+        }
+        auto option = std::make_unique<Option>();
+        option->hasDefault = false;
+        option->defaultValue = "";
+        option->hasImplicit = false;
+        option->implicitValue = "";
+        option->shortFlag = trimmedShortFlag;
+        option->longFlag = trimmedLongFlag;
+        option->helpText = "";
+        Option *raw = option.get();
+        _longOptions[trimmedLongFlag] = std::move(option);
+        if (!trimmedShortFlag.empty())
+        {
+            _shortOptions[trimmedShortFlag] = raw;
+        }
+        return StringOption(raw);
+    }
+
+    BoolOption addBoolOption(const std::string &longFlag, const std::string &shortFlag = "")
+    {
+        std::string trimmedLongFlag = stringUtils::trim(longFlag);
+        std::string trimmedShortFlag = stringUtils::trim(shortFlag);
+        if (trimmedLongFlag.empty())
+        {
+            throw CliError("Long flag must be provided");
+        }
+        auto option = std::make_unique<Option>();
+        option->hasDefault = false;
+        option->defaultValue = false;
+        option->hasImplicit = false;
+        option->implicitValue = false;
+        option->shortFlag = trimmedShortFlag;
+        option->longFlag = trimmedLongFlag;
+        option->helpText = "";
+
+        Option *raw = option.get();
+        _longOptions[trimmedLongFlag] = std::move(option);
+        if (!trimmedShortFlag.empty())
+        {
+            _shortOptions[trimmedShortFlag] = raw;
+        }
+        return BoolOption(raw);
+    }
 };
