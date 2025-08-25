@@ -31,7 +31,7 @@ std::vector<std::string> tokenize(int argc, char *argv[])
 void Cli::Options::_handleFlagArgument(
     std::vector<std::string> &tokens,
     size_t &index,
-    std::unordered_map<std::string, Cli::optionValue> &parsedMap)
+    std::unordered_map<std::string, Cli::Parsed::ParsedOption> &parsedMap)
 {
     std::string &token = tokens[index];
     Cli::Options::Option option;
@@ -56,14 +56,27 @@ void Cli::Options::_handleFlagArgument(
     if (std::holds_alternative<std::string>(option.defaultValue))
     {
     }
-    else if (std::holds_alternative<bool>(option.defaultValue)) // I don't use default boolean values, but I can still check whether this value is supposed to be a bool because default value should still hold a boolean
+    else if (std::holds_alternative<bool>(option.defaultValue))
+    // I don't use default boolean values, but I can still check whether this value
+    // is supposed to be a bool because default value should still hold a boolean
     {
+        Cli::Parsed::ParsedOption parsedOption = {
+            count : 0,
+            data : true,
+        };
+        auto it = parsedMap.find(option.longFlag);
+        if (it != parsedMap.end())
+        {
+            parsedOption = it->second;
+            parsedOption.count++;
+        }
+        parsedMap[option.longFlag] = parsedOption;
     }
 }
 Cli::Parsed Cli::Options::parse(int argc, char *argv[])
 {
     std::vector<std::string> tokens = tokenize(argc, argv);
-    std::unordered_map<std::string, Cli::optionValue> parsedMap;
+    std::unordered_map<std::string, Cli::Parsed::ParsedOption> parsedMap;
 
     size_t i = 0;
     while (i < tokens.size())

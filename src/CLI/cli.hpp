@@ -30,6 +30,8 @@ namespace Cli
         void ensureExclusive(const std::vector<std::string> &keys);
         void ensureUsedOnce();
         void ensureUsedOnce(const std::vector<std::string> &keys);
+
+        friend class Options;
     };
 
     class Options
@@ -38,7 +40,7 @@ namespace Cli
         void _handleFlagArgument(
             std::vector<std::string> &tokens,
             size_t &index,
-            std::unordered_map<std::string, Cli::optionValue> &parsedMap);
+            std::unordered_map<std::string, Parsed::ParsedOption> &parsedMap);
 
         struct Option
         {
@@ -97,8 +99,6 @@ namespace Cli
 
         std::map<std::string, std::unique_ptr<Option>> _longOptions;
         std::map<std::string, Option *> _shortOptions;
-
-        friend class Parsed;
 
     public:
         StringOption stringOption(const std::string &longFlag, const std::string &shortFlag = "")
