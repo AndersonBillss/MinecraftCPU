@@ -149,7 +149,7 @@ size_t stringUtils::getOccurrences(const std::string &text, const std::string &s
     return count;
 }
 
-size_t stringUtils::indexOfFirst(const std::string &text, const std::string &section)
+int stringUtils::indexOfFirst(const std::string &text, const std::string &section)
 {
     size_t foundIndex = 0;
     while (foundIndex < text.size())

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <memory>
 
 #include "cliError.hpp"
@@ -10,10 +11,35 @@
 
 namespace Cli
 {
+    using optionValue = std::variant<std::string, bool>;
+
+    class Parsed
+    {
+    private:
+        struct ParsedOption
+        {
+            size_t count;
+            optionValue data;
+        };
+        std::unordered_map<std::string, optionValue> _parsedOptions;
+
+    public:
+        optionValue operator[](const std::string &key);
+        size_t count(const std::string &key);
+
+        void ensureExclusive(const std::vector<std::string> &keys);
+        void ensureUsedOnce();
+        void ensureUsedOnce(const std::vector<std::string> &keys);
+    };
+
     class Options
     {
     private:
-        using optionValue = std::variant<std::string, bool>;
+        void _handleFlagArgument(
+            std::vector<std::string> &tokens,
+            size_t &index,
+            std::unordered_map<std::string, Cli::optionValue> &parsedMap);
+
         struct Option
         {
             bool hasDefault;
@@ -72,6 +98,8 @@ namespace Cli
         std::map<std::string, std::unique_ptr<Option>> _longOptions;
         std::map<std::string, Option *> _shortOptions;
 
+        friend class Parsed;
+
     public:
         StringOption stringOption(const std::string &longFlag, const std::string &shortFlag = "")
         {
@@ -86,8 +114,8 @@ namespace Cli
             option->defaultValue = "";
             option->hasImplicit = false;
             option->implicitValue = "";
-            option->shortFlag = trimmedShortFlag;
-            option->longFlag = trimmedLongFlag;
+            option->shortFlag = "-" + trimmedShortFlag;
+            option->longFlag = "--" + trimmedLongFlag;
             option->helpText = "";
             Option *raw = option.get();
             _longOptions[trimmedLongFlag] = std::move(option);
@@ -111,10 +139,9 @@ namespace Cli
             option->defaultValue = false;
             option->hasImplicit = false;
             option->implicitValue = false;
-            option->shortFlag = trimmedShortFlag;
-            option->longFlag = trimmedLongFlag;
+            option->shortFlag = "-" + trimmedShortFlag;
+            option->longFlag = "--" + trimmedLongFlag;
             option->helpText = "";
-
             Option *raw = option.get();
             _longOptions[trimmedLongFlag] = std::move(option);
             if (!trimmedShortFlag.empty())
@@ -123,5 +150,8 @@ namespace Cli
             }
             return BoolOption(raw);
         }
+
+        void printHelp();
+        Parsed parse(int argc, char *argv[]);
     };
 }

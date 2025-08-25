@@ -11,6 +11,6 @@ namespace stringUtils
     std::string join(const std::vector<std::string> &text, const std::string &delimiter);
     std::string getBlock(const std::string &text, const std::string &opening, const std::string &closing, int index = 0);
     size_t getOccurrences(const std::string &text, const std::string &section);
-    size_t indexOfFirst(const std::string &text, const std::string &section);
+    int indexOfFirst(const std::string &text, const std::string &section);
     std::string parseEsc(const std::string &text);
 }
