@@ -16,7 +16,7 @@ std::vector<std::string> tokenize(int argc, char *argv[])
     std::vector<std::string> args;
     for (int i = 0; i < argc; i++)
     {
-        std::string argStr(args[i]);
+        std::string argStr(argv[i]);
         if (argStr[0] == '-')
         {
             tokenizeFlag(args, argStr);
@@ -130,8 +130,9 @@ Cli::Parsed Cli::Options::parse(int argc, char *argv[])
         {
             throw CliError("Invalid flag: " + token);
         }
+        i++;
     }
-    
+
     Parsed result;
     result._parsedOptions = parsedMap;
     return result;
