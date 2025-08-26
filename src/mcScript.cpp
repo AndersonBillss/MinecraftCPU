@@ -92,13 +92,6 @@ void checkExclusive(const cxxopts::ParseResult &result, const std::vector<std::s
 
 int main(int argc, char *argv[])
 {
-
-    std::string s = "HELLO=THERE";
-    int in = stringUtils::indexOfFirst(s, "=");
-    std::cout << s.substr(0, in) << std::endl;
-    std::cout << s.substr(in+1, s.size()-1) << std::endl;
-
-    return (0);
     for (int i = 0; i < argc; i++)
     {
         std::cout << argv[i] << std::endl;

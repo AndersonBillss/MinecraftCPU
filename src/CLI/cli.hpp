@@ -25,7 +25,15 @@ namespace Cli
 
     public:
         template <typename T>
-        T get(const std::string &key);
+        T get(const std::string &key)
+        {
+            auto it = _parsedOptions.find(key);
+            if (it == _parsedOptions.end())
+            {
+                throw CliError("Cannot access flag: '" + key + "'");
+            }
+            return std::get<T>(it->second.data);
+        };
         size_t count(const std::string &key);
 
         void ensureExclusive(const std::vector<std::string> &keys);

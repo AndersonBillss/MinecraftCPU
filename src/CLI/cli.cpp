@@ -118,7 +118,7 @@ Cli::Parsed Cli::Options::parse(int argc, char *argv[])
     std::vector<std::string> tokens = tokenize(argc, argv);
     std::unordered_map<std::string, Cli::Parsed::ParsedOption> parsedMap;
 
-    size_t i = 0;
+    size_t i = 1;
     while (i < tokens.size())
     {
         std::string &token = tokens[i];
@@ -136,17 +136,6 @@ Cli::Parsed Cli::Options::parse(int argc, char *argv[])
     Parsed result;
     result._parsedOptions = parsedMap;
     return result;
-}
-
-template <typename T>
-T Cli::Parsed::get(const std::string &key)
-{
-    auto it = _parsedOptions.find(key);
-    if (it == _parsedOptions.end())
-    {
-        throw CliError("Cannot access flag: '" + key + "'");
-    }
-    return std::get<T>(it->second.data);
 }
 
 size_t Cli::Parsed::count(const std::string &key)
