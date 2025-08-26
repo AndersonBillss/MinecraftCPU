@@ -48,9 +48,10 @@ TEST_CASE("CLI flags")
                                .addHelp("Wow some sample options"); });
     REQUIRE(parsed.get<bool>("sampleFlag") == true);
 
-    parsed = parseHelper({"mcScript", "-s"}, [](Cli::Options &o)
+    parsed = parseHelper({"mcScript", "-s", "--text", "Hello, world!"}, [](Cli::Options &o)
                          { o.boolOption("sampleFlag", "s")
                                    .addHelp("Wow some sample options");
                             o.stringOption("text"); });
     REQUIRE(parsed.get<bool>("sampleFlag") == true);
+    REQUIRE(parsed.get<std::string>("text") == "Hello, world!");
 }

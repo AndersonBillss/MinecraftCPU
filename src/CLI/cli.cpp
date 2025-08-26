@@ -79,7 +79,7 @@ void Cli::Options::_handleFlagArgument(
         }
 
         std::string argument;
-        if (hasArgument)
+        if (!hasArgument)
         {
             if (option.hasImplicit)
             {
