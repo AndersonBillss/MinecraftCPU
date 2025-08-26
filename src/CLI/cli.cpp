@@ -79,7 +79,11 @@ void Cli::Options::_handleFlagArgument(
         }
 
         std::string argument;
-        if (!hasArgument)
+        if (hasArgument)
+        {
+            argument = stringUtils::parseEsc(tokens[index]);
+        }
+        else
         {
             if (option.hasImplicit)
             {
@@ -90,7 +94,6 @@ void Cli::Options::_handleFlagArgument(
                 throw CliError("No value provided for '" + option.longFlag + "' option");
             }
         }
-        argument = stringUtils::parseEsc(tokens[index]);
         parsedOption.data = argument;
         parsedMap[option.longFlag] = parsedOption;
     }

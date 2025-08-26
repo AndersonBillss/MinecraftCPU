@@ -54,4 +54,25 @@ TEST_CASE("CLI flags")
                             o.stringOption("text"); });
     REQUIRE(parsed.get<bool>("sampleFlag") == true);
     REQUIRE(parsed.get<std::string>("text") == "Hello, world!");
+
+    parsed = parseHelper({"mcScript"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .addHelp("Wow some sample options"); });
+    REQUIRE(parsed.count("sampleFlag") == 0);
+
+    parsed = parseHelper({"mcScript"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .addHelp("Wow some sample options");
+                            o.stringOption("text"); });
+    REQUIRE(parsed.count("sampleFlag") == 0);
+    REQUIRE(parsed.count("text") == 0);
+
+    parsed = parseHelper({"mcScript", "-t", "hello"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t"); });
+    REQUIRE(parsed.get<std::string>("text") == "hello");
+
+    parsed = parseHelper({"mcScript", "-t"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                            .addImplicit("test value"); });
+    REQUIRE(parsed.get<std::string>("text") == "test value");
 }
