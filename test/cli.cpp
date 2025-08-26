@@ -31,25 +31,26 @@ Cli::Parsed parseHelper(std::initializer_list<std::string> args, std::function<v
 
 TEST_CASE("CLI flags")
 {
-    size_t resultCount;
-    bool resultBool;
-    std::string resultString;
+    Cli::Parsed parsed;
 
-    resultCount = parseHelper({"mcScript", "--sampleFlag"}, [](Cli::Options &o)
-                              { o.boolOption("sampleFlag", "s")
-                                    .addHelp("Wow some sample options"); })
-                      .count("sampleFlag");
-    REQUIRE(resultCount == 1);
+    parsed = parseHelper({"mcScript", "--sampleFlag"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .addHelp("Wow some sample options"); });
+    REQUIRE(parsed.count("sampleFlag") == 1);
 
-    resultCount = parseHelper({"mcScript", "-s"}, [](Cli::Options &o)
-                              { o.boolOption("sampleFlag", "s")
-                                    .addHelp("Wow some sample options"); })
-                      .count("sampleFlag");
-    REQUIRE(resultCount == 1);
+    parsed = parseHelper({"mcScript", "-s"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .addHelp("Wow some sample options"); });
+    REQUIRE(parsed.count("sampleFlag") == 1);
 
-    resultBool = parseHelper({"mcScript", "-s"}, [](Cli::Options &o)
-                             { o.boolOption("sampleFlag", "s")
-                                   .addHelp("Wow some sample options"); })
-                     .get<bool>("sampleFlag");
-    REQUIRE(resultBool == true);
+    parsed = parseHelper({"mcScript", "-s"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .addHelp("Wow some sample options"); });
+    REQUIRE(parsed.get<bool>("sampleFlag") == true);
+
+    parsed = parseHelper({"mcScript", "-s"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                                   .addHelp("Wow some sample options");
+                            o.stringOption("text"); });
+    REQUIRE(parsed.get<bool>("sampleFlag") == true);
 }
