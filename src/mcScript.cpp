@@ -4,7 +4,6 @@
 #include <sstream>
 #include <unordered_map>
 
-#include "cxxopts.hpp"
 #include "assembler/assembler.hpp"
 #include "schematicBuilder/schematicBuilder.hpp"
 #include "configManager/configManager.hpp"
@@ -12,26 +11,27 @@
 #include "utils/binStringUtils.hpp"
 #include "utils/fileUtils.hpp"
 #include "utils/syntaxError.hpp"
+#include "CLI/cli.hpp"
 
-void handleAssembleArg(cxxopts::ParseResult parsed)
+void handleAssembleArg(Cli::Parsed parsed)
 {
     if (!parsed.count("assemble"))
     {
         std::cerr << "No input filepath provided" << std::endl;
         exit(1);
     }
-    std::string inFilePath = parsed["assemble"].as<std::string>();
+    std::string inFilePath = parsed.get<std::string>("assemble");
     bool shouldOutputMcexe = parsed.count("output-mcexe");
     bool shouldOutputSchem = parsed.count("output-schem");
     std::string outMcexePath;
     std::string outSchemPath;
     if (shouldOutputMcexe)
     {
-        outMcexePath = parsed["output-mcexe"].as<std::string>();
+        outMcexePath = parsed.get<std::string>("output-mcexe");
     }
     if (shouldOutputSchem)
     {
-        outSchemPath = parsed["output-schem"].as<std::string>();
+        outSchemPath = parsed.get<std::string>("output-schem");
     }
     if (!shouldOutputMcexe && !shouldOutputSchem)
     {
@@ -60,47 +60,11 @@ void handleAssembleArg(cxxopts::ParseResult parsed)
     }
 }
 
-void checkExclusive(const cxxopts::ParseResult &result, const std::vector<std::string> &opts)
-{
-    std::vector<std::string> selectedFlags;
-    for (auto &opt : opts)
-    {
-        if (result.count(opt))
-            selectedFlags.push_back(opt);
-    }
-    if (selectedFlags.size() > 1)
-    {
-        std::cerr << "Error: options ";
-        for (size_t i = 0; i < selectedFlags.size(); i++)
-        {
-            std::string &flag = selectedFlags[i];
-            std::string textFormat = ",";
-            if (selectedFlags.size() == 2 || i == 0)
-            {
-                textFormat = "";
-            }
-            if (i == selectedFlags.size() - 1)
-            {
-                textFormat += "and ";
-            }
-            std::cerr << textFormat << "--" << flag << " ";
-        }
-        std::cerr << "are mutually exclusive.\n";
-        std::exit(1);
-    }
-}
-
 int main(int argc, char *argv[])
 {
-    for (int i = 0; i < argc; i++)
-    {
-        std::cout << argv[i] << std::endl;
-    }
-    return (0);
-
     if (argc < 2)
     {
-        std::cerr << "No Arguments provided\nUse the -help flag to see available commands" << std::endl;
+        std::cerr << "No Arguments provided\nUse the --help flag to see available commands" << std::endl;
         return 1;
     }
 
@@ -115,48 +79,32 @@ int main(int argc, char *argv[])
     if (it != config.end())
         defaultMcexePath = config["mcexe-path"];
 
-    cxxopts::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
-    // clang-format off
-    options.add_options()
-        ("c,compile", "Compile .mcscript code into assembly (not implemented yet)", cxxopts::value<std::string>())
-        ("a,assemble", "Assemble .mcasm assembly code", cxxopts::value<std::string>())
-        ("x,execute", "Execute .mcexe binary via an emulator (not implemented yet)")
-        ("set-schem-path", "Set a default schematic ouput path", cxxopts::value<std::string>())
-        ("set-mcexe-path", "Set a default mcexe ouput path", cxxopts::value<std::string>())
-        ("h,help", "Print usage")
-        ("o,output-mcexe", "Filepath for the output .mcexe file", cxxopts::value<std::string>()->implicit_value(defaultMcexePath))
-        ("s,output-schem", "Filepath for the output schematic", cxxopts::value<std::string>()->implicit_value(defaultSchemPath))
-    ;
-    // clang-format on
-    cxxopts::ParseResult parsed;
+    // "McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer"
+    Cli::Options options;
+    options.stringOption("compile", "c").addHelp("Compile .mcscript code into assembly (not implemented yet)");
+    options.stringOption("assemble", "a").addHelp("Assemble .mcasm assembly code");
+    options.stringOption("execute", "x").addHelp("Execute .mcexe binary via an emulator (not implemented yet)");
+    options.stringOption("set-schem-path").addHelp("Set a default schematic ouput path");
+    options.stringOption("set-mcexe-path").addHelp("Set a default mcexe ouput path");
+    options.boolOption("help", "h").addHelp("Print usage");
+    options.stringOption("output-mcexe", "o").addHelp("Filepath for the output .mcexe file").addImplicit(defaultMcexePath);
+    options.stringOption("output-schem", "s").addHelp("Filepath for the output schematic file").addImplicit(defaultSchemPath);
+
+    Cli::Parsed parsed;
     try
     {
         parsed = options.parse(argc, argv);
+        parsed.ensureExclusive({"compile", "assemble", "execute", "help", "set-schem-path", "set-mcexe-path"});
     }
-    catch (const cxxopts::exceptions::no_such_option &e)
+    catch (CliError &e)
     {
         std::cerr << e.what() << std::endl;
-        exit(1);
+        exit(0);
     }
-    catch (cxxopts::exceptions::missing_argument &e)
-    {
-        std::cerr << e.what() << std::endl;
-        exit(1);
-    }
-
-    const std::vector<std::string> commandTypes = {
-        "compile",
-        "assemble",
-        "execute",
-        "help",
-        "set-schem-path",
-        "set-mcexe-path"};
-
-    checkExclusive(parsed, commandTypes);
 
     if (parsed.count("help"))
     {
-        std::cout << options.help() << std::endl;
+        std::cout << "Help is not implemented yet" << std::endl;
         exit(0);
     }
     if (parsed.count("compile"))
@@ -171,18 +119,18 @@ int main(int argc, char *argv[])
     }
     if (parsed.count("set-schem-path"))
     {
-        std::string path = parsed["set-schem-path"].as<std::string>();
+        std::string path = parsed.get<std::string>("set-schem-path");
         config["schem-path"] = path;
         configManager::saveConfig(config);
-        std::cout << "Schematic path is now set to \"" + path + "\"";
+        std::cout << "Schematic path is now set to \"" + path + "\"" << std::endl;
         exit(0);
     }
     if (parsed.count("set-mcexe-path"))
     {
-        std::string path = parsed["set-mcexe-path"].as<std::string>();
+        std::string path = parsed.get<std::string>("set-mcexe-path");
         config["mcexe-path"] = path;
         configManager::saveConfig(config);
-        std::cout << "mcexe path is now set to \"" + path + "\"";
+        std::cout << "mcexe path is now set to \"" + path + "\"" << std::endl;
         exit(0);
     }
     std::cout << "Default command is not implemented yet" << std::endl;

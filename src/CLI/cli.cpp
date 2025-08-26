@@ -181,7 +181,7 @@ void Cli::Parsed::ensureExclusive(const std::vector<std::string> &keys)
             }
             else
             {
-                throw CliError("Option '" + selectedOption + "' and '" + key + "' are mutually exclusive");
+                throw CliError("Options '" + selectedOption + "' and '" + key + "' are mutually exclusive");
             }
         }
     }

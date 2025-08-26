@@ -11,7 +11,7 @@ std::string fileUtils::readFile(const std::string &filename)
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        std::cerr << "Failed to open file: " + filename;
+        std::cerr << "Failed to open file: " + filename << std::endl;
     }
     std::stringstream buffer;
     buffer << file.rdbuf();
@@ -40,7 +40,7 @@ void fileUtils::writeToFile(const std::string &outputPath, const std::string &co
     std::ofstream outFile(outputPath);
     if (!outFile.is_open())
     {
-        std::cerr << "Failed to open file: " + outputPath;
+        std::cerr << "Failed to open file: " + outputPath << std::endl;
         return;
     }
     outFile << contents;
