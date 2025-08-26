@@ -62,8 +62,8 @@ void Cli::Options::_handleFlagArgument(
         auto it = parsedMap.find(option.longFlag);
         if (it != parsedMap.end())
         {
-            throw CliError("Can only have one '" + option.longFlag + "' option");
-            // I am keeping this code in case I want to allow duplicates.
+            if (!option.multipleAllowed)
+                throw CliError("Can only have one '" + option.longFlag + "' option");
             parsedOption = it->second;
             parsedOption.count++;
         }
@@ -85,6 +85,7 @@ void Cli::Options::_handleFlagArgument(
         }
         else
         {
+            // Add implicit value
             if (option.hasImplicit)
             {
                 argument = std::get<std::string>(option.implicitValue);
@@ -108,8 +109,8 @@ void Cli::Options::_handleFlagArgument(
         auto it = parsedMap.find(option.longFlag);
         if (it != parsedMap.end())
         {
-            throw CliError("Can only have one '" + option.longFlag + "' option");
-            // I am keeping this code in case I want to allow duplicates.
+            if (!option.multipleAllowed)
+                throw CliError("Can only have one '" + option.longFlag + "' option");
             parsedOption = it->second;
             parsedOption.count++;
         }

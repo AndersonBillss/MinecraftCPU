@@ -1,5 +1,6 @@
 #include "catch_amalgamated.hpp"
 #include "../src/CLI/cli.hpp"
+#include "../src/CLI/cliError.hpp"
 #include <string>
 #include <vector>
 
@@ -128,4 +129,51 @@ TEST_CASE("CLI flags")
                                .addDefault("test 2"); });
     REQUIRE(parsed.count("text") == 1);
     REQUIRE(parsed.get<std::string>("text") == "test 3");
+
+    REQUIRE_THROWS_AS(parseHelper({"mcScript", "--sampleFlag", "--sampleFlag"}, [](Cli::Options &o)
+                                  { o.boolOption("sampleFlag", "s"); }),
+                      CliError);
+
+    REQUIRE_THROWS_AS(parseHelper({"mcScript", "--sampleFlag", "-s"}, [](Cli::Options &o)
+                                  { o.boolOption("sampleFlag", "s"); }),
+                      CliError);
+
+    REQUIRE_THROWS_AS(parseHelper({"mcScript", "-s", "-s"}, [](Cli::Options &o)
+                                  { o.boolOption("sampleFlag", "s"); }),
+                      CliError);
+
+    parsed = parseHelper({"mcScript", "-s"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .allowMultiple(); });
+    REQUIRE(parsed.count("sampleFlag") == 1);
+
+    parsed = parseHelper({"mcScript", "-s", "--sampleFlag"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .allowMultiple(); });
+    REQUIRE(parsed.count("sampleFlag") == 2);
+
+    parsed = parseHelper({"mcScript", "-s", "--sampleFlag", "-s", "-s"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .allowMultiple(); });
+    REQUIRE(parsed.count("sampleFlag") == 4);
+
+    parsed = parseHelper({"mcScript", "-s", "--sampleFlag", "-s", "-s"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .allowMultiple();
+                            o.boolOption("verbose", "v"); });
+    REQUIRE(parsed.count("sampleFlag") == 4);
+    REQUIRE(parsed.count("verbose") == 0);
+
+    parsed = parseHelper({"mcScript", "-s", "--sampleFlag", "-s", "-s", "-v"}, [](Cli::Options &o)
+                         { o.boolOption("sampleFlag", "s")
+                               .allowMultiple();
+                            o.boolOption("verbose", "v"); });
+    REQUIRE(parsed.count("sampleFlag") == 4);
+    REQUIRE(parsed.count("verbose") == 1);
+
+    REQUIRE_THROWS_AS(parseHelper({"mcScript", "-s", "--sampleFlag", "-v", "-s", "-s", "-v"}, [](Cli::Options &o)
+                                  { o.boolOption("sampleFlag", "s")
+                               .allowMultiple();
+                            o.boolOption("verbose", "v"); }),
+                      CliError);
 }

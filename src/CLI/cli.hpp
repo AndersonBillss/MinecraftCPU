@@ -37,8 +37,6 @@ namespace Cli
         size_t count(const std::string &key);
 
         void ensureExclusive(const std::vector<std::string> &keys);
-        void ensureUsedOnce();
-        void ensureUsedOnce(const std::vector<std::string> &keys);
 
         friend class Options;
     };
@@ -57,6 +55,7 @@ namespace Cli
             optionValue defaultValue;
             bool hasImplicit;
             optionValue implicitValue;
+            bool multipleAllowed;
             std::string shortFlag;
             std::string longFlag;
             std::string helpText;
@@ -88,6 +87,11 @@ namespace Cli
                 _data->helpText = help;
                 return *this;
             }
+            StringOption &allowMultiple()
+            {
+                _data->multipleAllowed = true;
+                return *this;
+            };
         };
         class BoolOption
         {
@@ -104,6 +108,11 @@ namespace Cli
                 _data->helpText = help;
                 return *this;
             }
+            BoolOption &allowMultiple()
+            {
+                _data->multipleAllowed = true;
+                return *this;
+            };
         };
 
         std::map<std::string, std::unique_ptr<Option>> _longOptions;
