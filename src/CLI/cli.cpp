@@ -9,7 +9,7 @@ void tokenizeFlag(std::vector<std::string> &args, std::string arg)
         return;
     }
     args.push_back(arg.substr(0, equalIndex));
-    args.push_back(arg.substr(equalIndex + 1, args.size() - 1));
+    args.push_back(arg.substr(equalIndex + 1, arg.size() - 1));
 }
 std::vector<std::string> tokenize(int argc, char *argv[])
 {

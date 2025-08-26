@@ -73,6 +73,16 @@ TEST_CASE("CLI flags")
 
     parsed = parseHelper({"mcScript", "-t"}, [](Cli::Options &o)
                          { o.stringOption("text", "t")
-                            .addImplicit("test value"); });
+                               .addImplicit("test value"); });
     REQUIRE(parsed.get<std::string>("text") == "test value");
+
+    parsed = parseHelper({"mcScript", "-t", "hello"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addImplicit("test value"); });
+    REQUIRE(parsed.get<std::string>("text") == "hello");
+
+    parsed = parseHelper({"mcScript", "-t=hello"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addImplicit("test value"); });
+    REQUIRE(parsed.get<std::string>("text") == "hello");
 }
