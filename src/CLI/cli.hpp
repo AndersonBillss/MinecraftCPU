@@ -21,10 +21,11 @@ namespace Cli
             size_t count;
             optionValue data;
         };
-        std::unordered_map<std::string, optionValue> _parsedOptions;
+        std::unordered_map<std::string, ParsedOption> _parsedOptions;
 
     public:
-        optionValue operator[](const std::string &key);
+        template <typename T>
+        T get(const std::string &key);
         size_t count(const std::string &key);
 
         void ensureExclusive(const std::vector<std::string> &keys);
@@ -114,14 +115,14 @@ namespace Cli
             option->defaultValue = "";
             option->hasImplicit = false;
             option->implicitValue = "";
-            option->shortFlag = "-" + trimmedShortFlag;
-            option->longFlag = "--" + trimmedLongFlag;
+            option->shortFlag = trimmedShortFlag;
+            option->longFlag = trimmedLongFlag;
             option->helpText = "";
             Option *raw = option.get();
-            _longOptions[trimmedLongFlag] = std::move(option);
+            _longOptions["--" + trimmedLongFlag] = std::move(option);
             if (!trimmedShortFlag.empty())
             {
-                _shortOptions[trimmedShortFlag] = raw;
+                _shortOptions["-" + trimmedShortFlag] = raw;
             }
             return StringOption(raw);
         }
@@ -139,14 +140,14 @@ namespace Cli
             option->defaultValue = false;
             option->hasImplicit = false;
             option->implicitValue = false;
-            option->shortFlag = "-" + trimmedShortFlag;
-            option->longFlag = "--" + trimmedLongFlag;
+            option->shortFlag = trimmedShortFlag;
+            option->longFlag = trimmedLongFlag;
             option->helpText = "";
             Option *raw = option.get();
-            _longOptions[trimmedLongFlag] = std::move(option);
+            _longOptions["--" + trimmedLongFlag] = std::move(option);
             if (!trimmedShortFlag.empty())
             {
-                _shortOptions[trimmedShortFlag] = raw;
+                _shortOptions["-" + trimmedShortFlag] = raw;
             }
             return BoolOption(raw);
         }
@@ -154,4 +155,4 @@ namespace Cli
         void printHelp();
         Parsed parse(int argc, char *argv[]);
     };
-}
+};

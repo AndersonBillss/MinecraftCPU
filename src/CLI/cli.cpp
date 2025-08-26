@@ -131,6 +131,29 @@ Cli::Parsed Cli::Options::parse(int argc, char *argv[])
             throw CliError("Invalid flag: " + token);
         }
     }
+    
+    Parsed result;
+    result._parsedOptions = parsedMap;
+    return result;
+}
 
-    return Parsed();
+template <typename T>
+T Cli::Parsed::get(const std::string &key)
+{
+    auto it = _parsedOptions.find(key);
+    if (it == _parsedOptions.end())
+    {
+        throw CliError("Cannot access flag: '" + key + "'");
+    }
+    return std::get<T>(it->second.data);
+}
+
+size_t Cli::Parsed::count(const std::string &key)
+{
+    auto it = _parsedOptions.find(key);
+    if (it == _parsedOptions.end())
+    {
+        return 0;
+    }
+    return it->second.count;
 }
