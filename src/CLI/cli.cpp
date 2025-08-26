@@ -167,3 +167,22 @@ size_t Cli::Parsed::count(const std::string &key)
     }
     return it->second.count;
 }
+
+void Cli::Parsed::ensureExclusive(const std::vector<std::string> &keys)
+{
+    std::string selectedOption = "";
+    for (const std::string &key : keys)
+    {
+        if (count(key))
+        {
+            if (selectedOption.empty())
+            {
+                selectedOption = key;
+            }
+            else
+            {
+                throw CliError("Option '" + selectedOption + "' and '" + key + "' are mutually exclusive");
+            }
+        }
+    }
+}
