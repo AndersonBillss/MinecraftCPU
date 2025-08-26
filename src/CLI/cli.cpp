@@ -55,18 +55,58 @@ void Cli::Options::_handleFlagArgument(
     }
     if (std::holds_alternative<std::string>(option.defaultValue))
     {
+        Cli::Parsed::ParsedOption parsedOption = {
+            count : 1,
+            data : "",
+        };
+        auto it = parsedMap.find(option.longFlag);
+        if (it != parsedMap.end())
+        {
+            throw CliError("Can only have one '" + option.longFlag + "' option");
+            // I am keeping this code in case I want to allow duplicates.
+            parsedOption = it->second;
+            parsedOption.count++;
+        }
+        index++;
+        bool hasArgument = true;
+        if (index >= tokens.size())
+        {
+            hasArgument = false;
+        }
+        else if (tokens[index][0] == '-') // This means that the next token is another option
+        {
+            hasArgument = false;
+        }
+
+        std::string argument;
+        if (hasArgument)
+        {
+            if (option.hasImplicit)
+            {
+                argument = std::get<std::string>(option.implicitValue);
+            }
+            else
+            {
+                throw CliError("No value provided for '" + option.longFlag + "' option");
+            }
+        }
+        argument = stringUtils::parseEsc(tokens[index]);
+        parsedOption.data = argument;
+        parsedMap[option.longFlag] = parsedOption;
     }
     else if (std::holds_alternative<bool>(option.defaultValue))
     // I don't use default boolean values, but I can still check whether this value
     // is supposed to be a bool because default value should still hold a boolean
     {
         Cli::Parsed::ParsedOption parsedOption = {
-            count : 0,
+            count : 1,
             data : true,
         };
         auto it = parsedMap.find(option.longFlag);
         if (it != parsedMap.end())
         {
+            throw CliError("Can only have one '" + option.longFlag + "' option");
+            // I am keeping this code in case I want to allow duplicates.
             parsedOption = it->second;
             parsedOption.count++;
         }
