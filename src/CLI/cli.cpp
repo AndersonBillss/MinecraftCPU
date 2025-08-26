@@ -136,6 +136,22 @@ Cli::Parsed Cli::Options::parse(int argc, char *argv[])
         i++;
     }
 
+    // Add default values if necessary
+    for (const auto &[key, value] : _longOptions)
+    {
+        if (value->hasDefault)
+        {
+            if (parsedMap.find(value->longFlag) == parsedMap.end())
+            {
+                Cli::Parsed::ParsedOption newOption{
+                    count : 1,
+                    data : value->defaultValue
+                };
+                parsedMap[value->longFlag] = newOption;
+            }
+        }
+    }
+
     Parsed result;
     result._parsedOptions = parsedMap;
     return result;

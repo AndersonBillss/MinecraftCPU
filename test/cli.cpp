@@ -85,4 +85,47 @@ TEST_CASE("CLI flags")
                          { o.stringOption("text", "t")
                                .addImplicit("test value"); });
     REQUIRE(parsed.get<std::string>("text") == "hello");
+
+    parsed = parseHelper({"mcScript", "-t"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addImplicit("test value"); });
+    REQUIRE(parsed.count("text") == 1);
+
+    parsed = parseHelper({"mcScript"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addImplicit("test value"); });
+    REQUIRE(parsed.count("text") == 0);
+
+    parsed = parseHelper({"mcScript"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addDefault("test value"); });
+    REQUIRE(parsed.count("text") == 1);
+    REQUIRE(parsed.get<std::string>("text") == "test value");
+
+    parsed = parseHelper({"mcScript"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addDefault("test value"); });
+    REQUIRE(parsed.count("text") == 1);
+    REQUIRE(parsed.get<std::string>("text") == "test value");
+
+    parsed = parseHelper({"mcScript", "-t"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addImplicit("test 1")
+                               .addDefault("test 2"); });
+    REQUIRE(parsed.count("text") == 1);
+    REQUIRE(parsed.get<std::string>("text") == "test 1");
+
+    parsed = parseHelper({"mcScript"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addImplicit("test 1")
+                               .addDefault("test 2"); });
+    REQUIRE(parsed.count("text") == 1);
+    REQUIRE(parsed.get<std::string>("text") == "test 2");
+
+    parsed = parseHelper({"mcScript", "-t", "test 3"}, [](Cli::Options &o)
+                         { o.stringOption("text", "t")
+                               .addImplicit("test 1")
+                               .addDefault("test 2"); });
+    REQUIRE(parsed.count("text") == 1);
+    REQUIRE(parsed.get<std::string>("text") == "test 3");
 }
