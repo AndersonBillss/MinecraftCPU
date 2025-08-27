@@ -88,13 +88,15 @@ int main(int argc, char *argv[])
     options.stringOption("output-mcexe", "o").addHelp("Filepath for the output .mcexe file").addImplicit(defaultMcexePath);
     options.stringOption("output-schem", "s").addHelp("Filepath for the output schematic file").addImplicit(defaultSchemPath);
     options.stringOption("set-schem-path").addHelp("Set a default schematic ouput path");
+    options.boolOption("reset-schem-path").addHelp("reset default schematic ouput path");
     options.stringOption("set-mcexe-path").addHelp("Set a default mcexe ouput path");
+    options.boolOption("reset-mcexe-path").addHelp("reset default mcexe ouput path");
 
     Cli::Parsed parsed;
     try
     {
         parsed = options.parse(argc, argv);
-        parsed.ensureExclusive({"compile", "assemble", "execute", "help", "set-schem-path", "set-mcexe-path"});
+        parsed.ensureExclusive({"compile", "assemble", "execute", "help", "set-schem-path", "reset-schem-path", "set-mcexe-path", "reset-mcexe-path"});
     }
     catch (CliError &e)
     {
@@ -125,12 +127,26 @@ int main(int argc, char *argv[])
         std::cout << "Schematic path is now set to \"" + path + "\"" << std::endl;
         exit(0);
     }
+    if (parsed.count("reset-schem-path"))
+    {
+        config.erase("schem-path");
+        configManager::saveConfig(config);
+        std::cout << "Schematic path is now set to \"" + defaultSchemPath + "\"" << std::endl;
+        exit(0);
+    }
     if (parsed.count("set-mcexe-path"))
     {
         std::string path = parsed.get<std::string>("set-mcexe-path");
         config["mcexe-path"] = path;
         configManager::saveConfig(config);
         std::cout << "mcexe path is now set to \"" + path + "\"" << std::endl;
+        exit(0);
+    }
+    if (parsed.count("reset-mcexe-path"))
+    {
+        config.erase("mcexe-path");
+        configManager::saveConfig(config);
+        std::cout << "mcexe path is now set to \"" + defaultMcexePath + "\"" << std::endl;
         exit(0);
     }
     std::cout << "Default command is not implemented yet" << std::endl;
