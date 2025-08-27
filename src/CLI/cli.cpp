@@ -132,7 +132,7 @@ Cli::Parsed Cli::Options::parse(int argc, char *argv[])
         }
         else
         {
-            throw CliError("Invalid flag: " + token);
+            throw CliError("Invalid option: " + token);
         }
         i++;
     }
