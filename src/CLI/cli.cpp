@@ -117,6 +117,42 @@ void Cli::Options::_handleFlagArgument(
         parsedMap[option.longFlag] = parsedOption;
     }
 }
+void Cli::Options::printHelp()
+{
+    std::string usageText = _title + "\n" + _description + "\n\nOptions:\n";
+    size_t longestShortOption = 0;
+    size_t longestLongOption = 0;
+    for (const auto &[key, value] : _longOptions)
+    {
+        if (value->shortFlag.size() > longestShortOption)
+        {
+            longestShortOption = value->shortFlag.size();
+        }
+        if (value->longFlag.size() > longestLongOption)
+        {
+            longestLongOption = value->longFlag.size();
+        }
+    }
+    for (const auto &[key, value] : _longOptions)
+    {
+        usageText += "  ";
+        if (value->shortFlag.empty())
+        {
+            usageText += "    ";
+        }
+        else
+        {
+            usageText += "-" + value->shortFlag + ", ";
+        }
+        std::string longFlagText = value->longFlag;
+        while (longFlagText.size() <= longestLongOption)
+        {
+            longFlagText += " ";
+        }
+        usageText += "--" + longFlagText + "    " + value->helpText + "\n";
+    }
+        std::cout << usageText << std::endl;
+}
 Cli::Parsed Cli::Options::parse(int argc, char *argv[])
 {
     std::vector<std::string> tokens = tokenize(argc, argv);

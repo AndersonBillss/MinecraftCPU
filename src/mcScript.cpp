@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     Cli::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
     options.stringOption("compile", "c").addHelp("Compile .mcscript code into assembly (not implemented yet)");
     options.stringOption("assemble", "a").addHelp("Assemble .mcasm assembly code");
-    options.stringOption("execute", "x").addHelp("Execute .mcexe binary via an emulator (not implemented yet)");
+    options.stringOption("execute", "a").addHelp("Execute .mcexe binary via an emulator (not implemented yet)");
     options.stringOption("set-schem-path").addHelp("Set a default schematic ouput path");
     options.stringOption("set-mcexe-path").addHelp("Set a default mcexe ouput path");
     options.boolOption("help", "h").addHelp("Print usage");
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
     if (parsed.count("help"))
     {
-        std::cout << "Help is not implemented yet" << std::endl;
+        options.printHelp();
         exit(0);
     }
     if (parsed.count("compile"))
