@@ -44,6 +44,9 @@ namespace Cli
     class Options
     {
     private:
+        std::string _title;
+        std::string _description;
+
         void _handleFlagArgument(
             std::vector<std::string> &tokens,
             size_t &index,
@@ -119,6 +122,11 @@ namespace Cli
         std::map<std::string, Option *> _shortOptions;
 
     public:
+        Options(const std::string &title, const std::string &description)
+        {
+            _title = title;
+            _description = description;
+        }
         StringOption stringOption(const std::string &longFlag, const std::string &shortFlag = "")
         {
             std::string trimmedLongFlag = stringUtils::trim(longFlag);

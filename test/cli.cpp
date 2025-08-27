@@ -24,7 +24,7 @@ struct Argv
 
 Cli::Parsed parseHelper(std::initializer_list<std::string> args, std::function<void(Cli::Options &)> setup)
 {
-      Cli::Options options;
+      Cli::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
       setup(options);
       Argv argv(args);
       return options.parse(argv.argc(), argv.argv());

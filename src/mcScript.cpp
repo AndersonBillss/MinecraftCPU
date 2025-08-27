@@ -35,7 +35,8 @@ void handleAssembleArg(Cli::Parsed parsed)
     }
     if (!shouldOutputMcexe && !shouldOutputSchem)
     {
-        std::cout << "No output option provided" << std::endl;
+        std::cerr << "No output option provided" << std::endl;
+        exit(0);
     }
 
     std::string sourceCode = fileUtils::readFile(inFilePath);
@@ -79,8 +80,7 @@ int main(int argc, char *argv[])
     if (it != config.end())
         defaultMcexePath = config["mcexe-path"];
 
-    // "McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer"
-    Cli::Options options;
+    Cli::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
     options.stringOption("compile", "c").addHelp("Compile .mcscript code into assembly (not implemented yet)");
     options.stringOption("assemble", "a").addHelp("Assemble .mcasm assembly code");
     options.stringOption("execute", "x").addHelp("Execute .mcexe binary via an emulator (not implemented yet)");
