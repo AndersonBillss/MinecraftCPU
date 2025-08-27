@@ -131,9 +131,13 @@ namespace Cli
         {
             std::string trimmedLongFlag = stringUtils::trim(longFlag);
             std::string trimmedShortFlag = stringUtils::trim(shortFlag);
+            if (trimmedShortFlag.size() > 1)
+            {
+                throw std::runtime_error("Short flags should be one character long");
+            }
             if (trimmedLongFlag.empty())
             {
-                throw CliError("Long flag must be provided");
+                throw std::runtime_error("Long flag must be provided");
             }
             auto option = std::make_unique<Option>();
             option->hasDefault = false;
@@ -156,9 +160,13 @@ namespace Cli
         {
             std::string trimmedLongFlag = stringUtils::trim(longFlag);
             std::string trimmedShortFlag = stringUtils::trim(shortFlag);
+            if (trimmedShortFlag.size() > 1)
+            {
+                throw std::runtime_error("Short flags should be one character long");
+            }
             if (trimmedLongFlag.empty())
             {
-                throw CliError("Long flag must be provided");
+                throw std::runtime_error("Long flag must be provided");
             }
             auto option = std::make_unique<Option>();
             option->hasDefault = false;
