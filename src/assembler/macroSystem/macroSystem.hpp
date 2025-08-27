@@ -20,6 +20,7 @@ class MacroSystem
 public:
     MacroSystem();
     std::string evaluate(const std::string &block);
+    std::string replaceLocationSymbols(const std::string &block);
 
     void setNumber(std::string symbol, unsigned int value);
     void setMacro(std::string symbol, std::string value);
@@ -35,12 +36,10 @@ private:
 
     void _handleAssignment(std::vector<std::string> &tokens, size_t &index);
     Operand _evaluateFunction(std::string function, std::vector<std::string> &tokens, size_t &index);
-    Operand _handleEvaluation(std::vector<std::string> &tokens, size_t &index, bool incrementCurrLine);
-    Operand _parseOperand(std::vector<std::string> &tokens, size_t &index, bool incrementCurrLine);
-    std::string _evaluateHelper(const std::string &block, size_t startingIndex, size_t endingIndex, bool incrementCurrLine);
+    Operand _handleEvaluation(std::vector<std::string> &tokens, size_t &index);
+    Operand _parseOperand(std::vector<std::string> &tokens, size_t &index);
+    std::string _evaluateHelper(const std::string &block, size_t startingIndex, size_t endingIndex);
     
-    size_t _currLineNum;
-
     std::vector<VariableMap> _variables;
     size_t _currentStack;
 };
