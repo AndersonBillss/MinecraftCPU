@@ -122,36 +122,36 @@ void Cli::Options::printHelp()
     std::string usageText = _title + "\n" + _description + "\n\nOptions:\n";
     size_t longestShortOption = 0;
     size_t longestLongOption = 0;
-    for (const auto &[key, value] : _longOptions)
+    for (const auto &option : _allOptions)
     {
-        if (value->shortFlag.size() > longestShortOption)
+        if (option->shortFlag.size() > longestShortOption)
         {
-            longestShortOption = value->shortFlag.size();
+            longestShortOption = option->shortFlag.size();
         }
-        if (value->longFlag.size() > longestLongOption)
+        if (option->longFlag.size() > longestLongOption)
         {
-            longestLongOption = value->longFlag.size();
+            longestLongOption = option->longFlag.size();
         }
     }
-    for (const auto &[key, value] : _longOptions)
+    for (const auto &option : _allOptions)
     {
         usageText += "  ";
-        if (value->shortFlag.empty())
+        if (option->shortFlag.empty())
         {
             usageText += "    ";
         }
         else
         {
-            usageText += "-" + value->shortFlag + ", ";
+            usageText += "-" + option->shortFlag + ", ";
         }
-        std::string longFlagText = value->longFlag;
+        std::string longFlagText = option->longFlag;
         while (longFlagText.size() <= longestLongOption)
         {
             longFlagText += " ";
         }
-        usageText += "--" + longFlagText + "    " + value->helpText + "\n";
+        usageText += "--" + longFlagText + "    " + option->helpText + "\n";
     }
-        std::cout << usageText << std::endl;
+    std::cout << usageText << std::endl;
 }
 Cli::Parsed Cli::Options::parse(int argc, char *argv[])
 {

@@ -118,8 +118,9 @@ namespace Cli
             };
         };
 
-        std::map<std::string, std::unique_ptr<Option>> _longOptions;
+        std::map<std::string, Option *> _longOptions;
         std::map<std::string, Option *> _shortOptions;
+        std::vector<std::unique_ptr<Option>> _allOptions;
 
     public:
         Options(const std::string &title, const std::string &description)
@@ -148,7 +149,8 @@ namespace Cli
             option->longFlag = trimmedLongFlag;
             option->helpText = "";
             Option *raw = option.get();
-            _longOptions["--" + trimmedLongFlag] = std::move(option);
+            _allOptions.push_back(std::move(option));
+            _longOptions["--" + trimmedLongFlag] = raw;
             if (!trimmedShortFlag.empty())
             {
                 _shortOptions["-" + trimmedShortFlag] = raw;
@@ -177,7 +179,8 @@ namespace Cli
             option->longFlag = trimmedLongFlag;
             option->helpText = "";
             Option *raw = option.get();
-            _longOptions["--" + trimmedLongFlag] = std::move(option);
+            _allOptions.push_back(std::move(option));
+            _longOptions["--" + trimmedLongFlag] = raw;
             if (!trimmedShortFlag.empty())
             {
                 _shortOptions["-" + trimmedShortFlag] = raw;
