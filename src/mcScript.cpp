@@ -70,23 +70,25 @@ int main(int argc, char *argv[])
     }
 
     // Load config
-    std::string defaultSchemPath = "mcScriptBuild/bin.schem";
-    std::string defaultMcexePath = "mcScriptBuild/bin.mcexe";
+    const std::string defaultSchemPath = "mcScriptBuild/bin.schem";
+    const std::string defaultMcexePath = "mcScriptBuild/bin.mcexe";
+    std::string configSchemPath = defaultSchemPath;
+    std::string configMcexePath = defaultMcexePath;
     auto config = configManager::loadConfig();
     auto it = config.find("schem-path");
     if (it != config.end())
-        defaultSchemPath = config["schem-path"];
+        configSchemPath = config["schem-path"];
     it = config.find("mcexe-path");
     if (it != config.end())
-        defaultMcexePath = config["mcexe-path"];
+        configMcexePath = config["mcexe-path"];
 
     Cli::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
     options.boolOption("help", "h").addHelp("Print usage");
     options.stringOption("compile", "c").addHelp("Compile .mcscript code into assembly (not implemented yet)");
     options.stringOption("assemble", "a").addHelp("Assemble .mcasm assembly code");
     options.stringOption("execute", "x").addHelp("Execute .mcexe binary via an emulator (not implemented yet)");
-    options.stringOption("output-mcexe", "o").addHelp("Filepath for the output .mcexe file").addImplicit(defaultMcexePath);
-    options.stringOption("output-schem", "s").addHelp("Filepath for the output schematic file").addImplicit(defaultSchemPath);
+    options.stringOption("output-mcexe", "o").addHelp("Filepath for the output .mcexe file").addImplicit(configMcexePath);
+    options.stringOption("output-schem", "s").addHelp("Filepath for the output schematic file").addImplicit(configSchemPath);
     options.stringOption("set-schem-path").addHelp("Set a default schematic ouput path");
     options.boolOption("reset-schem-path").addHelp("reset default schematic ouput path");
     options.stringOption("set-mcexe-path").addHelp("Set a default mcexe ouput path");
