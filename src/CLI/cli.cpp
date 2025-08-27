@@ -2,7 +2,28 @@
 
 void tokenizeFlag(std::vector<std::string> &args, std::string arg)
 {
+    if (arg.size() < 2)
+    {
+        throw CliError("Flags should not be empty");
+    }
     int equalIndex = stringUtils::indexOfFirst(arg, "=");
+    bool argIsShort = arg[1] != '-';
+    if (argIsShort)
+    {
+        int max = equalIndex == -1 ? arg.size() : equalIndex;
+        std::string seperatedOption;
+        for (int i = 1; i < max; i++)
+        {
+            char seperatedCharacter = arg[i];
+            seperatedOption = "-" + std::string(1, seperatedCharacter);
+            args.push_back(seperatedOption);
+        }
+        if (equalIndex != -1)
+        {
+            args.push_back(arg.substr(equalIndex + 1, arg.size() - 1));
+        }
+        return;
+    }
     if (equalIndex == -1)
     {
         args.push_back(arg);
@@ -35,7 +56,7 @@ void Cli::Options::_handleFlagArgument(
 {
     std::string &token = tokens[index];
     Cli::Options::Option option;
-    if (token.size() > 1 && token[1] == '-')
+    if (token.size() > 2 && token[1] == '-')
     {
         auto it = _longOptions.find(token);
         if (it == _longOptions.end())

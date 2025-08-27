@@ -195,4 +195,34 @@ TEST_CASE("CLI flags")
                               o.stringOption("file", "f")
                                     .addImplicit("Hello"); });
       REQUIRE_THROWS_AS(parsed.ensureExclusive({"sampleFlag", "file"}), CliError);
+
+      parsed = parseHelper({"mcScript", "-sv"}, [](Cli::Options &o)
+                           { o.boolOption("sampleFlag", "s");
+                              o.boolOption("verbose", "v"); });
+      REQUIRE(parsed.count("sampleFlag") == 1);
+      REQUIRE(parsed.count("verbose") == 1);
+
+      parsed = parseHelper({"mcScript", "-svf", "sampleOutput"},
+                           [](Cli::Options &o)
+                           {
+                                 o.boolOption("sampleFlag", "s");
+                                 o.boolOption("verbose", "v");
+                                 o.stringOption("file", "f");
+                           });
+      REQUIRE(parsed.count("sampleFlag") == 1);
+      REQUIRE(parsed.count("verbose") == 1);
+      REQUIRE(parsed.count("file") == 1);
+      REQUIRE(parsed.get<std::string>("file") == "sampleOutput");
+
+      parsed = parseHelper({"mcScript", "-svf=sampleOutput"},
+                           [](Cli::Options &o)
+                           {
+                                 o.boolOption("sampleFlag", "s");
+                                 o.boolOption("verbose", "v");
+                                 o.stringOption("file", "f");
+                           });
+      REQUIRE(parsed.count("sampleFlag") == 1);
+      REQUIRE(parsed.count("verbose") == 1);
+      REQUIRE(parsed.count("file") == 1);
+      REQUIRE(parsed.get<std::string>("file") == "sampleOutput");
 }
