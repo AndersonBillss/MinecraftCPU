@@ -281,15 +281,28 @@ std::string MacroSystem::replaceLocationSymbols(const std::string &block)
         {
             lineNum++;
             sinceLineIncrease = 0;
+        }
+        else if (sinceLineIncrease == 0 && token[0] == '.')
+        {
+            symbols[token] = lineNum;
+        }
+        else
+        {
+            sinceLineIncrease++;
+        }
+    }
+    sinceLineIncrease = 0;
+    for (std::string &token : tokens)
+    {
+        if (token == "\n")
+        {
+            lineNum++;
+            sinceLineIncrease = 0;
             result += token;
         }
         else if (token[0] == '.')
         {
-            if (sinceLineIncrease == 0)
-            {
-                symbols[token] = lineNum;
-            }
-            else
+            if (sinceLineIncrease != 0)
             {
                 auto it = symbols.find(token);
                 if (it == symbols.end())
