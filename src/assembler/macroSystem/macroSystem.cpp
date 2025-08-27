@@ -277,7 +277,6 @@ std::string MacroSystem::replaceLocationSymbols(const std::string &block)
     size_t sinceLineIncrease = 0;
     for (std::string &token : tokens)
     {
-        sinceLineIncrease++;
         if (token == "\n")
         {
             lineNum++;
@@ -289,20 +288,29 @@ std::string MacroSystem::replaceLocationSymbols(const std::string &block)
             if (sinceLineIncrease == 0)
             {
                 symbols[token] = lineNum;
-            } else {
+            }
+            else
+            {
                 auto it = symbols.find(token);
-                if(it == symbols.end()){
+                if (it == symbols.end())
+                {
                     throw RuntimeError("Symbol not found: " + token);
                 }
-                result += it->second + " ";
+                result += " " + std::to_string(it->second);
+                sinceLineIncrease++;
             }
         }
         else
         {
-            result += token + " ";
+            if (sinceLineIncrease != 0)
+            {
+                result += " ";
+            }
+            result += token;
+            sinceLineIncrease++;
         }
     }
-    return result;
+    return stringUtils::trim(result);
 }
 
 std::string MacroSystem::evaluate(const std::string &block)

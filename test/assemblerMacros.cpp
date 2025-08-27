@@ -341,3 +341,59 @@ TEST_CASE("Evaluate functions")
     expected = "80";
     REQUIRE(m->evaluate(sourceCode) == expected);
 }
+
+TEST_CASE("replace location symbols")
+{
+    MacroSystem *m = new MacroSystem();
+    std::string sourceCode = R"(
+        .testSymbol
+        hello .testSymbol
+    )";
+    std::string expected = "hello 0";
+    REQUIRE(m->replaceLocationSymbols(m->evaluate(sourceCode)) == expected);
+
+    m = new MacroSystem();
+    sourceCode = R"(
+        hello
+        hello
+        hello
+        hello
+
+    .testSymbol
+        hello
+        hello
+        hello .testSymbol
+        hello
+    )";
+    expected = R"(hello
+hello
+hello
+hello
+
+hello
+hello
+hello 4
+hello)";
+    REQUIRE(m->replaceLocationSymbols(m->evaluate(sourceCode)) == expected);
+
+    m = new MacroSystem();
+    sourceCode = R"(
+            hello
+            hello
+            hello
+            hello
+.testSymbol hello
+            hello
+            hello .testSymbol
+            hello
+    )";
+    expected = R"(hello
+hello
+hello
+hello
+hello
+hello
+hello 4
+hello)";
+    REQUIRE(m->replaceLocationSymbols(m->evaluate(sourceCode)) == expected);
+}
