@@ -3,28 +3,6 @@
 #include "../../utils/stringUtils.hpp"
 #include "../../utils/runtimeError.hpp"
 
-void removeComments(std::string &line)
-{
-    if (line.empty())
-        return;
-    for (size_t i = 0; i < line.size() - 1; i++)
-    {
-        if (line[i] == '#')
-        {
-            line.erase(i);
-            break;
-        }
-
-        if (i + 1 >= line.size())
-            break; // Avoid segfaults by breaking early
-        if (line[i] == '/' && line[i + 1] == '/')
-        {
-            line.erase(i);
-            break;
-        }
-    }
-}
-
 std::set<char> AsmMacroLexer::operatorTokens = {
     '+',
     '-',
@@ -106,6 +84,19 @@ int handleComment(std::vector<std::string> &tokens, const std::string &text, siz
     return text.size();
 }
 
+int handleSymbol(std::vector<std::string> &tokens, const std::string &text, size_t index)
+{
+    std::string symbol = "";
+    size_t i = index;
+    while (i < text.size() && !std::isspace(text[i]) && text[i] != '#' && !stringUtils::subSectionEqual(text, i, "//"))
+    {
+        symbol += text[i];
+        i++;
+    }
+    tokens.push_back(symbol);
+    return symbol.size();
+}
+
 std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block, size_t startingIndex, size_t endingIndex)
 {
     size_t index = startingIndex;
@@ -117,24 +108,21 @@ std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block, size_
     std::vector<std::string> tokens;
     while (index < end)
     {
-        if (AsmMacroLexer::operatorTokens.find(block[index]) != AsmMacroLexer::operatorTokens.end())
-        {
-            index += handleOperator(tokens, block, index);
-        }
-        else if (block[index] == '#')
+        if (block[index] == '#')
         {
             index += handleComment(tokens, block, index);
         }
-        else if (block[index] == '/')
+        else if (stringUtils::subSectionEqual(block, index, "//"))
         {
-            if (index + 1 >= block.size())
-            {
-                index += 1;
-            }
-            else if (block[index + 1] == '/')
-            {
-                index += handleComment(tokens, block, index);
-            }
+            index += handleComment(tokens, block, index);
+        }
+        else if (block[index] == '.')
+        {
+            index += handleSymbol(tokens, block, index);
+        }
+        else if (AsmMacroLexer::operatorTokens.find(block[index]) != AsmMacroLexer::operatorTokens.end())
+        {
+            index += handleOperator(tokens, block, index);
         }
         else if (block[index] == '(')
         {

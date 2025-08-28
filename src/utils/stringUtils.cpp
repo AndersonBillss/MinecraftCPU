@@ -48,11 +48,14 @@ std::vector<std::string> stringUtils::split(const std::string &text)
     return splitString;
 }
 
-bool subSectionEqual(const std::string &text, size_t startingIndex, const std::string &subSection)
+bool stringUtils::subSectionEqual(const std::string &text, size_t startingIndex, const std::string &subSection)
 {
     for (size_t subSectionIndex = 0; subSectionIndex < subSection.size(); subSectionIndex++)
     {
         size_t textIndex = subSectionIndex + startingIndex;
+        if(textIndex >= text.size()){
+            return false;
+        }
         if (text[textIndex] != subSection[subSectionIndex])
             return false;
     }

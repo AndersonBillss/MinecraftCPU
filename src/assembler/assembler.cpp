@@ -13,6 +13,7 @@ std::string Assembler::compile(const std::string &sourceCode)
     MacroSystem macroSystem;
     std::string expanded = macroSystem.evaluate(sourceCode);
     std::string linked = macroSystem.replaceLocationSymbols(expanded);
+    // std::cout << linked << std::endl;
 
     Tokenizer::InstructionList instructions = Tokenizer::tokenize(linked);
     std::vector<std::string> compiled;
