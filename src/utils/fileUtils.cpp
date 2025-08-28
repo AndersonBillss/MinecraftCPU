@@ -33,9 +33,11 @@ void fileUtils::writeToFile(const std::string &outputPath, const std::string &co
 
     std::filesystem::path filePath = outputPath;
     std::filesystem::path parentPath = filePath.parent_path();
-    if (!parentPath.empty())
+    if (std::filesystem::exists(parentPath))
     {
-        std::filesystem::create_directories(parentPath);
+        // std::filesystem::create_directories(parentPath);
+        std::cerr << "Folder doesn't exist: " << parentPath << std::endl;
+        return;
     }
     std::ofstream outFile(outputPath);
     if (!outFile.is_open())

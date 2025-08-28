@@ -102,7 +102,8 @@ void Cli::Options::_handleFlagArgument(
         std::string argument;
         if (hasArgument)
         {
-            argument = stringUtils::parseEsc(tokens[index]);
+            // argument = stringUtils::parseEsc(tokens[index]); // Uncomment this for string parsing
+            argument = tokens[index];
         }
         else
         {

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <filesystem>
+
 #include "exportSchematic.hpp"
 #include "schematicBuilder.hpp"
 #include "schematic.hpp"
@@ -9,13 +11,14 @@ material getMaterial(int x, int y, int z, const std::vector<int> &dimensions, co
     // Z and Y go from back to front
     z = dimensions[2] - z - 1;
     y = dimensions[1] - y - 1;
-    
+
     size_t yIndex = y;
     size_t xIndex = x * dimensions[1];
     size_t zIndex = z * dimensions[0] * dimensions[1];
     size_t index = yIndex + xIndex + zIndex;
 
-    if(index > bin.size()) return material::glass;
+    if (index > bin.size())
+        return material::glass;
     return bin[index] == '1' ? material::redstoneBlock : material::glass;
 }
 
@@ -65,6 +68,14 @@ Schematic createSchem(const std::string &binary)
 
 void schematicBuilder::writeToFile(const std::string &outputPath, const std::string &binary)
 {
+    std::filesystem::path filePath = outputPath;
+    std::filesystem::path parentPath = filePath.parent_path();
+    if (std::filesystem::exists(parentPath))
+    {
+        // std::filesystem::create_directories(parentPath);
+        std::cerr << "Folder doesn't exist: " << parentPath << std::endl;
+        return;
+    }
     Schematic schem = createSchem(binary);
     ExportSchematic(schem, outputPath);
 }
