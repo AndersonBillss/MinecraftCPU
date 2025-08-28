@@ -28,8 +28,10 @@ void pushInt32(std::vector<uint8_t> &buffer, const int &n)
 void write_gzip(const std::string &filename, const std::vector<uint8_t> &data)
 {
     gzFile file = gzopen(filename.c_str(), "wb");
-    if (!file)
-        throw std::runtime_error("Failed to open gzip file");
+    if (!file){
+        std::cerr << "Failed to open file: " + filename << std::endl;
+        return;
+    }
     gzwrite(file, data.data(), data.size());
     gzclose(file);
 }

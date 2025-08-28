@@ -70,12 +70,6 @@ void schematicBuilder::writeToFile(const std::string &outputPath, const std::str
 {
     std::filesystem::path filePath = outputPath;
     std::filesystem::path parentPath = filePath.parent_path();
-    if (std::filesystem::exists(parentPath))
-    {
-        // std::filesystem::create_directories(parentPath);
-        std::cerr << "Folder doesn't exist: " << parentPath << std::endl;
-        return;
-    }
     Schematic schem = createSchem(binary);
     ExportSchematic(schem, outputPath);
 }
