@@ -2,8 +2,9 @@
 #include "lexer.hpp"
 #include "../../utils/stringUtils.hpp"
 #include "../../utils/runtimeError.hpp"
+#include "newLexer.hpp"
 
-std::set<char> AsmMacroLexer::operatorTokens = {
+std::set<char> operatorTokens = {
     '+',
     '-',
     '*',
@@ -25,7 +26,7 @@ int handleOperator(std::vector<std::string> &tokens, const std::string &text, si
         if (
             (std::isspace(text[index])) ||
             (index == text.size() - 1) ||
-            (AsmMacroLexer::operatorTokens.find(text[index]) == AsmMacroLexer::operatorTokens.end()))
+            (operatorTokens.find(text[index]) == operatorTokens.end()))
         {
             tokens.push_back(fullOperator);
             return fullOperator.size();
@@ -45,7 +46,7 @@ int handleFullWord(std::vector<std::string> &tokens, const std::string &text, si
         if (
             (std::isspace(text[index])) ||
             (index >= endingIndex) ||
-            (AsmMacroLexer::operatorTokens.find(text[index]) != AsmMacroLexer::operatorTokens.end()))
+            (operatorTokens.find(text[index]) != operatorTokens.end()))
         {
             tokens.push_back(fullWord);
             return fullWord.size();
@@ -120,7 +121,7 @@ std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block, size_
         {
             index += handleSymbol(tokens, block, index);
         }
-        else if (AsmMacroLexer::operatorTokens.find(block[index]) != AsmMacroLexer::operatorTokens.end())
+        else if (operatorTokens.find(block[index]) != operatorTokens.end())
         {
             index += handleOperator(tokens, block, index);
         }
@@ -158,4 +159,8 @@ std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block, size_
         tokens.pop_back();
     }
     return tokens;
+}
+
+void AsmMacroLexer::_advanceIndex(size_t n)
+{
 }
