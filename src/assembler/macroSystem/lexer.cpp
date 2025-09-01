@@ -165,6 +165,16 @@ void AsmMacroLexer::_advanceIndex(size_t n)
 {
     for (size_t i = 0; i < n; i++)
     {
-        size_t index = i + _currIndex;
+        if (_currIndex + 1 >= _sourceCode.size())
+        {
+            return;
+        }
+        _currIndex += 1;
+        _currLocation.column++;
+        if (_sourceCode[_currIndex] == '\n')
+        {
+            _currLocation.column = 0;
+            _currLocation.line++;
+        }
     }
 }
