@@ -163,4 +163,8 @@ std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block, size_
 
 void AsmMacroLexer::_advanceIndex(size_t n)
 {
+    for (size_t i = 0; i < n; i++)
+    {
+        size_t index = i + _currIndex;
+    }
 }

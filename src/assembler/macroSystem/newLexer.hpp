@@ -16,6 +16,7 @@ public:
 
 private:
     void _advanceIndex(size_t n);
-    SourceLocation _currentLocation;
-    size_t _currLocation;
+    std::string _sourceCode;
+    SourceLocation _currLocation;
+    size_t _currIndex;
 };
