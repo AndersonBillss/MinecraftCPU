@@ -169,7 +169,7 @@ void AsmMacroLexer::_advanceIndex(size_t n)
         {
             return;
         }
-        _currIndex += 1;
+        _currIndex++;
         _currLocation.column++;
         if (_sourceCode[_currIndex] == '\n')
         {

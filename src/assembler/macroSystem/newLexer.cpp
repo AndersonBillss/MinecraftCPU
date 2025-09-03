@@ -1,46 +1,185 @@
+#include <cctype>
+#include "lexer.hpp"
+#include "../../utils/stringUtils.hpp"
+#include "../../utils/runtimeError.hpp"
+#include "newLexer.hpp"
 
-#include "fileUtils.hpp"
-#include "stringUtils.hpp"
-#include "syntaxError.hpp"
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <filesystem>
+std::set<char> operatorTokens = {
+    '+',
+    '-',
+    '*',
+    '/',
+    '=',
+    '|',
+    '&',
+    '^',
+    '<',
+    '>',
+    ',',
+};
 
-
-std::string fileUtils::readFile(const std::string &filename)
+void AsmMacroLexer::_advanceIndex(size_t n)
 {
-    std::ifstream file(filename);
-    if (!file.is_open())
+    for (size_t i = 0; i < n; i++)
     {
-        std::cerr << "Failed to open file: " + filename << std::endl;
+        if (_currIndex + 1 >= _endIndex)
+        {
+            return;
+        }
+        _currIndex++;
+        _currLocation.column++;
+        if (_sourceCode[_currIndex] == '\n')
+        {
+            _currLocation.column = 0;
+            _currLocation.line++;
+        }
     }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
 }
 
-void fileUtils::writeToFile(const std::string &outputPath, const std::string &contents)
+void AsmMacroLexer::_pushToken(std::string data, TokenType type)
 {
-    std::string trimmedOutputPath = stringUtils::trim(outputPath);
-    if (trimmedOutputPath.empty())
-    {
-        throw SyntaxError("File paths cannot be empty");
-    }
-    char lastCharacter = trimmedOutputPath[trimmedOutputPath.size() - 1];
-    if (lastCharacter == '/' || lastCharacter == '\\')
-    {
-        throw SyntaxError("File paths cannot end in a '/' or a '\\'");
-    }
+    SourceLocation begin = _currLocation;
+    _advanceIndex(data.size());
+    _tokens.push_back({
+        begin : begin,
+        end : _currLocation,
+        type : type,
+        data : data
+    });
+}
 
-    std::filesystem::path filePath = outputPath;
-    std::filesystem::path parentPath = filePath.parent_path();
-    std::ofstream outFile(outputPath);
-    if (!outFile.is_open())
+void AsmMacroLexer::_handleOperator()
+{
+    std::string fullOperator = "";
+    size_t i = _currIndex;
+    while (i < _endIndex)
     {
-        std::cerr << "Failed to open file: " + outputPath << std::endl;
-        return;
+        if (
+            (std::isspace(_sourceCode[i])) ||
+            (i == _endIndex - 1) ||
+            (operatorTokens.find(_sourceCode[i]) == operatorTokens.end()))
+        {
+            _pushToken(fullOperator, TokenType::OPERATOR);
+            return;
+        }
+        i++;
     }
-    outFile << contents;
-    outFile.close();
+    _pushToken(fullOperator, TokenType::OPERATOR);
+}
+
+void AsmMacroLexer::_handleFullWord()
+{
+    std::string fullWord = "";
+    size_t i = _currIndex;
+    while (i < _endIndex)
+    {
+        if (
+            (std::isspace(_sourceCode[i])) ||
+            (i >= _endIndex) ||
+            (operatorTokens.find(_sourceCode[i]) != operatorTokens.end()))
+        {
+            TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+            _pushToken(fullWord, t);
+        }
+        fullWord += _sourceCode[i];
+        i++;
+    }
+    TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+    _pushToken(fullWord, t);
+}
+
+void AsmMacroLexer::_handleLocationMarker()
+{
+    std::string fullWord = "";
+    size_t i = _currIndex;
+    while (i < _endIndex)
+    {
+        if (
+            (std::isspace(_sourceCode[i])) ||
+            (i >= _endIndex))
+        {
+            TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+            _pushToken(fullWord, t);
+        }
+        fullWord += _sourceCode[i];
+        i++;
+    }
+    TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+    _pushToken(fullWord, t);
+}
+
+void AsmMacroLexer::_handleComment()
+{
+    for (size_t i = _currIndex; i < _endIndex; i++)
+    {
+        if (_sourceCode[i] == '\n')
+        {
+            _advanceIndex(1);
+            return;
+        }
+    }
+}
+
+void AsmMacroLexer::_handleNewLine()
+{
+    if (_tokens.size() == 0)
+    {
+        _currIndex++;
+    }
+    else if (_tokens[_tokens.size() - 1].type == TokenType::ENDLINE)
+    {
+        _currIndex++;
+    }
+    else
+    {
+        _pushToken("\n", TokenType::ENDLINE);
+    }
+}
+
+std::vector<AsmMacroLexer::Token> AsmMacroLexer::tokenize(const std::string &block)
+{
+    while (_endIndex < _currIndex)
+    {
+        if (block[_currIndex] == '#')
+        {
+            _handleComment();
+        }
+        else if (stringUtils::subSectionEqual(block, _currIndex, "//"))
+        {
+            _handleComment();
+        }
+        else if (block[_currIndex] == '.')
+        {
+            _handleLocationMarker();
+        }
+        else if (operatorTokens.find(block[_currIndex]) != operatorTokens.end())
+        {
+            _handleOperator();
+        }
+        else if (block[_currIndex] == '(')
+        {
+            _pushToken("(", TokenType::OPENINGPARENTHESE);
+        }
+        else if (block[_currIndex] == ')')
+        {
+            _pushToken(")", TokenType::CLOSINGPARENTHESE);
+        }
+        else if (block[_currIndex] == '\n')
+        {
+            _handleNewLine();
+        }
+        else if (std::isspace(block[_currIndex]))
+        {
+            _advanceIndex(1);
+        }
+        else
+        {
+            _handleFullWord();
+        }
+    }
+    if (_tokens[_tokens.size() - 1].type == TokenType::ENDLINE)
+    {
+        _tokens.pop_back();
+    }
+    return _tokens;
 }
