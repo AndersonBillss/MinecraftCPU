@@ -2,7 +2,6 @@
 #include "lexer.hpp"
 #include "../../utils/stringUtils.hpp"
 #include "../../utils/runtimeError.hpp"
-#include "newLexer.hpp"
 
 std::set<char> operatorTokens = {
     '+',
@@ -18,154 +17,11 @@ std::set<char> operatorTokens = {
     ',',
 };
 
-int handleOperator(std::vector<std::string> &tokens, const std::string &text, size_t index)
-{
-    std::string fullOperator = "";
-    while (index < text.size())
-    {
-        if (
-            (std::isspace(text[index])) ||
-            (index == text.size() - 1) ||
-            (operatorTokens.find(text[index]) == operatorTokens.end()))
-        {
-            tokens.push_back(fullOperator);
-            return fullOperator.size();
-        }
-        fullOperator += text[index];
-        index++;
-    }
-    tokens.push_back(fullOperator);
-    return fullOperator.size();
-}
-
-int handleFullWord(std::vector<std::string> &tokens, const std::string &text, size_t index, size_t endingIndex)
-{
-    std::string fullWord = "";
-    while (index < endingIndex)
-    {
-        if (
-            (std::isspace(text[index])) ||
-            (index >= endingIndex) ||
-            (operatorTokens.find(text[index]) != operatorTokens.end()))
-        {
-            tokens.push_back(fullWord);
-            return fullWord.size();
-        }
-        fullWord += text[index];
-        index++;
-    }
-    tokens.push_back(fullWord);
-    return fullWord.size();
-}
-
-int handleBlock(std::vector<std::string> &tokens, const std::string &text, size_t index)
-{
-    std::string subBlock;
-    try
-    {
-        subBlock = stringUtils::getBlock(text, "(", ")", index);
-    }
-    catch (std::runtime_error &)
-    {
-        throw RuntimeError("Failed to find matching bracket for block");
-    }
-    tokens.push_back(subBlock);
-    return subBlock.size();
-}
-
-int handleComment(std::vector<std::string> &tokens, const std::string &text, size_t index)
-{
-    for (size_t i = index; i < text.size(); i++)
-    {
-        if (text[i] == '\n')
-        {
-            return i - index;
-        }
-    }
-    return text.size();
-}
-
-int handleSymbol(std::vector<std::string> &tokens, const std::string &text, size_t index)
-{
-    std::string symbol = "";
-    size_t i = index;
-    while (i < text.size() && !std::isspace(text[i]) && text[i] != '#' && !stringUtils::subSectionEqual(text, i, "//"))
-    {
-        symbol += text[i];
-        i++;
-    }
-    tokens.push_back(symbol);
-    return symbol.size();
-}
-
-std::vector<std::string> AsmMacroLexer::tokenize(const std::string &block, size_t startingIndex, size_t endingIndex)
-{
-    size_t index = startingIndex;
-    size_t end = endingIndex;
-    if (endingIndex <= startingIndex)
-    {
-        end = block.size();
-    }
-    std::vector<std::string> tokens;
-    while (index < end)
-    {
-        if (block[index] == '#')
-        {
-            index += handleComment(tokens, block, index);
-        }
-        else if (stringUtils::subSectionEqual(block, index, "//"))
-        {
-            index += handleComment(tokens, block, index);
-        }
-        else if (block[index] == '.')
-        {
-            index += handleSymbol(tokens, block, index);
-        }
-        else if (operatorTokens.find(block[index]) != operatorTokens.end())
-        {
-            index += handleOperator(tokens, block, index);
-        }
-        else if (block[index] == '(')
-        {
-            index += handleBlock(tokens, block, index);
-        }
-        else if (block[index] == '\n')
-        {
-            if (tokens.size() == 0)
-            {
-                index++;
-            }
-            else if (tokens[tokens.size() - 1] == "\n")
-            {
-                index++;
-            }
-            else
-            {
-                tokens.push_back("\n");
-                index++;
-            }
-        }
-        else if (std::isspace(block[index]))
-        {
-            index++;
-        }
-        else
-        {
-            index += handleFullWord(tokens, block, index, end);
-        }
-    }
-    if (tokens[tokens.size() - 1] == "\n")
-    {
-        tokens.pop_back();
-    }
-    return tokens;
-}
-
 void AsmMacroLexer::_advanceIndex(size_t n)
 {
     for (size_t i = 0; i < n; i++)
     {
-        if (_currIndex + 1 >= _sourceCode.size())
+        if (_currIndex + 1 >= _endIndex)
         {
             return;
         }
@@ -177,4 +33,152 @@ void AsmMacroLexer::_advanceIndex(size_t n)
             _currLocation.line++;
         }
     }
+}
+
+void AsmMacroLexer::_pushToken(std::string data, TokenType type)
+{
+    SourceLocation begin = _currLocation;
+    _advanceIndex(data.size());
+    _tokens.push_back({
+        begin : begin,
+        end : _currLocation,
+        type : type,
+        data : data
+    });
+}
+
+void AsmMacroLexer::_handleOperator()
+{
+    std::string fullOperator = "";
+    size_t i = _currIndex;
+    while (i < _endIndex)
+    {
+        if (
+            (std::isspace(_sourceCode[i])) ||
+            (i == _endIndex - 1) ||
+            (operatorTokens.find(_sourceCode[i]) == operatorTokens.end()))
+        {
+            _pushToken(fullOperator, TokenType::OPERATOR);
+            return;
+        }
+        i++;
+    }
+    _pushToken(fullOperator, TokenType::OPERATOR);
+}
+
+void AsmMacroLexer::_handleFullWord()
+{
+    std::string fullWord = "";
+    size_t i = _currIndex;
+    while (i < _endIndex)
+    {
+        if (
+            (std::isspace(_sourceCode[i])) ||
+            (i >= _endIndex) ||
+            (operatorTokens.find(_sourceCode[i]) != operatorTokens.end()))
+        {
+            TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+            _pushToken(fullWord, t);
+        }
+        fullWord += _sourceCode[i];
+        i++;
+    }
+    TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+    _pushToken(fullWord, t);
+}
+
+void AsmMacroLexer::_handleLocationMarker()
+{
+    std::string fullWord = "";
+    size_t i = _currIndex;
+    while (i < _endIndex)
+    {
+        if (
+            (std::isspace(_sourceCode[i])) ||
+            (i >= _endIndex))
+        {
+            TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+            _pushToken(fullWord, t);
+        }
+        fullWord += _sourceCode[i];
+        i++;
+    }
+    TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+    _pushToken(fullWord, t);
+}
+
+void AsmMacroLexer::_handleComment()
+{
+    for (size_t i = _currIndex; i < _endIndex; i++)
+    {
+        if (_sourceCode[i] == '\n')
+        {
+            _advanceIndex(1);
+            return;
+        }
+    }
+}
+
+void AsmMacroLexer::_handleNewLine()
+{
+    if (_tokens.size() == 0)
+    {
+        _currIndex++;
+    }
+    else if (_tokens[_tokens.size() - 1].type == TokenType::ENDLINE)
+    {
+        _currIndex++;
+    }
+    else
+    {
+        _pushToken("\n", TokenType::ENDLINE);
+    }
+}
+
+std::vector<AsmMacroLexer::Token> AsmMacroLexer::tokenize(const std::string &block)
+{
+    while (_endIndex < _currIndex)
+    {
+        if (block[_currIndex] == '#')
+        {
+            _handleComment();
+        }
+        else if (stringUtils::subSectionEqual(block, _currIndex, "//"))
+        {
+            _handleComment();
+        }
+        else if (block[_currIndex] == '.')
+        {
+            _handleLocationMarker();
+        }
+        else if (operatorTokens.find(block[_currIndex]) != operatorTokens.end())
+        {
+            _handleOperator();
+        }
+        else if (block[_currIndex] == '(')
+        {
+            _pushToken("(", TokenType::OPENINGPARENTHESE);
+        }
+        else if (block[_currIndex] == ')')
+        {
+            _pushToken(")", TokenType::CLOSINGPARENTHESE);
+        }
+        else if (block[_currIndex] == '\n')
+        {
+            _handleNewLine();
+        }
+        else if (std::isspace(block[_currIndex]))
+        {
+            _advanceIndex(1);
+        }
+        else
+        {
+            _handleFullWord();
+        }
+    }
+    if (_tokens[_tokens.size() - 1].type == TokenType::ENDLINE)
+    {
+        _tokens.pop_back();
+    }
+    return _tokens;
 }

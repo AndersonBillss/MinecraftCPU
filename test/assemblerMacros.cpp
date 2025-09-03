@@ -1,6 +1,6 @@
 #include "catch_amalgamated.hpp"
 #include "../src/assembler/macroSystem/macroSystem.hpp"
-#include "../src/assembler/macroSystem/lexer.hpp"
+#include "../src/assembler/macroSystem/oldLexer.hpp"
 #include "../src/utils/runtimeError.hpp"
 #include <iostream>
 
@@ -49,7 +49,7 @@ TEST_CASE("Tokenization logic works correctly")
         "LDI",
         "R1",
         "1"};
-    REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
+    REQUIRE(OldAsmMacroLexer::tokenize(sourceCode) == expected);
 
     sourceCode = R"(
         $test = 10
@@ -68,7 +68,7 @@ TEST_CASE("Tokenization logic works correctly")
         "$test2",
         "=",
         "(LDI R1 $test)"};
-    REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
+    REQUIRE(OldAsmMacroLexer::tokenize(sourceCode) == expected);
 
     sourceCode = R"(
         $test=10 +
@@ -97,7 +97,7 @@ TEST_CASE("Tokenization logic works correctly")
         "NOP",
         "\n",
         "NOP"};
-    REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
+    REQUIRE(OldAsmMacroLexer::tokenize(sourceCode) == expected);
 
     sourceCode = R"(
         $test=10 +
@@ -129,7 +129,7 @@ TEST_CASE("Tokenization logic works correctly")
         ".specialFunction:",
         "\n",
         "NOP"};
-    REQUIRE(AsmMacroLexer::tokenize(sourceCode) == expected);
+    REQUIRE(OldAsmMacroLexer::tokenize(sourceCode) == expected);
 }
 
 TEST_CASE("Evaluate variables and symbols")

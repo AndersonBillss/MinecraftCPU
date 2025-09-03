@@ -2,7 +2,7 @@
 #include "../../utils/runtimeError.hpp"
 #include "../../utils/syntaxError.hpp"
 #include "../../utils/stringUtils.hpp"
-#include "lexer.hpp"
+#include "oldLexer.hpp"
 #include "operations.hpp"
 
 MacroSystem::MacroSystem()
@@ -175,7 +175,7 @@ Operand MacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &ind
 
 std::string MacroSystem::_evaluateHelper(const std::string &block, size_t startingIndex, size_t endingIndex)
 {
-    std::vector<std::string> tokens = AsmMacroLexer::tokenize(block, startingIndex, endingIndex);
+    std::vector<std::string> tokens = OldAsmMacroLexer::tokenize(block, startingIndex, endingIndex);
     std::string evaluation = "";
     size_t index = 0;
     while (index < tokens.size())
@@ -272,7 +272,7 @@ std::string MacroSystem::replaceLocationSymbols(const std::string &block)
 {
     std::unordered_map<std::string, int> symbols;
     std::string result = "";
-    std::vector<std::string> tokens = AsmMacroLexer::tokenize(block);
+    std::vector<std::string> tokens = OldAsmMacroLexer::tokenize(block);
     size_t lineNum = 0;
     size_t sinceLineIncrease = 0;
     for (std::string &token : tokens)
