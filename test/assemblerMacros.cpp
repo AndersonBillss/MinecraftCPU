@@ -1,6 +1,7 @@
 #include "catch_amalgamated.hpp"
 #include "../src/assembler/macroSystem/macroSystem.hpp"
 #include "../src/assembler/macroSystem/oldLexer.hpp"
+#include "../src/assembler/macroSystem/lexer.hpp"
 #include "../src/utils/runtimeError.hpp"
 #include <iostream>
 
@@ -40,7 +41,7 @@ TEST_CASE("Variables can be stored across stacks")
     REQUIRE(value == 43);
 }
 
-TEST_CASE("Tokenization logic works correctly")
+TEST_CASE("Tokenization logic works correctly (old)")
 {
     std::string sourceCode = R"(
         LDI R1 1
@@ -130,6 +131,57 @@ TEST_CASE("Tokenization logic works correctly")
         "\n",
         "NOP"};
     REQUIRE(OldAsmMacroLexer::tokenize(sourceCode) == expected);
+}
+
+inline bool operator==(const AsmMacroLexer::SourceLocation &a,
+                       const AsmMacroLexer::SourceLocation &b)
+{
+    return a.line == b.line && a.column == b.column;
+}
+inline bool operator==(const AsmMacroLexer::Token &a,
+                       const AsmMacroLexer::Token &b)
+{
+    return a.begin == b.begin &&
+           a.end == b.end &&
+           a.type == b.type &&
+           a.data == b.data;
+}
+inline std::ostream &operator<<(std::ostream &os,
+                                const AsmMacroLexer::SourceLocation &loc)
+{
+    return os << "(" << loc.line << "," << loc.column << ")";
+}
+
+inline std::ostream &operator<<(std::ostream &os,
+                                const AsmMacroLexer::Token &t)
+{
+    return os << "Token{begin=" << t.begin
+              << ", end=" << t.end
+              << ", type=" << t.type
+              << ", data=\"" << t.data << "\"}";
+}
+TEST_CASE("Lexer properly tokenizes source code")
+{
+    std::string sourceCode = R"(
+        LDI R1 1
+    )";
+    std::vector<AsmMacroLexer::Token> expected{
+        {{1, 8},
+         {1, 10},
+         AsmMacroLexer::TokenType::VALUE,
+         "LDI"},
+        {{1, 12},
+         {1, 13},
+         AsmMacroLexer::TokenType::VALUE,
+         "LDI"},
+        {{1, 15},
+         {1, 16},
+         AsmMacroLexer::TokenType::VALUE,
+         "LDI"},
+    };
+
+    AsmMacroLexer l;
+    REQUIRE(l.tokenize(sourceCode) == expected);
 }
 
 TEST_CASE("Evaluate variables and symbols")
