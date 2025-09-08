@@ -21,7 +21,7 @@ void AsmMacroLexer::_advanceIndex(size_t n)
 {
     for (size_t i = 0; i < n; i++)
     {
-        if (_currIndex + 1 >= _endIndex)
+        if (_currIndex >= _endIndex)
         {
             return;
         }
@@ -79,6 +79,7 @@ void AsmMacroLexer::_handleFullWord()
         {
             TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
             _pushToken(fullWord, t);
+            return;
         }
         fullWord += _sourceCode[i];
         i++;
@@ -137,43 +138,67 @@ void AsmMacroLexer::_handleNewLine()
 
 std::vector<AsmMacroLexer::Token> AsmMacroLexer::tokenize(const std::string &block)
 {
-    while (_endIndex < _currIndex)
+    std::cout << "TOKENIZE" << std::endl;
+    std::cout << _currIndex << std::endl;
+    std::cout << _endIndex << std::endl;
+    _currIndex = 0;
+    _endIndex = block.size();
+    while (_currIndex < _endIndex)
     {
+        std::cout << _currIndex << std::endl;
         if (block[_currIndex] == '#')
         {
+            std::cout << "1";
             _handleComment();
+            std::cout << "-1" << std::endl;
         }
         else if (stringUtils::subSectionEqual(block, _currIndex, "//"))
         {
+            std::cout << "2";
             _handleComment();
+            std::cout << "-2" << std::endl;
         }
         else if (block[_currIndex] == '.')
         {
+            std::cout << "3";
             _handleLocationMarker();
+            std::cout << "-3" << std::endl;
         }
         else if (operatorTokens.find(block[_currIndex]) != operatorTokens.end())
         {
+            std::cout << "4";
             _handleOperator();
+            std::cout << "-4" << std::endl;
         }
         else if (block[_currIndex] == '(')
         {
+            std::cout << "5";
             _pushToken("(", TokenType::OPENINGPARENTHESE);
+            std::cout << "-6" << std::endl;
         }
         else if (block[_currIndex] == ')')
         {
+            std::cout << "7";
             _pushToken(")", TokenType::CLOSINGPARENTHESE);
+            std::cout << "-7" << std::endl;
         }
         else if (block[_currIndex] == '\n')
         {
+            std::cout << "8";
             _handleNewLine();
+            std::cout << "-8" << std::endl;
         }
         else if (std::isspace(block[_currIndex]))
         {
+            std::cout << "9";
             _advanceIndex(1);
+            std::cout << "-9" << std::endl;
         }
         else
         {
+            std::cout << "10";
             _handleFullWord();
+            std::cout << "-10" << std::endl;
         }
     }
     if (_tokens[_tokens.size() - 1].type == TokenType::ENDLINE)
