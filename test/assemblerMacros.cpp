@@ -167,17 +167,17 @@ TEST_CASE("Lexer properly tokenizes source code")
     )";
     std::vector<AsmMacroLexer::Token> expected{
         {{1, 8},
-         {1, 10},
+         {1, 11},
          AsmMacroLexer::TokenType::VALUE,
          "LDI"},
         {{1, 12},
          {1, 13},
          AsmMacroLexer::TokenType::VALUE,
-         "LDI"},
+         "R1"},
         {{1, 15},
          {1, 16},
          AsmMacroLexer::TokenType::VALUE,
-         "LDI"},
+         "1"},
     };
 
     AsmMacroLexer l;

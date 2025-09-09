@@ -37,6 +37,7 @@ void AsmMacroLexer::_advanceIndex(size_t n)
 
 void AsmMacroLexer::_pushToken(std::string data, TokenType type)
 {
+    std::cout << "_pushToken: " << data << std::endl;
     SourceLocation begin = _currLocation;
     _advanceIndex(data.size());
     _tokens.push_back({
@@ -68,10 +69,12 @@ void AsmMacroLexer::_handleOperator()
 
 void AsmMacroLexer::_handleFullWord()
 {
+    std::cout << "HANDLE FULL WORD" << std::endl;
     std::string fullWord = "";
     size_t i = _currIndex;
     while (i < _endIndex)
     {
+        std::cout << "_sourceCode[i]: " << _sourceCode[i] << std::endl;
         if (
             (std::isspace(_sourceCode[i])) ||
             (i >= _endIndex) ||
@@ -122,6 +125,7 @@ void AsmMacroLexer::_handleComment()
 
 void AsmMacroLexer::_handleNewLine()
 {
+    _currLocation.line++;
     if (_tokens.size() == 0)
     {
         _currIndex++;
@@ -143,62 +147,44 @@ std::vector<AsmMacroLexer::Token> AsmMacroLexer::tokenize(const std::string &blo
     std::cout << _endIndex << std::endl;
     _currIndex = 0;
     _endIndex = block.size();
+    _sourceCode = block;
     while (_currIndex < _endIndex)
     {
-        std::cout << _currIndex << std::endl;
-        if (block[_currIndex] == '#')
+        if (_sourceCode[_currIndex] == '#')
         {
-            std::cout << "1";
             _handleComment();
-            std::cout << "-1" << std::endl;
         }
-        else if (stringUtils::subSectionEqual(block, _currIndex, "//"))
+        else if (stringUtils::subSectionEqual(_sourceCode, _currIndex, "//"))
         {
-            std::cout << "2";
             _handleComment();
-            std::cout << "-2" << std::endl;
         }
-        else if (block[_currIndex] == '.')
+        else if (_sourceCode[_currIndex] == '.')
         {
-            std::cout << "3";
             _handleLocationMarker();
-            std::cout << "-3" << std::endl;
         }
-        else if (operatorTokens.find(block[_currIndex]) != operatorTokens.end())
+        else if (operatorTokens.find(_sourceCode[_currIndex]) != operatorTokens.end())
         {
-            std::cout << "4";
             _handleOperator();
-            std::cout << "-4" << std::endl;
         }
-        else if (block[_currIndex] == '(')
+        else if (_sourceCode[_currIndex] == '(')
         {
-            std::cout << "5";
             _pushToken("(", TokenType::OPENINGPARENTHESE);
-            std::cout << "-6" << std::endl;
         }
-        else if (block[_currIndex] == ')')
+        else if (_sourceCode[_currIndex] == ')')
         {
-            std::cout << "7";
             _pushToken(")", TokenType::CLOSINGPARENTHESE);
-            std::cout << "-7" << std::endl;
         }
-        else if (block[_currIndex] == '\n')
+        else if (_sourceCode[_currIndex] == '\n')
         {
-            std::cout << "8";
             _handleNewLine();
-            std::cout << "-8" << std::endl;
         }
-        else if (std::isspace(block[_currIndex]))
+        else if (std::isspace(_sourceCode[_currIndex]))
         {
-            std::cout << "9";
             _advanceIndex(1);
-            std::cout << "-9" << std::endl;
         }
         else
         {
-            std::cout << "10";
             _handleFullWord();
-            std::cout << "-10" << std::endl;
         }
     }
     if (_tokens[_tokens.size() - 1].type == TokenType::ENDLINE)
