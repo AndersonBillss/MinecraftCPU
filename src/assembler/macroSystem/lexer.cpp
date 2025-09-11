@@ -146,6 +146,10 @@ std::vector<AsmMacroLexer::Token> AsmMacroLexer::tokenize(const std::string &blo
     std::cout << _currIndex << std::endl;
     std::cout << _endIndex << std::endl;
     _currIndex = 0;
+    _currLocation = {
+        line : 0,
+        column : 0
+    };
     _endIndex = block.size();
     _sourceCode = block;
     while (_currIndex < _endIndex)
