@@ -37,15 +37,15 @@ void AsmMacroLexer::_advanceIndex(size_t n)
 
 void AsmMacroLexer::_pushToken(std::string data, TokenType type)
 {
-    std::cout << "_pushToken: " << data << std::endl;
     SourceLocation begin = _currLocation;
-    _advanceIndex(data.size());
+    _advanceIndex(data.size() - 1);
     _tokens.push_back({
         begin : begin,
         end : _currLocation,
         type : type,
         data : data
     });
+    _advanceIndex(1);
 }
 
 void AsmMacroLexer::_handleOperator()
@@ -69,12 +69,10 @@ void AsmMacroLexer::_handleOperator()
 
 void AsmMacroLexer::_handleFullWord()
 {
-    std::cout << "HANDLE FULL WORD" << std::endl;
     std::string fullWord = "";
     size_t i = _currIndex;
     while (i < _endIndex)
     {
-        std::cout << "_sourceCode[i]: " << _sourceCode[i] << std::endl;
         if (
             (std::isspace(_sourceCode[i])) ||
             (i >= _endIndex) ||
@@ -142,9 +140,6 @@ void AsmMacroLexer::_handleNewLine()
 
 std::vector<AsmMacroLexer::Token> AsmMacroLexer::tokenize(const std::string &block)
 {
-    std::cout << "TOKENIZE" << std::endl;
-    std::cout << _currIndex << std::endl;
-    std::cout << _endIndex << std::endl;
     _currIndex = 0;
     _currLocation = {
         line : 0,
