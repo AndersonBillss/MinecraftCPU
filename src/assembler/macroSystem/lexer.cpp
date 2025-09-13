@@ -21,16 +21,16 @@ void AsmMacroLexer::_advanceIndex(size_t n)
 {
     for (size_t i = 0; i < n; i++)
     {
-        if (_currIndex >= _endIndex)
-        {
-            return;
-        }
-        _currIndex++;
         _currLocation.column++;
         if (_sourceCode[_currIndex] == '\n')
         {
             _currLocation.column = 0;
             _currLocation.line++;
+        }
+        _currIndex++;
+        if (_currIndex >= _endIndex)
+        {
+            return;
         }
     }
 }
@@ -123,14 +123,13 @@ void AsmMacroLexer::_handleComment()
 
 void AsmMacroLexer::_handleNewLine()
 {
-    _currLocation.line++;
     if (_tokens.size() == 0)
     {
-        _currIndex++;
+        _advanceIndex(1);
     }
     else if (_tokens[_tokens.size() - 1].type == TokenType::ENDLINE)
     {
-        _currIndex++;
+        _advanceIndex(1);
     }
     else
     {

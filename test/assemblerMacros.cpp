@@ -203,6 +203,43 @@ TEST_CASE("Lexer properly tokenizes source code")
     l = new AsmMacroLexer();
     REQUIRE(l->tokenize(sourceCode) == expected);
     delete l;
+
+    sourceCode = R"(
+        LDI R1 1
+        $test = 4
+    )";
+    expected = {
+        {{1, 8},
+         {1, 10},
+         AsmMacroLexer::TokenType::VALUE,
+         "LDI"},
+        {{1, 12},
+         {1, 13},
+         AsmMacroLexer::TokenType::VALUE,
+         "R1"},
+        {{1, 15},
+         {1, 15},
+         AsmMacroLexer::TokenType::VALUE,
+         "1"},
+        {{1, 16},
+         {1, 16},
+         AsmMacroLexer::TokenType::ENDLINE,
+         "\n"},
+        {{2, 8},
+         {2, 12},
+         AsmMacroLexer::TokenType::SYMBOL,
+         "$test"},
+        {{2, 14},
+         {2, 14},
+         AsmMacroLexer::TokenType::OPERATOR,
+         "="},
+        {{2, 16},
+         {2, 16},
+         AsmMacroLexer::TokenType::VALUE,
+         "4"}};
+    l = new AsmMacroLexer();
+    REQUIRE(l->tokenize(sourceCode) == expected);
+    delete l;
 }
 
 TEST_CASE("Evaluate variables and symbols")
