@@ -62,6 +62,7 @@ void AsmMacroLexer::_handleOperator()
             _pushToken(fullOperator, TokenType::OPERATOR);
             return;
         }
+        fullOperator += _sourceCode[i];
         i++;
     }
     _pushToken(fullOperator, TokenType::OPERATOR);
@@ -69,6 +70,7 @@ void AsmMacroLexer::_handleOperator()
 
 void AsmMacroLexer::_handleFullWord()
 {
+    AsmMacroLexer::TokenType type = _sourceCode[_currIndex] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
     std::string fullWord = "";
     size_t i = _currIndex;
     while (i < _endIndex)
@@ -78,15 +80,13 @@ void AsmMacroLexer::_handleFullWord()
             (i >= _endIndex) ||
             (operatorTokens.find(_sourceCode[i]) != operatorTokens.end()))
         {
-            TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
-            _pushToken(fullWord, t);
+            _pushToken(fullWord, type);
             return;
         }
         fullWord += _sourceCode[i];
         i++;
     }
-    TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
-    _pushToken(fullWord, t);
+    _pushToken(fullWord, type);
 }
 
 void AsmMacroLexer::_handleLocationMarker()
