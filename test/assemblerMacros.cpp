@@ -240,6 +240,93 @@ TEST_CASE("Lexer properly tokenizes source code")
     l = new AsmMacroLexer();
     REQUIRE(l->tokenize(sourceCode) == expected);
     delete l;
+
+    sourceCode = R"(
+        LDI R1 1
+        $add = $1, $2 => $1 + $2
+    )";
+    expected = {
+        {{1, 8},
+         {1, 10},
+         AsmMacroLexer::TokenType::VALUE,
+         "LDI"},
+        {{1, 12},
+         {1, 13},
+         AsmMacroLexer::TokenType::VALUE,
+         "R1"},
+        {{1, 15},
+         {1, 15},
+         AsmMacroLexer::TokenType::VALUE,
+         "1"},
+        {{1, 16},
+         {1, 16},
+         AsmMacroLexer::TokenType::ENDLINE,
+         "\n"},
+        {{2, 8},
+         {2, 11},
+         AsmMacroLexer::TokenType::SYMBOL,
+         "$add"},
+        {{2, 13},
+         {2, 13},
+         AsmMacroLexer::TokenType::OPERATOR,
+         "="},
+        {{2, 15},
+         {2, 16},
+         AsmMacroLexer::TokenType::SYMBOL,
+         "$1"},
+        {{2, 17},
+         {2, 17},
+         AsmMacroLexer::TokenType::OPERATOR,
+         ","},
+        {{2, 19},
+         {2, 20},
+         AsmMacroLexer::TokenType::SYMBOL,
+         "$2"},
+        {{2, 22},
+         {2, 23},
+         AsmMacroLexer::TokenType::OPERATOR,
+         "=>"},
+        {{2, 25},
+         {2, 26},
+         AsmMacroLexer::TokenType::SYMBOL,
+         "$1"},
+        {{2, 28},
+         {2, 28},
+         AsmMacroLexer::TokenType::OPERATOR,
+         "+"},
+        {{2, 30},
+         {2, 31},
+         AsmMacroLexer::TokenType::SYMBOL,
+         "$2"},
+    };
+    l = new AsmMacroLexer();
+    REQUIRE(l->tokenize(sourceCode) == expected);
+    delete l;
+
+    sourceCode = R"(
+        (hello there)
+    )";
+    expected = {
+        {{1, 8},
+         {1, 8},
+         AsmMacroLexer::TokenType::OPENINGPARENTHESE,
+         "("},
+        {{1, 9},
+         {1, 13},
+         AsmMacroLexer::TokenType::VALUE,
+         "hello"},
+        {{1, 15},
+         {1, 19},
+         AsmMacroLexer::TokenType::VALUE,
+         "there"},
+        {{1, 20},
+         {1, 20},
+         AsmMacroLexer::TokenType::CLOSINGPARENTHESE,
+         ")"},
+    };
+    l = new AsmMacroLexer();
+    REQUIRE(l->tokenize(sourceCode) == expected);
+    delete l;
 }
 
 TEST_CASE("Evaluate variables and symbols")

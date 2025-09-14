@@ -78,7 +78,8 @@ void AsmMacroLexer::_handleFullWord()
         if (
             (std::isspace(_sourceCode[i])) ||
             (i >= _endIndex) ||
-            (operatorTokens.find(_sourceCode[i]) != operatorTokens.end()))
+            (operatorTokens.find(_sourceCode[i]) != operatorTokens.end()) ||
+            (_sourceCode[i] == ')'))
         {
             _pushToken(fullWord, type);
             return;
