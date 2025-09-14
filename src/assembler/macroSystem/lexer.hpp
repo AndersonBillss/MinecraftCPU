@@ -2,15 +2,11 @@
 #include <set>
 #include <vector>
 #include <iostream>
+#include "sourceLocation.hpp"
 
 class AsmMacroLexer
 {
 public:
-    struct SourceLocation
-    {
-        size_t line;
-        size_t column;
-    };
     enum TokenType
     {
         OPERATOR,

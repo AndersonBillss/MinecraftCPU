@@ -133,8 +133,8 @@ TEST_CASE("Tokenization logic works correctly (old)")
     REQUIRE(OldAsmMacroLexer::tokenize(sourceCode) == expected);
 }
 
-inline bool operator==(const AsmMacroLexer::SourceLocation &a,
-                       const AsmMacroLexer::SourceLocation &b)
+inline bool operator==(const SourceLocation &a,
+                       const SourceLocation &b)
 {
     return a.line == b.line && a.column == b.column;
 }
@@ -147,7 +147,7 @@ inline bool operator==(const AsmMacroLexer::Token &a,
            a.data == b.data;
 }
 inline std::ostream &operator<<(std::ostream &os,
-                                const AsmMacroLexer::SourceLocation &loc)
+                                const SourceLocation &loc)
 {
     return os << "(" << loc.line << "," << loc.column << ")";
 }
@@ -243,7 +243,7 @@ TEST_CASE("Lexer properly tokenizes source code")
 
     sourceCode = R"(
         LDI R1 1
-        $add = $1, $2 => $1 + $2
+        $add = $1 $2 => $1 + $2
     )";
     expected = {
         {{1, 8},
@@ -274,28 +274,24 @@ TEST_CASE("Lexer properly tokenizes source code")
          {2, 16},
          AsmMacroLexer::TokenType::SYMBOL,
          "$1"},
-        {{2, 17},
-         {2, 17},
-         AsmMacroLexer::TokenType::OPERATOR,
-         ","},
-        {{2, 19},
-         {2, 20},
+        {{2, 18},
+         {2, 19},
          AsmMacroLexer::TokenType::SYMBOL,
          "$2"},
-        {{2, 22},
-         {2, 23},
+        {{2, 21},
+         {2, 22},
          AsmMacroLexer::TokenType::OPERATOR,
          "=>"},
-        {{2, 25},
-         {2, 26},
+        {{2, 24},
+         {2, 25},
          AsmMacroLexer::TokenType::SYMBOL,
          "$1"},
-        {{2, 28},
-         {2, 28},
+        {{2, 27},
+         {2, 27},
          AsmMacroLexer::TokenType::OPERATOR,
          "+"},
-        {{2, 30},
-         {2, 31},
+        {{2, 29},
+         {2, 30},
          AsmMacroLexer::TokenType::SYMBOL,
          "$2"},
     };
