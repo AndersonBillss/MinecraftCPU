@@ -2,35 +2,43 @@
 #include <vector>
 #include <memory>
 #include "sourceLocation.hpp"
+#include "lexer.hpp"
 
-enum NodeType {
-    NEWLINE,
-    BLOCK,
+namespace Parser
+{
+    enum NodeType
+    {
+        NEWLINE,
+        BLOCK,
 
-    ADD,
-    SUB,
-    OR,
-    AND,
-    XOR,
-    EQUAL,
-    MULTIPLY,
-    DIVIDE,
+        ADD,
+        SUB,
+        OR,
+        AND,
+        XOR,
+        EQUAL,
+        MULTIPLY,
+        DIVIDE,
 
-    PARAMETER,
-    RETURN,
+        PARAMETER,
+        RETURN,
 
-    VARIABLE,
-    STRING,
-    INT,
-};
+        IDENTIFIER,
+        STRING,
+        INT,
+    };
 
-struct AST {
-    SourceLocation begin;
-    SourceLocation end;
-    NodeType nodeType;
+    struct AST
+    {
+        SourceLocation begin;
+        SourceLocation end;
+        NodeType nodeType;
 
-    std::vector<std::unique_ptr<AST>> children;
+        std::vector<std::unique_ptr<AST>> children;
 
-    std::string identifier;   
-    int intValue;
-};
+        std::string identifier;
+        int intValue;
+    };
+
+    std::vector<std::unique_ptr<AST>> parseTokens(std::vector<AsmMacroLexer::Token> tokens);
+}
