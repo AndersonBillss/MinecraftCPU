@@ -1,5 +1,5 @@
 # Minecraft CPU
-This is a 16-bit CPU built inside Minecraft. All of the hardware is entirely made through redstone. 
+This is an 8-bit CPU built inside Minecraft. All of the hardware is entirely made through redstone. 
 
 ## How it works
 Using the WorldEdit mod, I can paste a schematic file into Minecraft. A schematic file essentially contains data to paste a structure into your Minecraft world. The compiler for this project generates a schematic file for me to paste into my instruction ROM. It compiles a custom assembly code, converts it to binary, then outputs the schematic file.
