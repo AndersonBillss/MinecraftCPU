@@ -1,4 +1,5 @@
 # Minecraft CPU
+![alt text](./public/CPU.png)
 This is an 8-bit CPU built inside Minecraft. All of the hardware is entirely made through redstone. 
 
 ## How it works
