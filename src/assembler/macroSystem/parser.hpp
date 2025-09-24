@@ -42,7 +42,7 @@ namespace Parser
         int intValue;
     };
 
-    std::vector<std::unique_ptr<AST>> parseTokens(std::vector<AsmMacroLexer::Token> tokens);
+    AST parseTokens(std::vector<AsmMacroLexer::Token> &tokens);
 
     class ParseError : public std::exception
     {
