@@ -1,7 +1,14 @@
 #include "parser.hpp"
 
-bool isFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+bool isFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t currIndex)
 {
+    for (size_t i = currIndex; i < tokens.size(); i++)
+    {
+        if (tokens[i].type == AsmMacroLexer::TokenType::OPERATOR && tokens[i].data == "=>")
+        {
+            return true;
+        }
+    }
     return false;
 }
 void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
