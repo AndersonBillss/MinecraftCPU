@@ -4,12 +4,21 @@ bool isFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, si
 {
     for (size_t i = currIndex; i < tokens.size(); i++)
     {
-        if (tokens[i].type == AsmMacroLexer::TokenType::OPERATOR && tokens[i].data == "=>")
+        if (tokens[i].type == AsmMacroLexer::TokenType::ENDLINE)
+        {
+            return false;
+        }
+        else if (tokens[i].type == AsmMacroLexer::TokenType::OPERATOR && tokens[i].data == "=>")
         {
             return true;
         }
     }
     return false;
+}
+bool isAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t currIndex)
+{
+    AsmMacroLexer::Token token = tokens[currIndex + 1];
+    return token.type == AsmMacroLexer::TokenType::OPERATOR && token.data == "=";
 }
 void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
