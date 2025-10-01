@@ -18,10 +18,11 @@ namespace Parser
         OR,
         AND,
         XOR,
-        EQUAL,
         MULTIPLY,
         DIVIDE,
-
+        CONCAT,
+        
+        ASSIGNMENT,
         PARAMETER,
         RETURN,
 

@@ -20,7 +20,19 @@ bool isAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, 
     AsmMacroLexer::Token token = tokens[currIndex + 1];
     return token.type == AsmMacroLexer::TokenType::OPERATOR && token.data == "=";
 }
+void handleFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+{
+}
+void handleAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+{
+}
 void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+{
+}
+void handleParentheses(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+{
+}
+void handleLine(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
 }
 
@@ -36,7 +48,7 @@ Parser::AST Parser::parseTokens(std::vector<AsmMacroLexer::Token> &tokens)
         0};
     for (size_t i = 0; i < tokens.size(); i++)
     {
-        handleExpression(tree, tokens, i);
+        handleLine(tree, tokens, i);
     }
 
     return tree;
