@@ -26,14 +26,23 @@ void handleFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens
 void handleAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
 }
-void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+void handleParentheses(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
 }
-void handleParentheses(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
 }
 void handleLine(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
+    if (isFunction(tree, tokens, currIndex))
+    {
+        if (!isAssignment(tree, tokens, currIndex))
+        {
+        }
+    }
+    if (isAssignment(tree, tokens, currIndex))
+    {
+    }
 }
 
 Parser::AST Parser::parseTokens(std::vector<AsmMacroLexer::Token> &tokens)
