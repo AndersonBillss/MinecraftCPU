@@ -10,7 +10,6 @@ namespace Parser
 {
     enum NodeType
     {
-        NEWLINE,
         BLOCK,
 
         ADD,
@@ -23,7 +22,8 @@ namespace Parser
         CONCAT,
         
         ASSIGNMENT,
-        PARAMETER,
+        FUNCTION,
+        PARAMETER_LIST,
         RETURN,
 
         IDENTIFIER,
@@ -44,12 +44,4 @@ namespace Parser
     };
 
     AST parseTokens(std::vector<AsmMacroLexer::Token> &tokens);
-
-    class ParseError : public std::exception
-    {
-        std::string message;
-    public:
-        ParseError(const std::string &msg) : message(msg) {}
-        const char *what() const noexcept override { return message.c_str(); }
-    };
 }

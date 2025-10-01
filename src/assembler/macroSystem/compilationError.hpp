@@ -16,14 +16,14 @@ class CompilationError : public std::exception
 {
 private:
     ErrorStage stage;
-    SourceLocation start;
+    SourceLocation begin;
     SourceLocation end;
     std::string message;
     std::string formatted;
 
 public:
     CompilationError(ErrorStage s, SourceLocation start, SourceLocation end, const std::string &msg)
-        : stage(s), start(start), end(end), message(msg)
+        : stage(s), begin(start), end(end), message(msg)
     {
         formatted = msg;
     }
