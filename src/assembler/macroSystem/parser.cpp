@@ -168,6 +168,33 @@ void handleAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &toke
 }
 void handleParentheses(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
+    currIndex++;
+    if (currIndex >= tokens.size())
+    {
+        throw CompilationError(
+            ErrorStage::Parsing,
+            tokens[currIndex].begin,
+            tokens[currIndex].end,
+            "Unmatched parentheses");
+    }
+    auto blockNode = std::make_unique<Parser::AST>(Parser::AST{
+        tokens[currIndex].begin,
+        {0, 0},
+        Parser::NodeType::BLOCK,
+        {},
+        "",
+        0});
+    handleLine(tree, tokens, currIndex);
+    blockNode->end = tokens[currIndex].end;
+    currIndex++;
+    if (currIndex >= tokens.size())
+    {
+        throw CompilationError(
+            ErrorStage::Parsing,
+            tokens[currIndex].begin,
+            tokens[currIndex].end,
+            "Unmatched parentheses");
+    }
 }
 void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
