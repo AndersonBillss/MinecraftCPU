@@ -1,3 +1,5 @@
+#include <unordered_map>
+#include <unordered_set>
 #include "parser.hpp"
 #include "compilationError.hpp"
 
@@ -196,8 +198,67 @@ void handleParentheses(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tok
             "Unmatched parentheses");
     }
 }
+
+size_t precedence(Parser::NodeType opType)
+{
+    const std::vector<std::unordered_set<Parser::NodeType>> orderOfOperations = {
+        {Parser::NodeType::MULTIPLY, Parser::NodeType::DIVIDE},
+        {Parser::NodeType::ADD, Parser::NodeType::SUB},
+        {Parser::NodeType::AND},
+        {Parser::NodeType::XOR},
+        {Parser::NodeType::OR},
+    };
+    for (size_t i = 0; i < orderOfOperations.size(); i++)
+    {
+        std::unordered_set<Parser::NodeType> set = orderOfOperations[i];
+        auto it = set.find(opType);
+        if (it != set.end())
+            return i; // Operation is found
+    }
+    return 0;
+}
+
+Parser::NodeType nodeOperator(AsmMacroLexer::Token token)
+{
+    const std::unordered_map<std::string, Parser::NodeType> stringToOperator = {
+        {"*", Parser::NodeType::MULTIPLY},
+        {"/", Parser::NodeType::DIVIDE},
+        {"+", Parser::NodeType::ADD},
+        {"-", Parser::NodeType::SUB},
+        {"&", Parser::NodeType::AND},
+        {"^", Parser::NodeType::XOR},
+        {"|", Parser::NodeType::OR},
+    };
+
+    auto it = stringToOperator.find(token.data);
+    if (it == stringToOperator.end())
+    {
+        throw CompilationError(
+            ErrorStage::Parsing,
+            token.begin,
+            token.end,
+            "Invalid Operator: " + token.data);
+    }
+    return it->second;
+}
+
 void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
+
+    auto functionNode = std::make_unique<Parser::AST>(Parser::AST{
+        tokens[currIndex].begin,
+        {0, 0},
+        Parser::NodeType::FUNCTION,
+        {},
+        "",
+        0});
+
+    while (currIndex < tokens.size())
+    {
+        AsmMacroLexer::Token token = tokens[currIndex];
+
+        currIndex++;
+    }
 }
 void handleLine(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
