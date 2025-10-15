@@ -269,6 +269,16 @@ void handleFirstOperand(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &to
     }
 }
 
+Parser::NodeType handleOpType(std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+{
+    auto token = tokens[currIndex];
+    if(token.type == AsmMacroLexer::TokenType::OPERATOR){
+        currIndex++;
+        return operatorType(token);
+    }
+    return Parser::NodeType::CONCAT;
+}
+
 void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
     std::unique_ptr<Parser::AST> rootNode = std::make_unique<Parser::AST>(tree);
@@ -285,8 +295,8 @@ void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &toke
             {},
             tokens[0].data,
             0});
-        
         handleFirstOperand(*opNode, tokens, currIndex);
+        opNode->nodeType = handleOpType(tokens, currIndex);
     }
 }
 void handleLine(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
@@ -309,7 +319,7 @@ void handleLine(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, si
     }
     else
     {
-        handleLine(tree, tokens, currIndex);
+        handleExpression(tree, tokens, currIndex);
     }
 }
 
