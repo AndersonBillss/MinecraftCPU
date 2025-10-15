@@ -6,10 +6,12 @@
 #include "sourceLocation.hpp"
 #include "lexer.hpp"
 
-namespace Parser
+class Parser
 {
+public:
     enum NodeType
     {
+        PROGRAM,
         BLOCK,
 
         ADD,
@@ -20,7 +22,7 @@ namespace Parser
         MULTIPLY,
         DIVIDE,
         CONCAT,
-        
+
         ASSIGNMENT,
         FUNCTION,
         PARAMETER_LIST,
@@ -43,6 +45,34 @@ namespace Parser
         std::string identifier;
         int intValue;
     };
-
     AST parseTokens(std::vector<AsmMacroLexer::Token> &tokens);
-}
+
+private:
+    Parser::AST _tree;
+    size_t _currIndex;
+    std::vector<AsmMacroLexer::Token> _tokens;
+
+    bool _isFunction();
+    bool _isAssignment();
+    void _handleFunction();
+    void _handleAssignment();
+    void _handleParentheses();
+    void _handleFirstOperand();
+    Parser::NodeType _handleOpType();
+    void Parser::_handleExpression();
+    void _handleLine();
+
+public:
+    Parser()
+    {
+        _currIndex = 0;
+        _tokens = {};
+        _tree = Parser::AST{
+            _tokens[_currIndex + 2].begin,
+            {0, 0},
+            Parser::NodeType::PROGRAM,
+            {},
+            "",
+            0};
+    }
+};

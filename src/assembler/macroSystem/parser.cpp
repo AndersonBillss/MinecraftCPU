@@ -3,31 +3,31 @@
 #include "parser.hpp"
 #include "compilationError.hpp"
 
-bool isFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t currIndex)
+bool Parser::_isFunction()
 {
-    for (size_t i = currIndex; i < tokens.size(); i++)
+    for (size_t i = _currIndex; i < _tokens.size(); i++)
     {
-        if (tokens[i].type == AsmMacroLexer::TokenType::ENDLINE)
+        if (_tokens[i].type == AsmMacroLexer::TokenType::ENDLINE)
         {
             return false;
         }
-        else if (tokens[i].type == AsmMacroLexer::TokenType::OPERATOR && tokens[i].data == "=>")
+        else if (_tokens[i].type == AsmMacroLexer::TokenType::OPERATOR && _tokens[i].data == "=>")
         {
             return true;
         }
     }
     return false;
 }
-bool isAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t currIndex)
+bool Parser::_isAssignment()
 {
-    if (tokens.size() + 2 >= currIndex - 1)
+    if (_tokens.size() + 2 >= _currIndex - 1)
     {
         return false;
     }
-    AsmMacroLexer::Token token = tokens[currIndex + 2];
+    AsmMacroLexer::Token token = _tokens[_currIndex + 2];
     return token.type == AsmMacroLexer::TokenType::OPERATOR && token.data == "=";
 }
-void handleFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+void Parser::_handleFunction()
 {
     //   Function AST structure
     //
@@ -37,7 +37,7 @@ void handleFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens
     //   parameters     block
 
     auto functionNode = std::make_unique<Parser::AST>(Parser::AST{
-        tokens[currIndex].begin,
+        _tokens[_currIndex].begin,
         {0, 0},
         Parser::NodeType::FUNCTION,
         {},
@@ -45,7 +45,7 @@ void handleFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens
         0});
 
     auto parameterNode = std::make_unique<Parser::AST>(Parser::AST{
-        tokens[currIndex + 2].begin,
+        _tokens[_currIndex + 2].begin,
         {0, 0},
         Parser::NodeType::PARAMETER_LIST,
         {},
@@ -53,57 +53,57 @@ void handleFunction(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens
         0});
 
     auto blockNode = std::make_unique<Parser::AST>(Parser::AST{
-        tokens[currIndex].begin,
+        _tokens[_currIndex].begin,
         {0, 0},
         Parser::NodeType::BLOCK,
         {},
         "",
         0});
 
-    tree.children.push_back(std::move(functionNode));
+    _tree.children.push_back(std::move(functionNode));
     functionNode->children.push_back(std::move(functionNode));
     functionNode->children.push_back(std::move(parameterNode));
     functionNode->children.push_back(std::move(blockNode));
 
     bool isParameter = true;
-    while (currIndex < tokens.size())
+    while (_currIndex < _tokens.size())
     {
-        if (tokens[currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
+        if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
         {
             throw CompilationError(ErrorStage::Parsing,
-                                   tokens[currIndex].begin,
-                                   tokens[currIndex].end,
+                                   _tokens[_currIndex].begin,
+                                   _tokens[_currIndex].end,
                                    "Function terminated too soon");
         }
         if (isParameter)
         {
             parameterNode->children.push_back(
                 std::make_unique<Parser::AST>(Parser::AST{
-                    tokens[currIndex].begin,
+                    _tokens[_currIndex].begin,
                     {0, 0},
                     Parser::NodeType::IDENTIFIER,
                     {},
-                    tokens[0].data,
+                    _tokens[0].data,
                     0}));
         }
-        else if (tokens[currIndex].type == AsmMacroLexer::TokenType::OPERATOR &&
-                 tokens[currIndex].data == "=>")
+        else if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::OPERATOR &&
+                 _tokens[_currIndex].data == "=>")
         {
-            currIndex++;
-            if (tokens.size() >= currIndex || tokens[currIndex + 1].type == AsmMacroLexer::TokenType::ENDLINE)
+            _currIndex++;
+            if (_tokens.size() >= _currIndex || _tokens[_currIndex + 1].type == AsmMacroLexer::TokenType::ENDLINE)
             {
                 throw CompilationError(ErrorStage::Parsing,
-                                       tokens[currIndex].begin,
-                                       tokens[currIndex].end,
+                                       _tokens[_currIndex].begin,
+                                       _tokens[_currIndex].end,
                                        "Function has no output");
             }
-            handleLine(*blockNode, tokens, currIndex);
+            _handleLine();
         }
 
-        currIndex++;
+        _currIndex++;
     }
 }
-void handleAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+void Parser::_handleAssignment()
 {
     // Assignment AST structure
     //
@@ -119,23 +119,23 @@ void handleAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &toke
     //     |           |
     //   label       function
 
-    if (tokens.size() - 1 <= currIndex + 1 || tokens[currIndex + 1].type == AsmMacroLexer::TokenType::ENDLINE)
+    if (_tokens.size() - 1 <= _currIndex + 1 || _tokens[_currIndex + 1].type == AsmMacroLexer::TokenType::ENDLINE)
     {
         throw CompilationError(ErrorStage::Parsing,
-                               tokens[tokens.size() - 1].begin,
-                               tokens[tokens.size() - 1].end,
+                               _tokens[_tokens.size() - 1].begin,
+                               _tokens[_tokens.size() - 1].end,
                                "No equal sign for assignment");
     }
-    if (tokens.size() - 1 <= currIndex + 2)
+    if (_tokens.size() - 1 <= _currIndex + 2)
     {
         throw CompilationError(ErrorStage::Parsing,
-                               tokens[tokens.size() - 1].begin,
-                               tokens[tokens.size() - 1].end,
+                               _tokens[_tokens.size() - 1].begin,
+                               _tokens[_tokens.size() - 1].end,
                                "Label not assigned to value");
     }
 
     auto assignmentNode = std::make_unique<Parser::AST>(Parser::AST{
-        tokens[currIndex].begin,
+        _tokens[_currIndex].begin,
         {0, 0},
         Parser::NodeType::ASSIGNMENT,
         {},
@@ -143,58 +143,58 @@ void handleAssignment(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &toke
         0});
 
     auto labelNode = std::make_unique<Parser::AST>(Parser::AST{
-        tokens[currIndex].begin,
+        _tokens[_currIndex].begin,
         {0, 0},
         Parser::NodeType::IDENTIFIER,
         {},
-        tokens[0].data,
+        _tokens[0].data,
         0});
 
-    currIndex += 2;
+    _currIndex += 2;
     auto valueNode = std::make_unique<Parser::AST>(Parser::AST{
-        tokens[currIndex].begin,
+        _tokens[_currIndex].begin,
         {0, 0},
         Parser::NodeType::BLOCK,
         {},
         "",
         0});
 
-    if (isFunction(tree, tokens, currIndex))
+    if (_isFunction())
     {
-        handleFunction(*valueNode, tokens, currIndex);
+        _handleFunction();
     }
     else
     {
-        handleExpression(*valueNode, tokens, currIndex);
+        _handleExpression();
     }
 }
-void handleParentheses(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+void Parser::_handleParentheses()
 {
-    currIndex++;
-    if (currIndex >= tokens.size())
+    _currIndex++;
+    if (_currIndex >= _tokens.size())
     {
         throw CompilationError(
             ErrorStage::Parsing,
-            tokens[currIndex].begin,
-            tokens[currIndex].end,
+            _tokens[_currIndex].begin,
+            _tokens[_currIndex].end,
             "Unmatched parentheses");
     }
     auto blockNode = std::make_unique<Parser::AST>(Parser::AST{
-        tokens[currIndex].begin,
+        _tokens[_currIndex].begin,
         {0, 0},
         Parser::NodeType::BLOCK,
         {},
         "",
         0});
-    handleLine(tree, tokens, currIndex);
-    blockNode->end = tokens[currIndex].end;
-    currIndex++;
-    if (currIndex >= tokens.size())
+    _handleLine();
+    blockNode->end = _tokens[_currIndex].end;
+    _currIndex++;
+    if (_currIndex >= _tokens.size())
     {
         throw CompilationError(
             ErrorStage::Parsing,
-            tokens[currIndex].begin,
-            tokens[currIndex].end,
+            _tokens[_currIndex].begin,
+            _tokens[_currIndex].end,
             "Unmatched parentheses");
     }
 }
@@ -242,12 +242,12 @@ Parser::NodeType operatorType(AsmMacroLexer::Token token)
     return it->second;
 }
 
-void handleFirstOperand(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+void Parser::_handleFirstOperand()
 {
-    AsmMacroLexer::Token token = tokens[currIndex];
+    AsmMacroLexer::Token token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
     {
-        handleParentheses(tree, tokens, currIndex);
+        _handleParentheses();
     }
     else
     {
@@ -258,85 +258,86 @@ void handleFirstOperand(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &to
             nodeType = Parser::NodeType::IDENTIFIER;
         }
         auto firstOperand = std::make_unique<Parser::AST>(Parser::AST{
-            tokens[currIndex].begin,
-            tokens[currIndex].end,
+            _tokens[_currIndex].begin,
+            _tokens[_currIndex].end,
             nodeType,
             {},
             "", // TODO: Get the value of this operand
             0});
 
-        tree.children.push_back(firstOperand);
+        _tree.children.push_back(firstOperand);
     }
 }
 
-Parser::NodeType handleOpType(std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+Parser::NodeType Parser::_handleOpType()
 {
-    auto token = tokens[currIndex];
-    if(token.type == AsmMacroLexer::TokenType::OPERATOR){
-        currIndex++;
+    auto token = _tokens[_currIndex];
+    if (token.type == AsmMacroLexer::TokenType::OPERATOR)
+    {
+        _currIndex++;
         return operatorType(token);
     }
     return Parser::NodeType::CONCAT;
 }
 
-void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+void Parser::_handleExpression()
 {
-    std::unique_ptr<Parser::AST> rootNode = std::make_unique<Parser::AST>(tree);
+    std::unique_ptr<Parser::AST> rootNode = std::make_unique<Parser::AST>(_tree);
 
     size_t lastOperatorPrecedence = 0;
 
     AsmMacroLexer::Token lastToken;
-    while (currIndex < tokens.size())
+    while (_currIndex < _tokens.size())
     {
         std::unique_ptr<Parser::AST> opNode = std::make_unique<Parser::AST>(Parser::AST{
-            tokens[currIndex].begin,
+            _tokens[_currIndex].begin,
             {0, 0},
             Parser::NodeType::UNDEFINED,
             {},
-            tokens[0].data,
+            _tokens[0].data,
             0});
-        handleFirstOperand(*opNode, tokens, currIndex);
-        opNode->nodeType = handleOpType(tokens, currIndex);
+        _handleFirstOperand();
+        opNode->nodeType = _handleOpType();
     }
 }
-void handleLine(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+void Parser::_handleLine()
 {
-    if (isFunction(tree, tokens, currIndex))
+    if (_isFunction())
     {
-        if (!isAssignment(tree, tokens, currIndex))
+        if (!_isAssignment())
         {
             throw CompilationError(
                 ErrorStage::Parsing,
-                tokens[currIndex].begin,
-                tokens[currIndex].end,
+                _tokens[_currIndex].begin,
+                _tokens[_currIndex].end,
                 "A function must be assigned to a variable");
         }
-        handleFunction(tree, tokens, currIndex);
+        _handleFunction();
     }
-    else if (isAssignment(tree, tokens, currIndex))
+    else if (_isAssignment())
     {
-        handleAssignment(tree, tokens, currIndex);
+        _handleAssignment();
     }
     else
     {
-        handleExpression(tree, tokens, currIndex);
+        _handleExpression();
     }
 }
 
-Parser::AST Parser::parseTokens(std::vector<AsmMacroLexer::Token> &tokens)
+Parser::AST Parser::parseTokens(std::vector<AsmMacroLexer::Token> &_tokens)
 {
     size_t blockBaseIndex = 0;
-    Parser::AST tree = {
+    Parser::AST _tree = {
         {0, 0},
         {0, 0},
         Parser::NodeType::BLOCK,
         {},
         "",
         0};
-    for (size_t i = 0; i < tokens.size(); i++)
+    for (size_t i = 0; i < _tokens.size(); i++)
     {
-        handleLine(tree, tokens, i);
+        _handleLine();
     }
 
-    return tree;
+    return _tree;
 }
