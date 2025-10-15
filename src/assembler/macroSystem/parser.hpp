@@ -29,6 +29,7 @@ namespace Parser
         IDENTIFIER,
         STRING,
         INT,
+        UNDEFINED,
     };
 
     struct AST

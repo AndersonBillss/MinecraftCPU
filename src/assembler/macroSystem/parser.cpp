@@ -199,7 +199,7 @@ void handleParentheses(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tok
     }
 }
 
-size_t precedence(Parser::NodeType opType)
+size_t operatorPrecedence(Parser::NodeType opType)
 {
     const std::vector<std::unordered_set<Parser::NodeType>> orderOfOperations = {
         {Parser::NodeType::MULTIPLY, Parser::NodeType::DIVIDE},
@@ -213,12 +213,12 @@ size_t precedence(Parser::NodeType opType)
         std::unordered_set<Parser::NodeType> set = orderOfOperations[i];
         auto it = set.find(opType);
         if (it != set.end())
-            return i; // Operation is found
+            return i + 1; // Operation is found
     }
     return 0;
 }
 
-Parser::NodeType nodeOperator(AsmMacroLexer::Token token)
+Parser::NodeType operatorType(AsmMacroLexer::Token token)
 {
     const std::unordered_map<std::string, Parser::NodeType> stringToOperator = {
         {"*", Parser::NodeType::MULTIPLY},
@@ -242,22 +242,51 @@ Parser::NodeType nodeOperator(AsmMacroLexer::Token token)
     return it->second;
 }
 
+void handleFirstOperand(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
+{
+    AsmMacroLexer::Token token = tokens[currIndex];
+    if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
+    {
+        handleParentheses(tree, tokens, currIndex);
+    }
+    else
+    {
+        // TODO: Get the correct type and value for nodeType
+        Parser::NodeType nodeType = Parser::NodeType::STRING;
+        if (token.type == AsmMacroLexer::TokenType::SYMBOL)
+        {
+            nodeType = Parser::NodeType::IDENTIFIER;
+        }
+        auto firstOperand = std::make_unique<Parser::AST>(Parser::AST{
+            tokens[currIndex].begin,
+            tokens[currIndex].end,
+            nodeType,
+            {},
+            "", // TODO: Get the value of this operand
+            0});
+
+        tree.children.push_back(firstOperand);
+    }
+}
+
 void handleExpression(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
 {
+    std::unique_ptr<Parser::AST> rootNode = std::make_unique<Parser::AST>(tree);
 
-    auto functionNode = std::make_unique<Parser::AST>(Parser::AST{
-        tokens[currIndex].begin,
-        {0, 0},
-        Parser::NodeType::FUNCTION,
-        {},
-        "",
-        0});
+    size_t lastOperatorPrecedence = 0;
 
+    AsmMacroLexer::Token lastToken;
     while (currIndex < tokens.size())
     {
-        AsmMacroLexer::Token token = tokens[currIndex];
-
-        currIndex++;
+        std::unique_ptr<Parser::AST> opNode = std::make_unique<Parser::AST>(Parser::AST{
+            tokens[currIndex].begin,
+            {0, 0},
+            Parser::NodeType::UNDEFINED,
+            {},
+            tokens[0].data,
+            0});
+        
+        handleFirstOperand(*opNode, tokens, currIndex);
     }
 }
 void handleLine(Parser::AST &tree, std::vector<AsmMacroLexer::Token> &tokens, size_t &currIndex)
