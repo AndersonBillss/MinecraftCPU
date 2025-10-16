@@ -1,6 +1,7 @@
 #include <cmath>
 #include <unordered_set>
 #include <unordered_map>
+#include <iostream>
 
 #include "parseUtils.hpp"
 #include "stringUtils.hpp"
@@ -51,7 +52,7 @@ int parseHexadecimal(std::string text, unsigned char bitwidth, bool isSigned)
         {'F', 0xf},
     };
 
-    if (text.size() <= 3)
+    if (text.size() <= 2)
     {
         throw ParseUtils::ParseError(
             "Hexadecimal string must have some value");
@@ -61,8 +62,8 @@ int parseHexadecimal(std::string text, unsigned char bitwidth, bool isSigned)
     // Start at index 2: ignore starting 0x
     for (size_t i = 2; i < text.size(); i++)
     {
-        int inverted = text.size() - i;
-        int placeValue = pow(4, inverted);
+        int inverted = text.size() - i - 1;
+        int placeValue = pow(16, inverted);
         auto it = hexToInt.find(text[i]);
         if (it == hexToInt.end())
         {
