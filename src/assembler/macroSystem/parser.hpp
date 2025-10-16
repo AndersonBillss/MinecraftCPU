@@ -58,8 +58,8 @@ private:
     void _handleAssignment();
     void _handleParentheses();
     void _handleFirstOperand();
-    Parser::NodeType _handleOpType();
-    void Parser::_handleExpression();
+    NodeType _handleOpType();
+    void _handleExpression();
     void _handleLine();
 
 public:

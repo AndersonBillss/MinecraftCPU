@@ -265,7 +265,7 @@ void Parser::_handleFirstOperand()
             "", // TODO: Get the value of this operand
             0});
 
-        _tree.children.push_back(firstOperand);
+        _tree.children.push_back(std::move(firstOperand));
     }
 }
 
@@ -282,8 +282,6 @@ Parser::NodeType Parser::_handleOpType()
 
 void Parser::_handleExpression()
 {
-    std::unique_ptr<Parser::AST> rootNode = std::make_unique<Parser::AST>(_tree);
-
     size_t lastOperatorPrecedence = 0;
 
     AsmMacroLexer::Token lastToken;
