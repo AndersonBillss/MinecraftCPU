@@ -75,6 +75,11 @@ int parseHexadecimal(std::string text, unsigned char bitwidth, bool isSigned)
         int hexValue = it->second;
         result += hexValue * placeValue;
     }
+    int largestBit = pow(2, bitwidth - 1);
+    if (isSigned && result >= largestBit)
+    {
+        result -= largestBit * 2;
+    }
     return result;
 }
 int parseBinary(std::string text, unsigned char bitwidth, bool isSigned)
