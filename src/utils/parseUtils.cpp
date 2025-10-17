@@ -84,7 +84,40 @@ int parseHexadecimal(std::string text, unsigned char bitwidth, bool isSigned)
 }
 int parseBinary(std::string text, unsigned char bitwidth, bool isSigned)
 {
-    return 0;
+    std::unordered_map<char, int> binToInt = {
+        {'0', 0b0},
+        {'1', 0b1},
+    };
+
+    if (text.size() <= 2)
+    {
+        throw ParseUtils::ParseError(
+            "Hexadecimal string must have some value");
+    }
+
+    int result = 0;
+    // Start at index 2: ignore starting 0x
+    for (size_t i = 2; i < text.size(); i++)
+    {
+        int inverted = text.size() - i - 1;
+        int placeValue = pow(2, inverted);
+        auto it = binToInt.find(text[i]);
+        if (it == binToInt.end())
+        {
+            throw ParseUtils::ParseError(
+                "Character: " +
+                std::to_string(text[i]) +
+                "is not a valid binary character");
+        }
+        int hexValue = it->second;
+        result += hexValue * placeValue;
+    }
+    int largestBit = pow(2, bitwidth - 1);
+    if (isSigned && result >= largestBit)
+    {
+        result -= largestBit * 2;
+    }
+    return result;
 }
 int parseDecimal(std::string text, unsigned char bitwidth)
 {
