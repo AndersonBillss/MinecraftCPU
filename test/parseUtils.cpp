@@ -3,7 +3,7 @@
 #include "catch_amalgamated.hpp"
 #include "../src/utils/parseUtils.hpp"
 
-TEST_CASE("Parse unsigned hexadecimal integers")
+TEST_CASE("Parse hexadecimal integers")
 {
     std::string hexString = "0x3";
     int expected = 0x3;
@@ -39,4 +39,23 @@ TEST_CASE("Parse signed hexadecimal integers")
     hexString = "0x80";
     expected = (int)(char)0x80;
     REQUIRE(ParseUtils::parseInt(hexString, 8, true) == expected);
+
+    hexString = "0xa9";
+    expected = (int)(char)0xa9;
+    REQUIRE(ParseUtils::parseInt(hexString, 8, true) == expected);
+}
+
+TEST_CASE("Parse unsigned hexadecimal integers")
+{
+    std::string hexString = "0xff";
+    int expected = (int)(unsigned char)0xff;
+    REQUIRE(ParseUtils::parseInt(hexString, 8, false) == expected);
+
+    hexString = "0x80";
+    expected = (int)(unsigned char)0x80;
+    REQUIRE(ParseUtils::parseInt(hexString, 8, false) == expected);
+
+    hexString = "0xa9";
+    expected = (int)(unsigned char)0xa9;
+    REQUIRE(ParseUtils::parseInt(hexString, 8, false) == expected);
 }
