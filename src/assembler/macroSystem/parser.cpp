@@ -28,7 +28,7 @@ bool Parser::_isAssignment()
     AsmMacroLexer::Token token = _tokens[_currIndex + 2];
     return token.type == AsmMacroLexer::TokenType::OPERATOR && token.data == "=";
 }
-void Parser::_handleFunction()
+void Parser::_handleFunction(Parser::AST &tree)
 {
     //   Function AST structure
     //
@@ -61,7 +61,7 @@ void Parser::_handleFunction()
         "",
         0});
 
-    _tree.children.push_back(std::move(functionNode));
+    tree.children.push_back(std::move(functionNode));
     functionNode->children.push_back(std::move(functionNode));
     functionNode->children.push_back(std::move(parameterNode));
     functionNode->children.push_back(std::move(blockNode));
@@ -98,13 +98,13 @@ void Parser::_handleFunction()
                                        _tokens[_currIndex].end,
                                        "Function has no output");
             }
-            _handleLine();
+            _handleLine(tree);
         }
 
         _currIndex++;
     }
 }
-void Parser::_handleAssignment()
+void Parser::_handleAssignment(Parser::AST &tree)
 {
     // Assignment AST structure
     //
@@ -162,14 +162,14 @@ void Parser::_handleAssignment()
 
     if (_isFunction())
     {
-        _handleFunction();
+        _handleFunction(tree);
     }
     else
     {
-        _handleExpression();
+        _handleExpression(tree);
     }
 }
-void Parser::_handleParentheses()
+void Parser::_handleParentheses(Parser::AST &tree)
 {
     _currIndex++;
     if (_currIndex >= _tokens.size())
@@ -187,7 +187,7 @@ void Parser::_handleParentheses()
         {},
         "",
         0});
-    _handleLine();
+    _handleLine(tree);
     blockNode->end = _tokens[_currIndex].end;
     _currIndex++;
     if (_currIndex >= _tokens.size())
@@ -259,12 +259,12 @@ int parseNumeric(AsmMacroLexer::Token token)
     }
 }
 
-void Parser::_handleFirstOperand()
+void Parser::_handleFirstOperand(Parser::AST &tree)
 {
     AsmMacroLexer::Token token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
     {
-        _handleParentheses();
+        _handleParentheses(tree);
         return;
     }
 
@@ -296,7 +296,7 @@ void Parser::_handleFirstOperand()
         stringValue,
         intValue});
 
-    _tree.children.push_back(std::move(firstOperand));
+    tree.children.push_back(std::move(firstOperand));
 }
 
 Parser::NodeType Parser::_handleOpType()
@@ -310,7 +310,7 @@ Parser::NodeType Parser::_handleOpType()
     return Parser::NodeType::CONCAT;
 }
 
-void Parser::_handleExpression()
+void Parser::_handleExpression(Parser::AST &tree)
 {
     size_t lastOperatorPrecedence = 0;
 
@@ -324,11 +324,11 @@ void Parser::_handleExpression()
             {},
             _tokens[0].data,
             0});
-        _handleFirstOperand();
+        _handleFirstOperand(tree);
         opNode->nodeType = _handleOpType();
     }
 }
-void Parser::_handleLine()
+void Parser::_handleLine(Parser::AST &tree)
 {
     if (_isFunction())
     {
@@ -340,32 +340,34 @@ void Parser::_handleLine()
                 _tokens[_currIndex].end,
                 "A function must be assigned to a variable");
         }
-        _handleFunction();
+        _handleFunction(tree);
     }
     else if (_isAssignment())
     {
-        _handleAssignment();
+        _handleAssignment(tree);
     }
     else
     {
-        _handleExpression();
+        _handleExpression(tree);
     }
 }
 
 Parser::AST Parser::parseTokens(std::vector<AsmMacroLexer::Token> &_tokens)
 {
     size_t blockBaseIndex = 0;
-    Parser::AST _tree = {
+    _root = {
         {0, 0},
         {0, 0},
-        Parser::NodeType::BLOCK,
+        Parser::NodeType::PROGRAM,
         {},
         "",
         0};
-    for (size_t i = 0; i < _tokens.size(); i++)
+
+    _currIndex = 0;
+    while (_currIndex < _tokens.size())
     {
-        _handleLine();
+        _handleLine(_root);
     }
 
-    return _tree;
+    return _root;
 }

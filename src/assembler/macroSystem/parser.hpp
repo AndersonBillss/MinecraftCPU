@@ -48,26 +48,26 @@ public:
     AST parseTokens(std::vector<AsmMacroLexer::Token> &tokens);
 
 private:
-    Parser::AST _tree;
+    Parser::AST _root;
     size_t _currIndex;
     std::vector<AsmMacroLexer::Token> _tokens;
 
     bool _isFunction();
     bool _isAssignment();
-    void _handleFunction();
-    void _handleAssignment();
-    void _handleParentheses();
-    void _handleFirstOperand();
+    void _handleFunction(Parser::AST &tree);
+    void _handleAssignment(Parser::AST &tree);
+    void _handleParentheses(Parser::AST &tree);
+    void _handleFirstOperand(Parser::AST &tree);
     NodeType _handleOpType();
-    void _handleExpression();
-    void _handleLine();
+    void _handleExpression(Parser::AST &tree);
+    void _handleLine(Parser::AST &tree);
 
 public:
     Parser()
     {
         _currIndex = 0;
         _tokens = {};
-        _tree = Parser::AST{
+        _root = Parser::AST{
             _tokens[_currIndex + 2].begin,
             {0, 0},
             Parser::NodeType::PROGRAM,
