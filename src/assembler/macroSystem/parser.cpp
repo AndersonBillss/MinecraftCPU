@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include "parser.hpp"
 #include "compilationError.hpp"
+#include "../../utils/parseUtils.hpp"
 
 bool Parser::_isFunction()
 {
@@ -242,31 +243,60 @@ Parser::NodeType operatorType(AsmMacroLexer::Token token)
     return it->second;
 }
 
+int parseNumeric(AsmMacroLexer::Token token)
+{
+    try
+    {
+        return ParseUtils::parseInt(token.data, 8, false);
+    }
+    catch (ParseUtils::ParseError &e)
+    {
+        throw CompilationError(
+            ErrorStage::Parsing,
+            token.begin,
+            token.end,
+            std::string(e.what()));
+    }
+}
+
 void Parser::_handleFirstOperand()
 {
     AsmMacroLexer::Token token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
     {
         _handleParentheses();
+        return;
+    }
+
+    Parser::NodeType nodeType;
+    int intValue = 0;
+    std::string stringValue = "";
+    if (token.type == AsmMacroLexer::TokenType::SYMBOL)
+    {
+        nodeType = Parser::NodeType::IDENTIFIER;
     }
     else
     {
-        // TODO: Get the correct type and value for nodeType
-        Parser::NodeType nodeType = Parser::NodeType::STRING;
-        if (token.type == AsmMacroLexer::TokenType::SYMBOL)
+        nodeType = ParseUtils::isNumeric(token.data) ? Parser::NodeType::INT : Parser::NodeType::STRING;
+        if (nodeType == Parser::NodeType::INT)
         {
-            nodeType = Parser::NodeType::IDENTIFIER;
+            intValue = parseNumeric(token);
         }
-        auto firstOperand = std::make_unique<Parser::AST>(Parser::AST{
-            _tokens[_currIndex].begin,
-            _tokens[_currIndex].end,
-            nodeType,
-            {},
-            "", // TODO: Get the value of this operand
-            0});
-
-        _tree.children.push_back(std::move(firstOperand));
+        else
+        {
+            stringValue = token.data;
+        }
     }
+
+    auto firstOperand = std::make_unique<Parser::AST>(Parser::AST{
+        token.begin,
+        token.end,
+        nodeType,
+        {},
+        stringValue,
+        intValue});
+
+    _tree.children.push_back(std::move(firstOperand));
 }
 
 Parser::NodeType Parser::_handleOpType()
