@@ -92,11 +92,11 @@ int parseBinary(std::string text, unsigned char bitwidth, bool isSigned)
     if (text.size() <= 2)
     {
         throw ParseUtils::ParseError(
-            "Hexadecimal string must have some value");
+            "Binary string must have some value");
     }
 
     int result = 0;
-    // Start at index 2: ignore starting 0x
+    // Start at index 2: ignore starting 0b
     for (size_t i = 2; i < text.size(); i++)
     {
         int inverted = text.size() - i - 1;
@@ -119,9 +119,60 @@ int parseBinary(std::string text, unsigned char bitwidth, bool isSigned)
     }
     return result;
 }
-int parseDecimal(std::string text, unsigned char bitwidth)
+int parseDecimal(std::string text, unsigned char bitwidth, bool isSigned)
 {
-    return 0;
+    bool isNegative = false;
+    size_t startingIndex = 0;
+    if (text[0] == '-')
+    {
+        isNegative = true;
+        startingIndex = 1;
+    }
+    std::unordered_map<char, int> hexToInt = {
+        {'0', 0},
+        {'1', 1},
+        {'2', 2},
+        {'3', 3},
+        {'4', 4},
+        {'5', 5},
+        {'6', 6},
+        {'7', 7},
+        {'8', 8},
+        {'9', 9},
+    };
+
+    if (text.size() - startingIndex < 0)
+    {
+        throw ParseUtils::ParseError(
+            "Integer string must have some value");
+    }
+
+    int result = 0;
+    for (size_t i = startingIndex; i < text.size(); i++)
+    {
+        int inverted = text.size() - i - 1;
+        int placeValue = pow(10, inverted);
+        auto it = hexToInt.find(text[i]);
+        if (it == hexToInt.end())
+        {
+            throw ParseUtils::ParseError(
+                std::string("Character '") +
+                text[i] +
+                "' is not a valid hexadecimal character");
+        }
+        int hexValue = it->second;
+        result += hexValue * placeValue;
+    }
+    if (isNegative)
+    {
+        result = 0 - result;
+    }
+    int largestBit = pow(2, bitwidth - 1);
+    if (isSigned && result >= largestBit)
+    {
+        result -= largestBit * 2;
+    }
+    return result;
 }
 
 int ParseUtils::parseInt(std::string text, unsigned char bitWidth, bool isSigned)
@@ -141,6 +192,6 @@ int ParseUtils::parseInt(std::string text, unsigned char bitWidth, bool isSigned
     }
     else
     {
-        return parseDecimal(text, bitWidth);
+        return parseDecimal(text, bitWidth, isSigned);
     }
 }
