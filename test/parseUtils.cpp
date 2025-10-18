@@ -89,3 +89,41 @@ TEST_CASE("Parse unsigned binary integers")
     expected = (int)(unsigned char)0b10110101;
     REQUIRE(ParseUtils::parseInt(binString, 8, false) == expected);
 }
+
+TEST_CASE("Parse signed decimal integers")
+{
+    std::string decimalString = "-1";
+    int expected = (int)(char)-1;
+    REQUIRE(ParseUtils::parseInt(decimalString, 8, true) == expected);
+
+    decimalString = "255";
+    expected = (int)(char)255;
+    REQUIRE(ParseUtils::parseInt(decimalString, 8, true) == expected);
+
+    decimalString = "128";
+    expected = (int)(char)128;
+    REQUIRE(ParseUtils::parseInt(decimalString, 8, true) == expected);
+
+    decimalString = "199";
+    expected = (int)(char)199;
+    REQUIRE(ParseUtils::parseInt(decimalString, 8, true) == expected);
+}
+
+TEST_CASE("Parse unsigned decimal integers")
+{
+    std::string decimalString = "-1";
+    int expected = (int)(unsigned char)-1;
+    REQUIRE(ParseUtils::parseInt(decimalString, 8, false) == expected);
+
+    decimalString = "255";
+    expected = (int)(unsigned char)255;
+    REQUIRE(ParseUtils::parseInt(decimalString, 8, false) == expected);
+
+    decimalString = "128";
+    expected = (int)(unsigned char)128;
+    REQUIRE(ParseUtils::parseInt(decimalString, 8, false) == expected);
+
+    decimalString = "199";
+    expected = (int)(unsigned char)199;
+    REQUIRE(ParseUtils::parseInt(decimalString, 8, false) == expected);
+}

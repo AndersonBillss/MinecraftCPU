@@ -158,7 +158,7 @@ int parseDecimal(std::string text, unsigned char bitwidth, bool isSigned)
             throw ParseUtils::ParseError(
                 std::string("Character '") +
                 text[i] +
-                "' is not a valid hexadecimal character");
+                "' is not a valid decimal character");
         }
         int hexValue = it->second;
         result += hexValue * placeValue;
@@ -171,6 +171,10 @@ int parseDecimal(std::string text, unsigned char bitwidth, bool isSigned)
     if (isSigned && result >= largestBit)
     {
         result -= largestBit * 2;
+    }
+    while (!isSigned && result < 0)
+    {
+        result += largestBit * 2;
     }
     return result;
 }
