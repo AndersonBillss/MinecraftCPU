@@ -68,9 +68,9 @@ int parseHexadecimal(std::string text, unsigned char bitwidth, bool isSigned)
         if (it == hexToInt.end())
         {
             throw ParseUtils::ParseError(
-                "Character: " +
-                std::to_string(text[i]) +
-                "is not a valid hexadecimal character");
+                std::string("Character '") +
+                text[i] +
+                "' is not a valid hexadecimal character");
         }
         int hexValue = it->second;
         result += hexValue * placeValue;
@@ -105,9 +105,9 @@ int parseBinary(std::string text, unsigned char bitwidth, bool isSigned)
         if (it == binToInt.end())
         {
             throw ParseUtils::ParseError(
-                "Character: " +
-                std::to_string(text[i]) +
-                "is not a valid binary character");
+                std::string("Character '") +
+                text[i] +
+                "' is not a valid binary character");
         }
         int hexValue = it->second;
         result += hexValue * placeValue;
@@ -130,7 +130,7 @@ int ParseUtils::parseInt(std::string text, unsigned char bitWidth, bool isSigned
     bool isHex = stringUtils::subSectionEqual(text, 1, "x") || stringUtils::subSectionEqual(text, 1, "X");
     isHex = isBinOrHex && isHex;
     bool isBin = stringUtils::subSectionEqual(text, 1, "b") || stringUtils::subSectionEqual(text, 1, "B");
-    isBin = isBinOrHex && isHex;
+    isBin = isBinOrHex && isBin;
     if (isHex)
     {
         return parseHexadecimal(text, bitWidth, isSigned);

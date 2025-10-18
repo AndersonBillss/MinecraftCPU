@@ -59,3 +59,33 @@ TEST_CASE("Parse unsigned hexadecimal integers")
     expected = (int)(unsigned char)0xa9;
     REQUIRE(ParseUtils::parseInt(hexString, 8, false) == expected);
 }
+
+TEST_CASE("Parse signed binary integers")
+{
+    std::string binString = "0b11111111";
+    int expected = (int)(char)0b11111111;
+    REQUIRE(ParseUtils::parseInt(binString, 8, true) == expected);
+
+    binString = "0b10000000";
+    expected = (int)(char)0b10000000;
+    REQUIRE(ParseUtils::parseInt(binString, 8, true) == expected);
+
+    binString = "0b10110101";
+    expected = (int)(char)0b10110101;
+    REQUIRE(ParseUtils::parseInt(binString, 8, true) == expected);
+}
+
+TEST_CASE("Parse unsigned binary integers")
+{
+    std::string binString = "0b11111111";
+    int expected = (int)(unsigned char)0b11111111;
+    REQUIRE(ParseUtils::parseInt(binString, 8, false) == expected);
+
+    binString = "0b10000000";
+    expected = (int)(unsigned char)0b10000000;
+    REQUIRE(ParseUtils::parseInt(binString, 8, false) == expected);
+
+    binString = "0b10110101";
+    expected = (int)(unsigned char)0b10110101;
+    REQUIRE(ParseUtils::parseInt(binString, 8, false) == expected);
+}
