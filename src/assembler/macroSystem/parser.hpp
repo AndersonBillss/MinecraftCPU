@@ -13,6 +13,7 @@ public:
     {
         PROGRAM,
         BLOCK,
+        LINE,
 
         ADD,
         SUB,
@@ -54,13 +55,13 @@ private:
 
     bool _isFunction();
     bool _isAssignment();
-    void _handleFunction(Parser::AST &tree);
-    void _handleAssignment(Parser::AST &tree);
+    NodeType _handleOpType();
+    std::unique_ptr<Parser::AST> _handleFunction(Parser::AST &tree);
+    std::unique_ptr<Parser::AST> _handleAssignment(Parser::AST &tree);
     std::unique_ptr<Parser::AST> _handleParentheses(Parser::AST &tree);
     std::unique_ptr<Parser::AST> _handleOperand(Parser::AST &tree);
-    NodeType _handleOpType();
     std::unique_ptr<Parser::AST> _handleExpression(Parser::AST &tree, int previousNodePrecedence = -1);
-    void _handleLine(Parser::AST &tree);
+    std::unique_ptr<Parser::AST> _handleLine(Parser::AST &tree);
 
 public:
     Parser()

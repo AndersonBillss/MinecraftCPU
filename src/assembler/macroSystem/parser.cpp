@@ -28,7 +28,7 @@ bool Parser::_isAssignment()
     AsmMacroLexer::Token token = _tokens[_currIndex + 2];
     return token.type == AsmMacroLexer::TokenType::OPERATOR && token.data == "=";
 }
-void Parser::_handleFunction(Parser::AST &tree)
+std::unique_ptr<Parser::AST> Parser::_handleFunction(Parser::AST &tree)
 {
     //   Function AST structure
     //
@@ -61,7 +61,6 @@ void Parser::_handleFunction(Parser::AST &tree)
         "",
         0});
 
-    tree.children.push_back(std::move(functionNode));
     functionNode->children.push_back(std::move(functionNode));
     functionNode->children.push_back(std::move(parameterNode));
     functionNode->children.push_back(std::move(blockNode));
@@ -103,8 +102,9 @@ void Parser::_handleFunction(Parser::AST &tree)
 
         _currIndex++;
     }
+    return functionNode;
 }
-void Parser::_handleAssignment(Parser::AST &tree)
+std::unique_ptr<Parser::AST> Parser::_handleAssignment(Parser::AST &tree)
 {
     // Assignment AST structure
     //
@@ -162,12 +162,13 @@ void Parser::_handleAssignment(Parser::AST &tree)
 
     if (_isFunction())
     {
-        _handleFunction(tree);
+        valueNode->children.push_back(_handleFunction(tree));
     }
     else
     {
-        _handleExpression(tree);
+        valueNode->children.push_back(_handleExpression(tree));
     }
+    return assignmentNode;
 }
 std::unique_ptr<Parser::AST> Parser::_handleParentheses(Parser::AST &tree)
 {
@@ -339,8 +340,17 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(Parser::AST &tree, int pr
     std::unique_ptr<Parser::AST> parent = _handleExpression(*opNode, nodePrecedence);
     parent->children.push_back(opNode);
 }
-void Parser::_handleLine(Parser::AST &tree)
+std::unique_ptr<Parser::AST> Parser::_handleLine(Parser::AST &tree)
 {
+    std::unique_ptr<Parser::AST> lineNode = std::make_unique<Parser::AST>(Parser::AST{
+        _tokens[_currIndex].begin,
+        {0, 0},
+        Parser::NodeType::LINE,
+        {},
+        _tokens[0].data,
+        0});
+
+    std::unique_ptr<Parser::AST> node;
     if (_isFunction())
     {
         if (!_isAssignment())
@@ -351,16 +361,20 @@ void Parser::_handleLine(Parser::AST &tree)
                 _tokens[_currIndex].end,
                 "A function must be assigned to a variable");
         }
-        _handleFunction(tree);
+        node = _handleFunction(tree);
+        lineNode->end = node->end;
     }
     else if (_isAssignment())
     {
-        _handleAssignment(tree);
+        node = _handleAssignment(tree);
     }
     else
     {
-        _handleExpression(tree);
+        node = _handleExpression(tree);
     }
+    lineNode->end = node->end;
+    lineNode->children.push_back(node);
+    return lineNode;
 }
 
 Parser::AST Parser::parseTokens(std::vector<AsmMacroLexer::Token> &_tokens)
