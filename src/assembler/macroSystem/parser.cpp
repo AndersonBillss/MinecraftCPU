@@ -169,7 +169,7 @@ void Parser::_handleAssignment(Parser::AST &tree)
         _handleExpression(tree);
     }
 }
-void Parser::_handleParentheses(Parser::AST &tree)
+std::unique_ptr<Parser::AST> Parser::_handleParentheses(Parser::AST &tree)
 {
     _currIndex++;
     if (_currIndex >= _tokens.size())
@@ -198,6 +198,7 @@ void Parser::_handleParentheses(Parser::AST &tree)
             _tokens[_currIndex].end,
             "Unmatched parentheses");
     }
+    return blockNode;
 }
 
 size_t operatorPrecedence(Parser::NodeType opType)
@@ -208,13 +209,14 @@ size_t operatorPrecedence(Parser::NodeType opType)
         {Parser::NodeType::AND},
         {Parser::NodeType::XOR},
         {Parser::NodeType::OR},
+        {Parser::NodeType::CONCAT},
     };
     for (size_t i = 0; i < orderOfOperations.size(); i++)
     {
         std::unordered_set<Parser::NodeType> set = orderOfOperations[i];
         auto it = set.find(opType);
         if (it != set.end())
-            return i + 1; // Operation is found
+            return orderOfOperations.size() - i; // Operation is found
     }
     return 0;
 }
@@ -259,13 +261,14 @@ int parseNumeric(AsmMacroLexer::Token token)
     }
 }
 
-void Parser::_handleFirstOperand(Parser::AST &tree)
+/// @brief Pushes the next operand to the tree
+/// @param tree
+std::unique_ptr<Parser::AST> Parser::_handleOperand(Parser::AST &tree)
 {
     AsmMacroLexer::Token token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
     {
-        _handleParentheses(tree);
-        return;
+        return _handleParentheses(tree);
     }
 
     Parser::NodeType nodeType;
@@ -288,7 +291,7 @@ void Parser::_handleFirstOperand(Parser::AST &tree)
         }
     }
 
-    auto firstOperand = std::make_unique<Parser::AST>(Parser::AST{
+    auto operandNode = std::make_unique<Parser::AST>(Parser::AST{
         token.begin,
         token.end,
         nodeType,
@@ -296,7 +299,7 @@ void Parser::_handleFirstOperand(Parser::AST &tree)
         stringValue,
         intValue});
 
-    tree.children.push_back(std::move(firstOperand));
+    return operandNode;
 }
 
 Parser::NodeType Parser::_handleOpType()
@@ -304,29 +307,37 @@ Parser::NodeType Parser::_handleOpType()
     auto token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPERATOR)
     {
-        _currIndex++;
         return operatorType(token);
     }
     return Parser::NodeType::CONCAT;
 }
 
-void Parser::_handleExpression(Parser::AST &tree)
+std::unique_ptr<Parser::AST> Parser::_handleExpression(Parser::AST &tree, int previousNodePrecedence)
 {
     size_t lastOperatorPrecedence = 0;
 
     AsmMacroLexer::Token lastToken;
-    while (_currIndex < _tokens.size())
+    std::unique_ptr<Parser::AST> opNode = std::make_unique<Parser::AST>(Parser::AST{
+        _tokens[_currIndex].begin,
+        {0, 0},
+        Parser::NodeType::UNDEFINED,
+        {},
+        _tokens[0].data,
+        0});
+
+    _handleOperand(*opNode);
+    if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
     {
-        std::unique_ptr<Parser::AST> opNode = std::make_unique<Parser::AST>(Parser::AST{
-            _tokens[_currIndex].begin,
-            {0, 0},
-            Parser::NodeType::UNDEFINED,
-            {},
-            _tokens[0].data,
-            0});
-        _handleFirstOperand(tree);
-        opNode->nodeType = _handleOpType();
+        return _handleOperand(tree);
     }
+    opNode->nodeType = _handleOpType();
+    int nodePrecedence = operatorPrecedence(opNode->nodeType);
+    if (nodePrecedence > previousNodePrecedence)
+    {
+        return _handleExpression(*opNode, nodePrecedence);
+    }
+    std::unique_ptr<Parser::AST> parent = _handleExpression(*opNode, nodePrecedence);
+    parent->children.push_back(opNode);
 }
 void Parser::_handleLine(Parser::AST &tree)
 {

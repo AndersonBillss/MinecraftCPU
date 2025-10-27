@@ -56,10 +56,10 @@ private:
     bool _isAssignment();
     void _handleFunction(Parser::AST &tree);
     void _handleAssignment(Parser::AST &tree);
-    void _handleParentheses(Parser::AST &tree);
-    void _handleFirstOperand(Parser::AST &tree);
+    std::unique_ptr<Parser::AST> _handleParentheses(Parser::AST &tree);
+    std::unique_ptr<Parser::AST> _handleOperand(Parser::AST &tree);
     NodeType _handleOpType();
-    void _handleExpression(Parser::AST &tree);
+    std::unique_ptr<Parser::AST> _handleExpression(Parser::AST &tree, int previousNodePrecedence = -1);
     void _handleLine(Parser::AST &tree);
 
 public:
