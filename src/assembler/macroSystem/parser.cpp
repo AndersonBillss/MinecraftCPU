@@ -44,7 +44,7 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction()
         {},
         "",
         0});
-    _functions.emplace(functionNode->identifier, functionNode);
+    // _functions.emplace(functionNode->identifier, functionNode); // TODO: Implement function calls
 
     auto parameterNode = std::make_unique<Parser::AST>(Parser::AST{
         _tokens[_currIndex + 2].begin,
@@ -62,7 +62,6 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction()
         "",
         0});
 
-    functionNode->children.push_back(std::move(functionNode));
     functionNode->children.push_back(std::move(parameterNode));
     functionNode->children.push_back(std::move(blockNode));
 
@@ -316,8 +315,6 @@ Parser::NodeType Parser::_handleOpType()
 
 std::unique_ptr<Parser::AST> Parser::_handleExpression(int previousNodePrecedence)
 {
-    size_t lastOperatorPrecedence = 0;
-
     AsmMacroLexer::Token lastToken;
     std::unique_ptr<Parser::AST> opNode = std::make_unique<Parser::AST>(Parser::AST{
         _tokens[_currIndex].begin,
@@ -326,7 +323,14 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(int previousNodePrecedenc
         {},
         "",
         0});
-    opNode->children.push_back(_handleOperand());
+    
+    std::unique_ptr<Parser::AST> operand =_handleOperand(); 
+    AsmMacroLexer::Token currToken = this->_tokens[this->_currIndex];
+    if (currToken.type == AsmMacroLexer::TokenType::ENDLINE || currToken.type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
+    {
+        return operand;
+    }
+    opNode->children.push_back(std::move(operand));
 
     opNode->nodeType = _handleOpType();
     int nodePrecedence = operatorPrecedence(opNode->nodeType);
@@ -343,7 +347,6 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(int previousNodePrecedenc
         parentNode->children.push_back(std::move(opNode));
         return parentNode;
     }
-
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleLine()
@@ -379,28 +382,27 @@ std::unique_ptr<Parser::AST> Parser::_handleLine()
         node = _handleExpression();
     }
     lineNode->end = node->end;
-    lineNode->children.push_back(node);
+    lineNode->children.push_back(std::move(node));
     return lineNode;
 }
 
-Parser::AST Parser::parseTokens(std::vector<AsmMacroLexer::Token> &_tokens)
+std::unique_ptr<Parser::AST> Parser::parseTokens(std::vector<AsmMacroLexer::Token> &_tokens)
 {
-    size_t blockBaseIndex = 0;
-    _root = {
-        {0, 0},
-        {0, 0},
-        Parser::NodeType::PROGRAM,
-        {},
-        "",
-        0};
+    _root = std::make_unique<Parser::AST>(
+        Parser::AST{{0, 0},
+                    {0, 0},
+                    Parser::NodeType::PROGRAM,
+                    {},
+                    "",
+                    0});
 
     _currIndex = 0;
     while (_currIndex < _tokens.size())
     {
         auto node = _handleLine();
-        _root.children.push_back(node);
+        _root->children.push_back(std::move(node));
     }
-    _root.end = _root.children[_root.children.size() - 1]->end;
+    _root->end = _root->children[_root->children.size() - 1]->end;
 
-    return _root;
+    return std::move(_root);
 }
