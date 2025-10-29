@@ -52,6 +52,7 @@ private:
     Parser::AST _root;
     size_t _currIndex;
     std::vector<AsmMacroLexer::Token> _tokens;
+    std::unordered_map<std::string, std::unique_ptr<AST>> _functions;
 
     bool _isFunction();
     bool _isAssignment();

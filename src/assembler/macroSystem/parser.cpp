@@ -44,6 +44,7 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction()
         {},
         "",
         0});
+    _functions.emplace(functionNode->identifier, functionNode);
 
     auto parameterNode = std::make_unique<Parser::AST>(Parser::AST{
         _tokens[_currIndex + 2].begin,
@@ -323,23 +324,28 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(int previousNodePrecedenc
         {0, 0},
         Parser::NodeType::UNDEFINED,
         {},
-        _tokens[0].data,
+        "",
         0});
+    opNode->children.push_back(_handleOperand());
 
-    _handleOperand();
-    if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
-    {
-        return _handleOperand();
-    }
     opNode->nodeType = _handleOpType();
     int nodePrecedence = operatorPrecedence(opNode->nodeType);
+
     if (nodePrecedence > previousNodePrecedence)
     {
-        return _handleExpression(nodePrecedence);
+        std::unique_ptr<Parser::AST> subNode = _handleExpression(nodePrecedence);
+        opNode->children.push_back(std::move(subNode));
+        return opNode;
     }
-    std::unique_ptr<Parser::AST> parent = _handleExpression(nodePrecedence);
-    parent->children.push_back(opNode);
+    else
+    {
+        std::unique_ptr<Parser::AST> parentNode = _handleExpression(nodePrecedence);
+        parentNode->children.push_back(std::move(opNode));
+        return parentNode;
+    }
+
 }
+
 std::unique_ptr<Parser::AST> Parser::_handleLine()
 {
     std::unique_ptr<Parser::AST> lineNode = std::make_unique<Parser::AST>(Parser::AST{
