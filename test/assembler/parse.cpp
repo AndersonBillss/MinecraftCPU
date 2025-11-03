@@ -3,10 +3,9 @@
 #include "../../src/assembler/macroSystem/parser.hpp"
 #include <string>
 
-inline std::ostream &operator<<(std::ostream &os,
-                                const Parser::AST &tree)
+std::string &stringifyTree(const Parser::AST &tree, std::string tabs)
 {
-    std::unordered_map<Parser::NodeType, std::string> nodeToString {
+    std::unordered_map<Parser::NodeType, std::string> nodeToString{
         {Parser::NodeType::PROGRAM, "PROGRAM"},
         {Parser::NodeType::BLOCK, "BLOCK"},
         {Parser::NodeType::LINE, "LINE"},
@@ -30,11 +29,28 @@ inline std::ostream &operator<<(std::ostream &os,
         {Parser::NodeType::INT, "INT"},
         {Parser::NodeType::UNDEFINED, "UNDEFINED"},
     };
-
-    return os << "()";
+    std::string stringifiedNodeType = "?????";
+    auto it = nodeToString.find(tree.nodeType);
+    if (it != nodeToString.end())
+    {
+        stringifiedNodeType = it->second;
+    }
+    std::string stringified = stringifiedNodeType + ": " + std::to_string(tree.intValue) + " " + tree.identifier + "\n";
+    for (const auto &branch : tree.children)
+    {
+        stringified += stringifyTree(*branch, tabs + "\t") + "\n";
+    }
+    return stringified;
 }
 
-std::unique_ptr<Parser::AST> parseTokensHelper(std::string program){
+inline std::ostream &operator<<(std::ostream &os,
+                                const Parser::AST &tree)
+{
+    return os << stringifyTree(tree, "");
+}
+
+std::unique_ptr<Parser::AST> parseTokensHelper(std::string program)
+{
     AsmMacroLexer lexer;
     Parser parser;
     auto tokens = lexer.tokenize(program);
@@ -46,6 +62,7 @@ TEST_CASE("Parser no macros")
 {
     std::string program = "LDI R0 1";
     auto tree = parseTokensHelper(program);
-    
+    std::cout << *tree << std::endl;
+
     REQUIRE(true == true);
 }
