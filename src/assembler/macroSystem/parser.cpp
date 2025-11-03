@@ -323,8 +323,8 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(int previousNodePrecedenc
         {},
         "",
         0});
-    
-    std::unique_ptr<Parser::AST> operand =_handleOperand(); 
+
+    std::unique_ptr<Parser::AST> operand = _handleOperand();
     AsmMacroLexer::Token currToken = this->_tokens[this->_currIndex];
     if (currToken.type == AsmMacroLexer::TokenType::ENDLINE || currToken.type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
     {
@@ -386,10 +386,11 @@ std::unique_ptr<Parser::AST> Parser::_handleLine()
     return lineNode;
 }
 
-std::unique_ptr<Parser::AST> Parser::parseTokens(std::vector<AsmMacroLexer::Token> &_tokens)
+std::unique_ptr<Parser::AST> Parser::parseTokens(std::vector<AsmMacroLexer::Token> &tokens)
 {
+    this->_tokens = tokens;
     _root = std::make_unique<Parser::AST>(
-        Parser::AST{{0, 0},
+        Parser::AST{tokens[_currIndex].begin,
                     {0, 0},
                     Parser::NodeType::PROGRAM,
                     {},

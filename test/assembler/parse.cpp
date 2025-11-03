@@ -3,7 +3,7 @@
 #include "../../src/assembler/macroSystem/parser.hpp"
 #include <string>
 
-std::string &stringifyTree(const Parser::AST &tree, std::string tabs)
+std::string stringifyTree(const Parser::AST &tree, std::string tabs)
 {
     std::unordered_map<Parser::NodeType, std::string> nodeToString{
         {Parser::NodeType::PROGRAM, "PROGRAM"},
@@ -38,7 +38,7 @@ std::string &stringifyTree(const Parser::AST &tree, std::string tabs)
     std::string stringified = stringifiedNodeType + ": " + std::to_string(tree.intValue) + " " + tree.identifier + "\n";
     for (const auto &branch : tree.children)
     {
-        stringified += stringifyTree(*branch, tabs + "\t") + "\n";
+        stringified += stringifyTree(*branch, tabs + "\t");
     }
     return stringified;
 }
@@ -54,7 +54,9 @@ std::unique_ptr<Parser::AST> parseTokensHelper(std::string program)
     AsmMacroLexer lexer;
     Parser parser;
     auto tokens = lexer.tokenize(program);
+    std::cout << "1" << std::endl;
     auto tree = parser.parseTokens(tokens);
+    std::cout << "2" << std::endl;
     return tree;
 }
 

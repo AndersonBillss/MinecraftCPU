@@ -69,12 +69,5 @@ public:
     {
         _currIndex = 0;
         _tokens = {};
-        _root = std::make_unique<Parser::AST>(
-            Parser::AST{_tokens[_currIndex + 2].begin,
-             {0, 0},
-             Parser::NodeType::PROGRAM,
-             {},
-             "",
-             0});
     }
 };
