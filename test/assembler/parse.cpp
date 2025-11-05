@@ -35,10 +35,10 @@ std::string stringifyTree(const Parser::AST &tree, std::string tabs)
     {
         stringifiedNodeType = it->second;
     }
-    std::string stringified = stringifiedNodeType + ": " + std::to_string(tree.intValue) + " " + tree.identifier + "\n";
+    std::string stringified = tabs + stringifiedNodeType + ": " + std::to_string(tree.intValue) + " " + tree.identifier + "\n";
     for (const auto &branch : tree.children)
     {
-        stringified += stringifyTree(*branch, tabs + "\t");
+        stringified += stringifyTree(*branch, tabs + "  ");
     }
     return stringified;
 }
@@ -54,9 +54,7 @@ std::unique_ptr<Parser::AST> parseTokensHelper(std::string program)
     AsmMacroLexer lexer;
     Parser parser;
     auto tokens = lexer.tokenize(program);
-    std::cout << "1" << std::endl;
     auto tree = parser.parseTokens(tokens);
-    std::cout << "2" << std::endl;
     return tree;
 }
 
