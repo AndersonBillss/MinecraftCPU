@@ -326,35 +326,52 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::A
         "",
         0});
 
-    auto operand = _handleOperand();
-    if (_currIndex >= _tokens.size())
+    std::unique_ptr<Parser::AST> operand;
+    Parser::NodeType beforeOperator;
+    Parser::NodeType betweenOperator;
+    if (prevNode)
     {
-        opNode->children.push_back(std::move(prevNode));
-        opNode->children.push_back(std::move(operand));
-        return opNode;
+        beforeOperator = _handleOpType();
+        operand = _handleOperand();
+        if (_currIndex >= _tokens.size())
+        {
+            opNode->nodeType = beforeOperator;
+            opNode->children.push_back(std::move(prevNode));
+            opNode->children.push_back(std::move(operand));
+            return opNode;
+        }
+        AsmMacroLexer::Token currToken = this->_tokens[this->_currIndex];
+        if (
+            currToken.type == AsmMacroLexer::TokenType::ENDLINE ||
+            currToken.type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
+        {
+            opNode->nodeType = beforeOperator;
+            opNode->children.push_back(std::move(prevNode));
+            opNode->children.push_back(std::move(operand));
+            return opNode;
+        }
+        betweenOperator = _handleOpType();
     }
-    AsmMacroLexer::Token currToken = this->_tokens[this->_currIndex];
-    if (
-        currToken.type == AsmMacroLexer::TokenType::ENDLINE ||
-        currToken.type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
+    else
     {
-        opNode->children.push_back(std::move(prevNode));
-        opNode->children.push_back(std::move(operand));
-        return opNode;
-    }
-    opNode->nodeType = _handleOpType();
-    int nodePrecedence = operatorPrecedence(opNode->nodeType);
-    // std::unique_ptr<Parser::AST> secondOperand = _handleOperand();
-    // int nextNodePrecedence = operatorPrecedence(_handleOperand()->nodeType);
-    // std::unique_ptr<Parser::AST> thirdOperand = _handleOperand();
-
-    if (!prevNode)
-    {
-        prevNode = std::move(operand);
+        prevNode = _handleOperand();
+        if (_currIndex >= _tokens.size())
+        {
+            return prevNode;
+        }
+        AsmMacroLexer::Token currToken = this->_tokens[this->_currIndex];
+        if (
+            currToken.type == AsmMacroLexer::TokenType::ENDLINE ||
+            currToken.type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
+        {
+            return prevNode;
+        }
+        betweenOperator = _handleOpType();
         operand = _handleOperand();
     }
     if (/* nodePrecedence > previousNodePrecedence */ true)
     {
+        opNode->nodeType = betweenOperator;
         opNode->children.push_back(std::move(prevNode));
         opNode->children.push_back(std::move(operand));
         auto result = _handleExpression(std::move(opNode));
