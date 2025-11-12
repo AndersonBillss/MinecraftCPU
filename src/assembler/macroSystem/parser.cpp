@@ -166,7 +166,7 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
     }
     else
     {
-        valueNode->children.push_back(_handleExpression(*valueNode));
+        valueNode->children.push_back(_handleExpression(nullptr));
     }
     return assignmentNode;
 }
@@ -310,11 +310,12 @@ Parser::NodeType Parser::_handleOpType()
     if (token.type == AsmMacroLexer::TokenType::OPERATOR)
     {
         return operatorType(token);
+        _currIndex++;
     }
     return Parser::NodeType::CONCAT;
 }
 
-std::unique_ptr<Parser::AST> Parser::_handleExpression(AST &prevNode)
+std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::AST> prevNode)
 {
     AsmMacroLexer::Token lastToken;
     std::unique_ptr<Parser::AST> opNode = std::make_unique<Parser::AST>(Parser::AST{
@@ -325,35 +326,47 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(AST &prevNode)
         "",
         0});
 
-    std::unique_ptr<Parser::AST> operand = _handleOperand();
+    auto operand = _handleOperand();
     if (_currIndex >= _tokens.size())
     {
-        return operand;
+        opNode->children.push_back(std::move(prevNode));
+        opNode->children.push_back(std::move(operand));
+        return opNode;
     }
     AsmMacroLexer::Token currToken = this->_tokens[this->_currIndex];
     if (
         currToken.type == AsmMacroLexer::TokenType::ENDLINE ||
         currToken.type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
     {
-        return operand;
+        opNode->children.push_back(std::move(prevNode));
+        opNode->children.push_back(std::move(operand));
+        return opNode;
     }
-    opNode->children.push_back(std::move(operand));
-
-    Parser::NodeType test = _handleOpType();
-    opNode->nodeType = test;
+    opNode->nodeType = _handleOpType();
     int nodePrecedence = operatorPrecedence(opNode->nodeType);
+    // std::unique_ptr<Parser::AST> secondOperand = _handleOperand();
+    // int nextNodePrecedence = operatorPrecedence(_handleOperand()->nodeType);
+    // std::unique_ptr<Parser::AST> thirdOperand = _handleOperand();
 
+    if (!prevNode)
+    {
+        prevNode = std::move(operand);
+        operand = _handleOperand();
+    }
     if (/* nodePrecedence > previousNodePrecedence */ true)
     {
-        std::unique_ptr<Parser::AST> subNode = _handleExpression(*opNode);
-        opNode->children.push_back(std::move(subNode));
-        return opNode;
+        opNode->children.push_back(std::move(prevNode));
+        opNode->children.push_back(std::move(operand));
+        auto result = _handleExpression(std::move(opNode));
+        return result;
     }
     else
     {
-        std::unique_ptr<Parser::AST> parentNode = _handleExpression(*opNode);
-        parentNode->children.push_back(std::move(opNode));
-        return parentNode;
+        // opNode->children.push_back(std::move(secondOperand));
+        // std::unique_ptr<Parser::AST> subNode = _handleExpression(*opNode);
+        // prevNode.children.push_back(std::move(subNode));
+        // return _handleExpression(*opNode);
+        return opNode;
     }
 }
 
@@ -387,7 +400,7 @@ std::unique_ptr<Parser::AST> Parser::_handleLine()
     }
     else
     {
-        node = _handleExpression(*lineNode);
+        node = _handleExpression(nullptr);
     }
     lineNode->end = node->end;
     lineNode->children.push_back(std::move(node));

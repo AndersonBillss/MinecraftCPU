@@ -35,7 +35,12 @@ std::string stringifyTree(const Parser::AST &tree, std::string tabs)
     {
         stringifiedNodeType = it->second;
     }
-    std::string stringified = tabs + stringifiedNodeType + ": " + std::to_string(tree.intValue) + " " + tree.identifier + "\n";
+    std::string stringifiedNumber = "";
+    if (tree.nodeType == Parser::INT)
+    {
+        stringifiedNumber = std::to_string(tree.intValue) + " ";
+    }
+    std::string stringified = tabs + stringifiedNodeType + ": " + stringifiedNumber + tree.identifier + "\n";
     for (const auto &branch : tree.children)
     {
         stringified += stringifyTree(*branch, tabs + "  ");
