@@ -309,16 +309,15 @@ Parser::NodeType Parser::_handleOpType()
     auto token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPERATOR)
     {
-        return operatorType(token);
         _currIndex++;
+        return operatorType(token);
     }
     return Parser::NodeType::CONCAT;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::AST> prevNode)
 {
-    AsmMacroLexer::Token lastToken;
-    std::unique_ptr<Parser::AST> opNode = std::make_unique<Parser::AST>(Parser::AST{
+    std::unique_ptr<Parser::AST> treeRoot = std::make_unique<Parser::AST>(Parser::AST{
         _tokens[_currIndex].begin,
         {0, 0},
         Parser::NodeType::UNDEFINED,
@@ -326,65 +325,53 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::A
         "",
         0});
 
-    std::unique_ptr<Parser::AST> operand;
-    Parser::NodeType beforeOperator;
-    Parser::NodeType betweenOperator;
-    if (prevNode)
+    Parser::AST *currTree = treeRoot.get();
+    currTree->children.push_back(_handleOperand());
+    if (_currIndex >= _tokens.size())
     {
-        beforeOperator = _handleOpType();
-        operand = _handleOperand();
+        return treeRoot;
+    }
+
+    int lastOpPrecedence = -1;
+    while (_currIndex <= _tokens.size())
+    {
+        auto currOp = _handleOpType();
+        int currOpPrecedence = operatorPrecedence(currOp);
+        if (currOpPrecedence >= lastOpPrecedence)
+        {
+            std::unique_ptr<Parser::AST> newTree = std::make_unique<Parser::AST>(Parser::AST{
+                _tokens[_currIndex].begin,
+                {0, 0},
+                Parser::NodeType::UNDEFINED,
+                {},
+                "",
+                0});
+            currTree->nodeType = currOp;
+            auto raw = newTree.get();
+            currTree->children.push_back(std::move(newTree));
+            currTree = raw;
+        }
+        else
+        {
+            auto newTree = std::make_unique<Parser::AST>(Parser::AST{
+                _tokens[_currIndex].begin,
+                {0, 0},
+                currOp,
+                {},
+                "",
+                0});
+            newTree->children.push_back(std::move(treeRoot));
+            treeRoot = std::move(newTree);
+            currTree = treeRoot.get();
+        }
+        currTree->children.push_back(_handleOperand());
+        lastOpPrecedence = currOpPrecedence;
         if (_currIndex >= _tokens.size())
         {
-            opNode->nodeType = beforeOperator;
-            opNode->children.push_back(std::move(prevNode));
-            opNode->children.push_back(std::move(operand));
-            return opNode;
+            break;
         }
-        AsmMacroLexer::Token currToken = this->_tokens[this->_currIndex];
-        if (
-            currToken.type == AsmMacroLexer::TokenType::ENDLINE ||
-            currToken.type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
-        {
-            opNode->nodeType = beforeOperator;
-            opNode->children.push_back(std::move(prevNode));
-            opNode->children.push_back(std::move(operand));
-            return opNode;
-        }
-        betweenOperator = _handleOpType();
     }
-    else
-    {
-        prevNode = _handleOperand();
-        if (_currIndex >= _tokens.size())
-        {
-            return prevNode;
-        }
-        AsmMacroLexer::Token currToken = this->_tokens[this->_currIndex];
-        if (
-            currToken.type == AsmMacroLexer::TokenType::ENDLINE ||
-            currToken.type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
-        {
-            return prevNode;
-        }
-        betweenOperator = _handleOpType();
-        operand = _handleOperand();
-    }
-    if (/* nodePrecedence > previousNodePrecedence */ true)
-    {
-        opNode->nodeType = betweenOperator;
-        opNode->children.push_back(std::move(prevNode));
-        opNode->children.push_back(std::move(operand));
-        auto result = _handleExpression(std::move(opNode));
-        return result;
-    }
-    else
-    {
-        // opNode->children.push_back(std::move(secondOperand));
-        // std::unique_ptr<Parser::AST> subNode = _handleExpression(*opNode);
-        // prevNode.children.push_back(std::move(subNode));
-        // return _handleExpression(*opNode);
-        return opNode;
-    }
+    return treeRoot;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleLine()
