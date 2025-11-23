@@ -262,8 +262,7 @@ int parseNumeric(AsmMacroLexer::Token token)
     }
 }
 
-/// @brief Pushes the next operand to the tree
-/// @param tree
+/// @brief Returns the next operand token and advances the current index
 std::unique_ptr<Parser::AST> Parser::_handleOperand()
 {
     AsmMacroLexer::Token token = _tokens[_currIndex];
@@ -326,6 +325,8 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::A
         0});
 
     Parser::AST *currTree = treeRoot.get();
+    std::unique_ptr<Parser::AST> *currOwner = &treeRoot;
+
     currTree->children.push_back(_handleOperand());
     if (_currIndex >= _tokens.size())
     {
@@ -339,6 +340,7 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::A
         int currOpPrecedence = operatorPrecedence(currOp);
         if (currOpPrecedence >= lastOpPrecedence)
         {
+            std::cout << "IF" << std::endl;
             std::unique_ptr<Parser::AST> newTree = std::make_unique<Parser::AST>(Parser::AST{
                 _tokens[_currIndex].begin,
                 {0, 0},
@@ -348,11 +350,13 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::A
                 0});
             currTree->nodeType = currOp;
             auto raw = newTree.get();
+            currOwner = &newTree; // Both currOwner and currTree are set to newTree
             currTree->children.push_back(std::move(newTree));
             currTree = raw;
         }
         else
         {
+            std::cout << "ELSE" << std::endl;
             auto newTree = std::make_unique<Parser::AST>(Parser::AST{
                 _tokens[_currIndex].begin,
                 {0, 0},
@@ -360,15 +364,16 @@ std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::A
                 {},
                 "",
                 0});
+            currTree = newTree.get(); // Set currTree to newTree
             newTree->children.push_back(std::move(treeRoot));
             treeRoot = std::move(newTree);
-            currTree = treeRoot.get();
+            currOwner = &treeRoot;
         }
         currTree->children.push_back(_handleOperand());
         lastOpPrecedence = currOpPrecedence;
         if (_currIndex >= _tokens.size())
         {
-            break;
+            return treeRoot;
         }
     }
     return treeRoot;
