@@ -65,7 +65,7 @@ std::unique_ptr<Parser::AST> parseTokensHelper(std::string program)
 
 TEST_CASE("Parser no macros")
 {
-    std::string program = "LDI + R1 1";
+    std::string program = "LDI + R1 * 2 1 + 2 Hello";
     auto tree = parseTokensHelper(program);
     std::cout << *tree << std::endl;
 

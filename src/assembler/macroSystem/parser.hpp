@@ -60,8 +60,8 @@ private:
     std::unique_ptr<Parser::AST> _handleFunction();
     std::unique_ptr<Parser::AST> _handleAssignment();
     std::unique_ptr<Parser::AST> _handleParentheses();
-    std::unique_ptr<Parser::AST> _handleOperand();
-    std::unique_ptr<Parser::AST> _handleExpression(std::unique_ptr<AST> prevNode);
+    std::unique_ptr<Parser::AST> _computeAtom();
+    std::unique_ptr<Parser::AST> _handleExpression(int minrec);
     std::unique_ptr<Parser::AST> _handleLine();
 
 public:

@@ -166,7 +166,7 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
     }
     else
     {
-        valueNode->children.push_back(_handleExpression(nullptr));
+        valueNode->children.push_back(_handleExpression(-1));
     }
     return assignmentNode;
 }
@@ -263,7 +263,7 @@ int parseNumeric(AsmMacroLexer::Token token)
 }
 
 /// @brief Returns the next operand token and advances the current index
-std::unique_ptr<Parser::AST> Parser::_handleOperand()
+std::unique_ptr<Parser::AST> Parser::_computeAtom()
 {
     AsmMacroLexer::Token token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
@@ -314,69 +314,43 @@ Parser::NodeType Parser::_handleOpType()
     return Parser::NodeType::CONCAT;
 }
 
-std::unique_ptr<Parser::AST> Parser::_handleExpression(std::unique_ptr<Parser::AST> prevNode)
+std::unique_ptr<Parser::AST> Parser::_handleExpression(int minPrec)
 {
-    std::unique_ptr<Parser::AST> treeRoot = std::make_unique<Parser::AST>(Parser::AST{
-        _tokens[_currIndex].begin,
-        {0, 0},
-        Parser::NodeType::UNDEFINED,
-        {},
-        "",
-        0});
+    auto atomLhs = _computeAtom();
 
-    Parser::AST *currTree = treeRoot.get();
-    std::unique_ptr<Parser::AST> *currOwner = &treeRoot;
-
-    currTree->children.push_back(_handleOperand());
-    if (_currIndex >= _tokens.size())
+    while (true)
     {
-        return treeRoot;
+        if (_currIndex >= _tokens.size() ||
+            _tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
+        {
+            break;
+        }
+
+        auto op = _handleOpType();
+        int prec = operatorPrecedence(op);
+        if (prec < minPrec)
+        {
+            break;
+        }
+
+        int nextMinPrec = prec + 1;
+        auto atomRhs = _handleExpression(nextMinPrec);
+
+        std::vector<std::unique_ptr<Parser::AST>> children;
+        children.push_back(std::move(atomLhs));
+        children.push_back(std::move(atomRhs));
+        auto tmp = std::make_unique<Parser::AST>(Parser::AST{
+            _tokens[_currIndex].begin,
+            {0, 0},
+            op,
+            std::move(children),
+            "",
+            0});
+
+        atomLhs = std::move(tmp);
     }
 
-    int lastOpPrecedence = -1;
-    while (_currIndex <= _tokens.size())
-    {
-        auto currOp = _handleOpType();
-        int currOpPrecedence = operatorPrecedence(currOp);
-        if (currOpPrecedence >= lastOpPrecedence)
-        {
-            std::cout << "IF" << std::endl;
-            std::unique_ptr<Parser::AST> newTree = std::make_unique<Parser::AST>(Parser::AST{
-                _tokens[_currIndex].begin,
-                {0, 0},
-                Parser::NodeType::UNDEFINED,
-                {},
-                "",
-                0});
-            currTree->nodeType = currOp;
-            auto raw = newTree.get();
-            currOwner = &newTree; // Both currOwner and currTree are set to newTree
-            currTree->children.push_back(std::move(newTree));
-            currTree = raw;
-        }
-        else
-        {
-            std::cout << "ELSE" << std::endl;
-            auto newTree = std::make_unique<Parser::AST>(Parser::AST{
-                _tokens[_currIndex].begin,
-                {0, 0},
-                currOp,
-                {},
-                "",
-                0});
-            currTree = newTree.get(); // Set currTree to newTree
-            newTree->children.push_back(std::move(treeRoot));
-            treeRoot = std::move(newTree);
-            currOwner = &treeRoot;
-        }
-        currTree->children.push_back(_handleOperand());
-        lastOpPrecedence = currOpPrecedence;
-        if (_currIndex >= _tokens.size())
-        {
-            return treeRoot;
-        }
-    }
-    return treeRoot;
+    return atomLhs;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleLine()
@@ -409,7 +383,7 @@ std::unique_ptr<Parser::AST> Parser::_handleLine()
     }
     else
     {
-        node = _handleExpression(nullptr);
+        node = _handleExpression(-1);
     }
     lineNode->end = node->end;
     lineNode->children.push_back(std::move(node));
