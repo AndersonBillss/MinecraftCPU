@@ -166,7 +166,7 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
     }
     else
     {
-        valueNode->children.push_back(_handleExpression(-1));
+        valueNode->children.push_back(_handleExpression());
     }
     return assignmentNode;
 }
@@ -202,7 +202,7 @@ std::unique_ptr<Parser::AST> Parser::_handleParentheses()
     return blockNode;
 }
 
-size_t operatorPrecedence(Parser::NodeType opType)
+int operatorPrecedence(Parser::NodeType opType)
 {
     const std::vector<std::unordered_set<Parser::NodeType>> orderOfOperations = {
         {Parser::NodeType::MULTIPLY, Parser::NodeType::DIVIDE},
@@ -263,7 +263,7 @@ int parseNumeric(AsmMacroLexer::Token token)
 }
 
 /// @brief Returns the next operand token and advances the current index
-std::unique_ptr<Parser::AST> Parser::_computeAtom()
+std::unique_ptr<Parser::AST> Parser::_parseAtom()
 {
     AsmMacroLexer::Token token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
@@ -305,52 +305,83 @@ std::unique_ptr<Parser::AST> Parser::_computeAtom()
 
 Parser::NodeType Parser::_handleOpType()
 {
+    if (_currIndex >= _tokens.size())
+    {
+        return Parser::NodeType::UNDEFINED;
+    }
     auto token = _tokens[_currIndex];
     if (token.type == AsmMacroLexer::TokenType::OPERATOR)
     {
         _currIndex++;
         return operatorType(token);
     }
-    return Parser::NodeType::CONCAT;
+    else if (
+        token.type == AsmMacroLexer::TokenType::SYMBOL ||
+        token.type == AsmMacroLexer::TokenType::VALUE ||
+        token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE ||
+        token.type == AsmMacroLexer::TokenType::LOCATIONMARKER)
+    {
+        return Parser::NodeType::CONCAT;
+    }
+    return Parser::NodeType::UNDEFINED;
 }
 
-std::unique_ptr<Parser::AST> Parser::_handleExpression(int minPrec)
+std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Parser::AST> lhs, int minPrecedence)
 {
-    auto atomLhs = _computeAtom();
-
-    while (true)
+    if (_currIndex >= _tokens.size())
     {
-        if (_currIndex >= _tokens.size() ||
-            _tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
+        return lhs;
+    }
+    auto lookahead = _tokens[_currIndex];
+    while (lookahead.type == AsmMacroLexer::TokenType::OPERATOR &&
+           operatorPrecedence(operatorType(lookahead)) >= minPrecedence)
+    {
+        if (_currIndex >= _tokens.size())
         {
-            break;
+            return lhs;
         }
-
-        auto op = _handleOpType();
-        int prec = operatorPrecedence(op);
-        if (prec < minPrec)
+        auto op = lookahead;
+        _currIndex++;
+        if (_currIndex >= _tokens.size())
         {
-            break;
+            return lhs;
         }
-
-        int nextMinPrec = prec + 1;
-        auto atomRhs = _handleExpression(nextMinPrec);
-
-        std::vector<std::unique_ptr<Parser::AST>> children;
-        children.push_back(std::move(atomLhs));
-        children.push_back(std::move(atomRhs));
-        auto tmp = std::make_unique<Parser::AST>(Parser::AST{
+        auto rhs = _parseAtom();
+        if (_currIndex < _tokens.size())
+        {
+            lookahead = _tokens[_currIndex];
+        }
+        while (lookahead.type == AsmMacroLexer::TokenType::OPERATOR &&
+               operatorPrecedence(operatorType(lookahead)) > operatorPrecedence(operatorType(op)))
+        {
+            auto opPrecedence = operatorPrecedence(operatorType(op));
+            auto lookaheadPrecedence = operatorPrecedence(operatorType(lookahead));
+            rhs = _handleExpressionHelper(std::move(rhs), opPrecedence + (lookaheadPrecedence > opPrecedence ? 1 : 0));
+            if (_currIndex < _tokens.size())
+            {
+                lookahead = _tokens[_currIndex];
+            }
+            else
+            {
+                break;
+            }
+        }
+        std::vector<std::unique_ptr<Parser::AST>> operands = {};
+        operands.push_back(std::move(lhs));
+        operands.push_back(std::move(rhs));
+        lhs = std::make_unique<Parser::AST>(Parser::AST{
             _tokens[_currIndex].begin,
             {0, 0},
-            op,
-            std::move(children),
+            operatorType(op),
+            std::move(operands),
             "",
             0});
-
-        atomLhs = std::move(tmp);
     }
-
-    return atomLhs;
+    return lhs;
+}
+std::unique_ptr<Parser::AST> Parser::_handleExpression()
+{
+    return _handleExpressionHelper(_parseAtom(), 0);
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleLine()
@@ -383,7 +414,7 @@ std::unique_ptr<Parser::AST> Parser::_handleLine()
     }
     else
     {
-        node = _handleExpression(-1);
+        node = _handleExpression();
     }
     lineNode->end = node->end;
     lineNode->children.push_back(std::move(node));

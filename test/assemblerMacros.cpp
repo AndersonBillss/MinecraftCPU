@@ -183,6 +183,15 @@ TEST_CASE("Lexer properly tokenizes source code")
     REQUIRE(l->tokenize(sourceCode) == expected);
     delete l;
 
+    // sourceCode = "1 * 2 * 3 * 4";
+    // l = new AsmMacroLexer();
+    // auto tokens = l->tokenize(sourceCode);
+    // for (auto t : tokens)
+    // {
+    //     std::cout << t << std::endl;
+    // }
+    // delete l;
+
     sourceCode = R"(
         $test = 4
     )";
