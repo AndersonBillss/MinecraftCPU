@@ -370,7 +370,7 @@ std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Par
         operands.push_back(std::move(lhs));
         operands.push_back(std::move(rhs));
         lhs = std::make_unique<Parser::AST>(Parser::AST{
-            _tokens[_currIndex].begin,
+            lookahead.begin,
             {0, 0},
             operatorType(op),
             std::move(operands),

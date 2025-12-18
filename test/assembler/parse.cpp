@@ -40,7 +40,9 @@ std::string stringifyTree(const Parser::AST &tree, std::string tabs)
     {
         stringifiedNumber = std::to_string(tree.intValue) + " ";
     }
-    std::string stringified = tabs + stringifiedNodeType + ": " + stringifiedNumber + tree.identifier + "\n";
+    std::string stringified = tabs + stringifiedNodeType + " " +
+                              tree.begin.stringify() + " " + tree.end.stringify() + ": " +
+                              stringifiedNumber + tree.identifier + "\n";
     for (const auto &branch : tree.children)
     {
         stringified += stringifyTree(*branch, tabs + "  ");
@@ -49,30 +51,108 @@ std::string stringifyTree(const Parser::AST &tree, std::string tabs)
 }
 
 inline std::ostream &operator<<(std::ostream &os,
-                                const Parser::AST &tree)
+                                const std::unique_ptr<Parser::AST> &tree)
 {
-    return os << stringifyTree(tree, "");
+    return os << stringifyTree(*tree, "");
 }
 
-std::unique_ptr<Parser::AST> parseTokensHelper(std::string program)
+inline bool operator==(const std::unique_ptr<Parser::AST> &a, const std::unique_ptr<Parser::AST> &b)
 {
-    AsmMacroLexer lexer;
+    if (
+        !(
+            a->begin == b->begin &&
+            a->end == b->end &&
+            a->identifier == b->identifier &&
+            a->intValue == b->intValue &&
+            a->nodeType == b->nodeType))
+        return false;
+
+    if (a->children.size() != b->children.size())
+        return false;
+
+    for (size_t i = 0; i < a->children.size(); i++)
+    {
+        auto &childA = a->children[i];
+        auto &childB = b->children[i];
+        bool childrenMatch = childA == childB;
+        if (!childrenMatch)
+            return false;
+    }
+    return true;
+}
+
+std::unique_ptr<Parser::AST> parseTokensHelper(std::vector<AsmMacroLexer::Token> tokens)
+{
     Parser parser;
-    auto tokens = lexer.tokenize(program);
     auto tree = parser.parseTokens(tokens);
     return tree;
 }
 
-TEST_CASE("Parser no macros")
+TEST_CASE("Parse Expressions")
 {
-    // std::string program = "1 * 2 * 3 + 4";
-    // std::string program = "2 + 3 * 4 + 5 | 19";
-    // std::string program = "1 | 2 + 3 * 4";
-    std::string program = "1 * 2 + 3 * 4";
-    // std::string program = "1 | 2 + 3 * 4 | 5";
-    // std::string program = "1 + 2 * 3";
-    auto tree = parseTokensHelper(program);
-    std::cout << *tree << std::endl;
+    std::vector<AsmMacroLexer::Token> tokens = {
+        {
+            {0, 0},
+            {0, 0},
+            AsmMacroLexer::TokenType::VALUE,
+            "1",
+        },
+        {
+            {0, 0},
+            {0, 0},
+            AsmMacroLexer::TokenType::OPERATOR,
+            "+",
+        },
+        {
+            {0, 0},
+            {0, 0},
+            AsmMacroLexer::TokenType::VALUE,
+            "2",
+        },
+    };
+    // leaf: INT 1
+    auto left = std::make_unique<Parser::AST>();
+    left->begin = {0, 0};
+    left->end = {0, 0};
+    left->nodeType = Parser::NodeType::INT;
+    left->intValue = 1;
+    left->identifier = "";
 
-    REQUIRE(true == true);
+    // leaf: INT 2
+    auto right = std::make_unique<Parser::AST>();
+    right->begin = {0, 0};
+    right->end = {0, 0};
+    right->nodeType = Parser::NodeType::INT;
+    right->intValue = 2;
+    right->identifier = "";
+
+    // ADD
+    auto add = std::make_unique<Parser::AST>();
+    add->begin = {0, 0};
+    add->end = {0, 0};
+    add->nodeType = Parser::NodeType::ADD;
+    add->intValue = 0;
+    add->identifier = "";
+    add->children.push_back(std::move(left));
+    add->children.push_back(std::move(right));
+
+    // LINE
+    auto line = std::make_unique<Parser::AST>();
+    line->begin = {0, 0};
+    line->end = {0, 0};
+    line->nodeType = Parser::NodeType::LINE;
+    line->intValue = 0;
+    line->identifier = "";
+    line->children.push_back(std::move(add));
+
+    // parent: PROGRAM
+    auto program = std::make_unique<Parser::AST>();
+    program->begin = {0, 0};
+    program->end = {0, 0};
+    program->nodeType = Parser::NodeType::PROGRAM;
+    program->intValue = 0;
+    program->identifier = "";
+    program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseTokensHelper(tokens));
 }

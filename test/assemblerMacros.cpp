@@ -133,11 +133,6 @@ TEST_CASE("Tokenization logic works correctly (old)")
     REQUIRE(OldAsmMacroLexer::tokenize(sourceCode) == expected);
 }
 
-inline bool operator==(const SourceLocation &a,
-                       const SourceLocation &b)
-{
-    return a.line == b.line && a.column == b.column;
-}
 inline bool operator==(const AsmMacroLexer::Token &a,
                        const AsmMacroLexer::Token &b)
 {
@@ -145,11 +140,6 @@ inline bool operator==(const AsmMacroLexer::Token &a,
            a.end == b.end &&
            a.type == b.type &&
            a.data == b.data;
-}
-inline std::ostream &operator<<(std::ostream &os,
-                                const SourceLocation &loc)
-{
-    return os << "(" << loc.line << "," << loc.column << ")";
 }
 
 inline std::ostream &operator<<(std::ostream &os,
