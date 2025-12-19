@@ -86,7 +86,8 @@ std::unique_ptr<Parser::AST> parseWithoutSourceLocationHelper(std::string source
     AsmMacroLexer lexer;
     Parser parser;
     auto tokens = lexer.tokenize(sourceCode);
-    for (auto &t : tokens) {
+    for (auto &t : tokens)
+    {
         t.begin.line = 0;
         t.begin.column = 0;
         t.end.line = 0;
@@ -165,9 +166,9 @@ TEST_CASE("Parse left-associtive addition: 1 + 2 + 3")
     //      LINE:
     //          ADD:
     //              INT: 1
-    //                  ADD:
-    //                      INT: 2
-    //                      INT: 3
+    //              ADD:
+    //                  INT: 2
+    //                  INT: 3
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
