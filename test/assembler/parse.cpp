@@ -81,9 +81,17 @@ inline bool operator==(const std::unique_ptr<Parser::AST> &a, const std::unique_
     return true;
 }
 
-std::unique_ptr<Parser::AST> parseTokensHelper(std::vector<AsmMacroLexer::Token> tokens)
+std::unique_ptr<Parser::AST> parseWithoutSourceLocationHelper(std::string sourceCode)
 {
+    AsmMacroLexer lexer;
     Parser parser;
+    auto tokens = lexer.tokenize(sourceCode);
+    for (auto &t : tokens) {
+        t.begin.line = 0;
+        t.begin.column = 0;
+        t.end.line = 0;
+        t.end.column = 0;
+    }
     auto tree = parser.parseTokens(tokens);
     return tree;
 }
@@ -101,26 +109,7 @@ std::unique_ptr<Parser::AST> createNode(Parser::NodeType type)
 
 TEST_CASE("Parse simple addition: 1 + 2")
 {
-    std::vector<AsmMacroLexer::Token> tokens = {
-        {
-            {0, 0},
-            {0, 0},
-            AsmMacroLexer::TokenType::VALUE,
-            "1",
-        },
-        {
-            {0, 0},
-            {0, 0},
-            AsmMacroLexer::TokenType::OPERATOR,
-            "+",
-        },
-        {
-            {0, 0},
-            {0, 0},
-            AsmMacroLexer::TokenType::VALUE,
-            "2",
-        },
-    };
+    std::string sourceCode = "1 + 2";
 
     auto left = createNode(Parser::NodeType::INT);
     left->intValue = 1;
@@ -143,43 +132,12 @@ TEST_CASE("Parse simple addition: 1 + 2")
     //              INT: 1
     //              INT: 2
 
-    REQUIRE(program == parseTokensHelper(tokens));
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
 TEST_CASE("Parse left-associtive addition: 1 + 2 + 3")
 {
-    std::vector<AsmMacroLexer::Token> tokens = {
-        {
-            {0, 0},
-            {0, 0},
-            AsmMacroLexer::TokenType::VALUE,
-            "1",
-        },
-        {
-            {0, 0},
-            {0, 0},
-            AsmMacroLexer::TokenType::OPERATOR,
-            "+",
-        },
-        {
-            {0, 0},
-            {0, 0},
-            AsmMacroLexer::TokenType::VALUE,
-            "2",
-        },
-        {
-            {0, 0},
-            {0, 0},
-            AsmMacroLexer::TokenType::OPERATOR,
-            "+",
-        },
-        {
-            {0, 0},
-            {0, 0},
-            AsmMacroLexer::TokenType::VALUE,
-            "3",
-        },
-    };
+    std::string sourceCode = "1 + 2 + 3";
 
     auto term1 = createNode(Parser::NodeType::INT);
     term1->intValue = 1;
@@ -211,5 +169,5 @@ TEST_CASE("Parse left-associtive addition: 1 + 2 + 3")
     //                      INT: 2
     //                      INT: 3
 
-    REQUIRE(program == parseTokensHelper(tokens));
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
