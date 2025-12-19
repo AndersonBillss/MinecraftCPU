@@ -88,6 +88,17 @@ std::unique_ptr<Parser::AST> parseTokensHelper(std::vector<AsmMacroLexer::Token>
     return tree;
 }
 
+std::unique_ptr<Parser::AST> createNode(Parser::NodeType type)
+{
+    auto tree = std::make_unique<Parser::AST>();
+    tree->begin = {0, 0};
+    tree->end = {0, 0};
+    tree->nodeType = type;
+    tree->intValue = 0;
+    tree->identifier = "";
+    return tree;
+}
+
 TEST_CASE("Parse Expressions")
 {
     std::vector<AsmMacroLexer::Token> tokens = {
@@ -110,49 +121,27 @@ TEST_CASE("Parse Expressions")
             "2",
         },
     };
-    // leaf: INT 1
-    auto left = std::make_unique<Parser::AST>();
-    left->begin = {0, 0};
-    left->end = {0, 0};
-    left->nodeType = Parser::NodeType::INT;
+
+    auto left = createNode(Parser::NodeType::INT);
     left->intValue = 1;
-    left->identifier = "";
 
-    // leaf: INT 2
-    auto right = std::make_unique<Parser::AST>();
-    right->begin = {0, 0};
-    right->end = {0, 0};
-    right->nodeType = Parser::NodeType::INT;
+    auto right = createNode(Parser::NodeType::INT);
     right->intValue = 2;
-    right->identifier = "";
 
-    // ADD
-    auto add = std::make_unique<Parser::AST>();
-    add->begin = {0, 0};
-    add->end = {0, 0};
-    add->nodeType = Parser::NodeType::ADD;
-    add->intValue = 0;
-    add->identifier = "";
+    auto add = createNode(Parser::NodeType::ADD);
     add->children.push_back(std::move(left));
     add->children.push_back(std::move(right));
 
-    // LINE
-    auto line = std::make_unique<Parser::AST>();
-    line->begin = {0, 0};
-    line->end = {0, 0};
-    line->nodeType = Parser::NodeType::LINE;
-    line->intValue = 0;
-    line->identifier = "";
+    auto line = createNode(Parser::NodeType::LINE);
     line->children.push_back(std::move(add));
 
-    // parent: PROGRAM
-    auto program = std::make_unique<Parser::AST>();
-    program->begin = {0, 0};
-    program->end = {0, 0};
-    program->nodeType = Parser::NodeType::PROGRAM;
-    program->intValue = 0;
-    program->identifier = "";
+    auto program = createNode(Parser::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
+    //  PROGRAM
+    //      LINE:
+    //          ADD:
+    //              INT: 1
+    //              INT: 2
 
     REQUIRE(program == parseTokensHelper(tokens));
 }
