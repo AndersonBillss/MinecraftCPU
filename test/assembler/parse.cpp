@@ -99,7 +99,7 @@ std::unique_ptr<Parser::AST> createNode(Parser::NodeType type)
     return tree;
 }
 
-TEST_CASE("Parse Expressions")
+TEST_CASE("Parse simple addition: 1 + 2")
 {
     std::vector<AsmMacroLexer::Token> tokens = {
         {
@@ -142,6 +142,74 @@ TEST_CASE("Parse Expressions")
     //          ADD:
     //              INT: 1
     //              INT: 2
+
+    REQUIRE(program == parseTokensHelper(tokens));
+}
+
+TEST_CASE("Parse left-associtive addition: 1 + 2 + 3")
+{
+    std::vector<AsmMacroLexer::Token> tokens = {
+        {
+            {0, 0},
+            {0, 0},
+            AsmMacroLexer::TokenType::VALUE,
+            "1",
+        },
+        {
+            {0, 0},
+            {0, 0},
+            AsmMacroLexer::TokenType::OPERATOR,
+            "+",
+        },
+        {
+            {0, 0},
+            {0, 0},
+            AsmMacroLexer::TokenType::VALUE,
+            "2",
+        },
+        {
+            {0, 0},
+            {0, 0},
+            AsmMacroLexer::TokenType::OPERATOR,
+            "+",
+        },
+        {
+            {0, 0},
+            {0, 0},
+            AsmMacroLexer::TokenType::VALUE,
+            "3",
+        },
+    };
+
+    auto term1 = createNode(Parser::NodeType::INT);
+    term1->intValue = 1;
+
+    auto term2 = createNode(Parser::NodeType::INT);
+    term2->intValue = 2;
+
+    auto term3 = createNode(Parser::NodeType::INT);
+    term3->intValue = 3;
+
+    auto add1 = createNode(Parser::NodeType::ADD);
+    add1->children.push_back(std::move(term1));
+    add1->children.push_back(std::move(term2));
+
+    auto add2 = createNode(Parser::NodeType::ADD);
+    add2->children.push_back(std::move(add1));
+    add2->children.push_back(std::move(term3));
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(add2));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+    //  PROGRAM
+    //      LINE:
+    //          ADD:
+    //              INT: 1
+    //                  ADD:
+    //                      INT: 2
+    //                      INT: 3
 
     REQUIRE(program == parseTokensHelper(tokens));
 }
