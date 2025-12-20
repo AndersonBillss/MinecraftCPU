@@ -61,6 +61,7 @@ private:
     std::unique_ptr<Parser::AST> _handleAssignment();
     std::unique_ptr<Parser::AST> _handleParentheses();
     std::unique_ptr<Parser::AST> _parseAtom();
+    bool _isExpressionEndingNonterminal();
     std::unique_ptr<Parser::AST> _handleExpressionHelper(std::unique_ptr<Parser::AST> lhs, int minPrecedence);
     std::unique_ptr<Parser::AST> _handleExpression();
     std::unique_ptr<Parser::AST> _handleLine();

@@ -326,38 +326,39 @@ Parser::NodeType Parser::_handleOpType()
     return Parser::NodeType::UNDEFINED;
 }
 
+bool Parser::_isExpressionEndingNonterminal()
+{
+    return _currIndex >= _tokens.size();
+}
+
 std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Parser::AST> lhs, int minPrecedence)
 {
-    if (_currIndex >= _tokens.size())
+    if (_isExpressionEndingNonterminal())
     {
         return lhs;
     }
     auto lookahead = _tokens[_currIndex];
-    while (lookahead.type == AsmMacroLexer::TokenType::OPERATOR &&
+    while (!_isExpressionEndingNonterminal() &&
            operatorPrecedence(operatorType(lookahead)) >= minPrecedence)
     {
-        if (_currIndex >= _tokens.size())
-        {
-            return lhs;
-        }
         auto op = lookahead;
         _currIndex++;
-        if (_currIndex >= _tokens.size())
+        if (_isExpressionEndingNonterminal())
         {
             return lhs;
         }
         auto rhs = _parseAtom();
-        if (_currIndex < _tokens.size())
+        if (!_isExpressionEndingNonterminal())
         {
             lookahead = _tokens[_currIndex];
         }
-        while (lookahead.type == AsmMacroLexer::TokenType::OPERATOR &&
+        while (!_isExpressionEndingNonterminal() &&
                operatorPrecedence(operatorType(lookahead)) > operatorPrecedence(operatorType(op)))
         {
             auto opPrecedence = operatorPrecedence(operatorType(op));
             auto lookaheadPrecedence = operatorPrecedence(operatorType(lookahead));
             rhs = _handleExpressionHelper(std::move(rhs), opPrecedence + (lookaheadPrecedence > opPrecedence ? 1 : 0));
-            if (_currIndex < _tokens.size())
+            if (!_isExpressionEndingNonterminal())
             {
                 lookahead = _tokens[_currIndex];
             }
