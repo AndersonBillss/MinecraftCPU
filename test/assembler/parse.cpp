@@ -172,3 +172,40 @@ TEST_CASE("Parse left-associtive addition: 1 + 2 + 3")
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
+
+TEST_CASE("Parse associativity with multiplication: 1 + 2 * 3")
+{
+    std::string sourceCode = "1 + 2 * 3";
+
+    auto term1 = createNode(Parser::NodeType::INT);
+    term1->intValue = 1;
+
+    auto factor1 = createNode(Parser::NodeType::INT);
+    factor1->intValue = 2;
+
+    auto factor2 = createNode(Parser::NodeType::INT);
+    factor2->intValue = 3;
+
+    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    multiply->children.push_back(std::move(factor1));
+    multiply->children.push_back(std::move(factor2));
+
+    auto add = createNode(Parser::NodeType::ADD);
+    add->children.push_back(std::move(term1));
+    add->children.push_back(std::move(multiply));
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(add));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+    //  PROGRAM
+    //      LINE:
+    //          ADD:
+    //              INT: 1
+    //              MULTIPLY:
+    //                  INT: 2
+    //                  INT: 3
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
