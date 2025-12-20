@@ -352,11 +352,13 @@ std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Par
         {
             lookahead = _tokens[_currIndex];
         }
-        while (!_isExpressionEndingNonterminal() &&
-               operatorPrecedence(operatorType(lookahead)) > operatorPrecedence(operatorType(op)))
+        while (!_isExpressionEndingNonterminal())
         {
             auto opPrecedence = operatorPrecedence(operatorType(op));
             auto lookaheadPrecedence = operatorPrecedence(operatorType(lookahead));
+            if (lookaheadPrecedence <= opPrecedence)
+                break;
+                
             rhs = _handleExpressionHelper(std::move(rhs), opPrecedence + (lookaheadPrecedence > opPrecedence ? 1 : 0));
             if (!_isExpressionEndingNonterminal())
             {
