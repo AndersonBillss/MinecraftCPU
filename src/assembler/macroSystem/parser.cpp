@@ -21,7 +21,7 @@ bool Parser::_isFunction()
 }
 bool Parser::_isAssignment()
 {
-    if (_tokens.size() + 2 >= _currIndex - 1)
+    if (_tokens.size() + 3 >= _currIndex)
     {
         return false;
     }
@@ -224,6 +224,10 @@ int operatorPrecedence(Parser::NodeType opType)
 
 Parser::NodeType operatorType(AsmMacroLexer::Token token)
 {
+    if (token.type != AsmMacroLexer::TokenType::OPERATOR)
+    {
+        return Parser::NodeType::CONCAT;
+    }
     const std::unordered_map<std::string, Parser::NodeType> stringToOperator = {
         {"*", Parser::NodeType::MULTIPLY},
         {"/", Parser::NodeType::DIVIDE},
@@ -342,7 +346,9 @@ std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Par
            operatorPrecedence(operatorType(lookahead)) >= minPrecedence)
     {
         auto op = lookahead;
-        _currIndex++;
+        if (op.type == AsmMacroLexer::TokenType::OPERATOR)
+            _currIndex++;
+
         if (_isExpressionEndingNonterminal())
         {
             return lhs;
@@ -358,7 +364,7 @@ std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Par
             auto lookaheadPrecedence = operatorPrecedence(operatorType(lookahead));
             if (lookaheadPrecedence <= opPrecedence)
                 break;
-                
+
             rhs = _handleExpressionHelper(std::move(rhs), opPrecedence + (lookaheadPrecedence > opPrecedence ? 1 : 0));
             if (!_isExpressionEndingNonterminal())
             {
