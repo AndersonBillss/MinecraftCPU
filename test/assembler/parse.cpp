@@ -413,3 +413,37 @@ TEST_CASE("Parse expression within parentheses")
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
+
+TEST_CASE("Parse expression with lower precedence operators in parentheses")
+{
+    std::string sourceCode = "3 * (1 + 2)";
+
+    auto factor1 = createNode(Parser::NodeType::INT);
+    factor1->intValue = 3;
+
+    auto term1 = createNode(Parser::NodeType::INT);
+    term1->intValue = 1;
+
+    auto term2 = createNode(Parser::NodeType::INT);
+    term2->intValue = 2;
+
+    auto add = createNode(Parser::NodeType::ADD);
+    add->children.push_back(std::move(term1));
+    add->children.push_back(std::move(term2));
+
+    auto factor2 = createNode(Parser::NodeType::BLOCK);
+    factor2->children.push_back(std::move(add));
+
+    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    multiply->children.push_back(std::move(factor1));
+    multiply->children.push_back(std::move(factor2));
+
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(multiply));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
