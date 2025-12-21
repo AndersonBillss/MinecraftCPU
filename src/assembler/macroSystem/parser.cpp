@@ -172,15 +172,6 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
 }
 std::unique_ptr<Parser::AST> Parser::_handleParentheses()
 {
-    _currIndex++;
-    if (_currIndex >= _tokens.size())
-    {
-        throw CompilationError(
-            ErrorStage::Parsing,
-            _tokens[_currIndex].begin,
-            _tokens[_currIndex].end,
-            "Unmatched parentheses");
-    }
     auto blockNode = std::make_unique<Parser::AST>(Parser::AST{
         _tokens[_currIndex].begin,
         {0, 0},
@@ -188,17 +179,29 @@ std::unique_ptr<Parser::AST> Parser::_handleParentheses()
         {},
         "",
         0});
-    _handleLine();
+
+    _currIndex++;
+    while (_tokens[_currIndex].type != AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
+    {
+        if (_currIndex >= _tokens.size())
+        {
+            throw CompilationError(
+                ErrorStage::Parsing,
+                _tokens[_currIndex].begin,
+                _tokens[_currIndex].end,
+                "Unmatched parentheses");
+        }
+        if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
+        {
+            blockNode->children.push_back(_handleLine());
+        }
+        else
+        {
+            blockNode->children.push_back(_handleExpression());
+        }
+    }
     blockNode->end = _tokens[_currIndex].end;
     _currIndex++;
-    if (_currIndex >= _tokens.size())
-    {
-        throw CompilationError(
-            ErrorStage::Parsing,
-            _tokens[_currIndex].begin,
-            _tokens[_currIndex].end,
-            "Unmatched parentheses");
-    }
     return blockNode;
 }
 
@@ -335,7 +338,9 @@ bool Parser::_isExpressionEndingNonterminal()
     if (_currIndex >= _tokens.size())
         return true;
 
-    return _tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE;
+    auto type = _tokens[_currIndex].type;
+    return type == AsmMacroLexer::TokenType::ENDLINE ||
+           type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Parser::AST> lhs, int minPrecedence)

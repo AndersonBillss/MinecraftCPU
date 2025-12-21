@@ -361,3 +361,22 @@ TEST_CASE("Parse multi-line expression")
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
+
+TEST_CASE("Parse single values within parentheses")
+{
+    std::string sourceCode = "(1)";
+
+    auto operand = createNode(Parser::NodeType::INT);
+    operand->intValue = 1;
+
+    auto block = createNode(Parser::NodeType::BLOCK);
+    block->children.push_back(std::move(operand));
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(block));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
