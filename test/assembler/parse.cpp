@@ -438,9 +438,31 @@ TEST_CASE("Parse expression with lower precedence operators in parentheses")
     multiply->children.push_back(std::move(factor1));
     multiply->children.push_back(std::move(factor2));
 
-
     auto line = createNode(Parser::NodeType::LINE);
     line->children.push_back(std::move(multiply));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
+
+TEST_CASE("Parse variable assigning")
+{
+    std::string sourceCode = "$a = 4";
+
+    auto variable = createNode(Parser::NodeType::IDENTIFIER);
+    variable->identifier = "$a";
+
+    auto integer = createNode(Parser::NodeType::INT);
+    integer->intValue = 4;
+
+    auto assignmentNode = createNode(Parser::NodeType::ASSIGNMENT);
+    assignmentNode->children.push_back(std::move(variable));
+    assignmentNode->children.push_back(std::move(integer));
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(assignmentNode));
 
     auto program = createNode(Parser::NodeType::PROGRAM);
     program->children.push_back(std::move(line));

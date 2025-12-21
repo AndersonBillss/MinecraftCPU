@@ -21,12 +21,12 @@ bool Parser::_isFunction()
 }
 bool Parser::_isAssignment()
 {
-    if (_tokens.size() + 3 >= _currIndex)
+    if (_currIndex + 2 >= _tokens.size())
     {
         return false;
     }
-    AsmMacroLexer::Token token = _tokens[_currIndex + 2];
-    return token.type == AsmMacroLexer::TokenType::OPERATOR && token.data == "=";
+    AsmMacroLexer::Token equalToken = _tokens[_currIndex + 1];
+    return equalToken.type == AsmMacroLexer::TokenType::OPERATOR && equalToken.data == "=";
 }
 std::unique_ptr<Parser::AST> Parser::_handleFunction()
 {
@@ -120,14 +120,14 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
     //     |           |
     //   label       function
 
-    if (_tokens.size() - 1 <= _currIndex + 1 || _tokens[_currIndex + 1].type == AsmMacroLexer::TokenType::ENDLINE)
+    if (_tokens.size() <= _currIndex + 1 || _tokens[_currIndex + 1].type == AsmMacroLexer::TokenType::ENDLINE)
     {
         throw CompilationError(ErrorStage::Parsing,
                                _tokens[_tokens.size() - 1].begin,
                                _tokens[_tokens.size() - 1].end,
                                "No equal sign for assignment");
     }
-    if (_tokens.size() - 1 <= _currIndex + 2)
+    if (_tokens.size() <= _currIndex + 2)
     {
         throw CompilationError(ErrorStage::Parsing,
                                _tokens[_tokens.size() - 1].begin,
@@ -152,21 +152,14 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
         0});
 
     _currIndex += 2;
-    auto valueNode = std::make_unique<Parser::AST>(Parser::AST{
-        _tokens[_currIndex].begin,
-        {0, 0},
-        Parser::NodeType::BLOCK,
-        {},
-        "",
-        0});
-
+    assignmentNode->children.push_back(std::move(labelNode));
     if (_isFunction())
     {
-        valueNode->children.push_back(_handleFunction());
+        assignmentNode->children.push_back(_handleFunction());
     }
     else
     {
-        valueNode->children.push_back(_handleExpression());
+        assignmentNode->children.push_back(_handleExpression());
     }
     return assignmentNode;
 }
