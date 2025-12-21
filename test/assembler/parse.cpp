@@ -258,18 +258,63 @@ TEST_CASE("Parse concatenation expression: 1 2")
 {
     std::string sourceCode = "1 2";
 
-    auto string1 = createNode(Parser::NodeType::INT);
-    string1->intValue = 1;
+    auto concatOperand1 = createNode(Parser::NodeType::INT);
+    concatOperand1->intValue = 1;
 
-    auto string2 = createNode(Parser::NodeType::INT);
-    string2->intValue = 2;
+    auto concatOperand2 = createNode(Parser::NodeType::INT);
+    concatOperand2->intValue = 2;
 
     auto concat = createNode(Parser::NodeType::CONCAT);
-    concat->children.push_back(std::move(string1));
-    concat->children.push_back(std::move(string2));
+    concat->children.push_back(std::move(concatOperand1));
+    concat->children.push_back(std::move(concatOperand2));
 
     auto line = createNode(Parser::NodeType::LINE);
     line->children.push_back(std::move(concat));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
+
+TEST_CASE("Parse concatenation expression with operators: 1 + 2 3")
+{
+    std::string sourceCode = "1 + 2 3";
+
+    auto term1 = createNode(Parser::NodeType::INT);
+    term1->intValue = 1;
+    auto term2 = createNode(Parser::NodeType::INT);
+    term2->intValue = 2;
+
+    auto concatOperand1 = createNode(Parser::NodeType::ADD);
+    concatOperand1->children.push_back(std::move(term1));
+    concatOperand1->children.push_back(std::move(term2));
+
+    auto concatOperand2 = createNode(Parser::NodeType::INT);
+    concatOperand2->intValue = 3;
+
+    auto concat = createNode(Parser::NodeType::CONCAT);
+    concat->children.push_back(std::move(concatOperand1));
+    concat->children.push_back(std::move(concatOperand2));
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(concat));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
+
+TEST_CASE("Parse single operand expression: 1")
+{
+    std::string sourceCode = "1";
+
+    auto operand = createNode(Parser::NodeType::INT);
+    operand->intValue = 1;
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(operand));
 
     auto program = createNode(Parser::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
