@@ -252,6 +252,27 @@ TEST_CASE("Parse associativity with higher and lower precedence operator: 1 + 2 
     //                      INT: 2
     //                      INT: 3
     //              INT: 4
+}
+
+TEST_CASE("Parse concatenation expression: 1 2")
+{
+    std::string sourceCode = "1 2";
+
+    auto string1 = createNode(Parser::NodeType::INT);
+    string1->intValue = 1;
+
+    auto string2 = createNode(Parser::NodeType::INT);
+    string2->intValue = 2;
+
+    auto concat = createNode(Parser::NodeType::CONCAT);
+    concat->children.push_back(std::move(string1));
+    concat->children.push_back(std::move(string2));
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(concat));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
