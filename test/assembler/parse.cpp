@@ -349,8 +349,8 @@ TEST_CASE("Parse multi-line expression")
     ex2Term2->intValue = 3;
 
     auto add2 = createNode(Parser::NodeType::ADD);
-    add2->children.push_back(std::move(ex1Term1));
-    add2->children.push_back(std::move(ex1Term2));
+    add2->children.push_back(std::move(ex2Term1));
+    add2->children.push_back(std::move(ex2Term2));
 
     auto line2 = createNode(Parser::NodeType::LINE);
     line2->children.push_back(std::move(add2));

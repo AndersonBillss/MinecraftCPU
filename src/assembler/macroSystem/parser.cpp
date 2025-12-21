@@ -332,7 +332,10 @@ Parser::NodeType Parser::_handleOpType()
 
 bool Parser::_isExpressionEndingNonterminal()
 {
-    return _currIndex >= _tokens.size();
+    if (_currIndex >= _tokens.size())
+        return true;
+
+    return _tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Parser::AST> lhs, int minPrecedence)
@@ -446,6 +449,7 @@ std::unique_ptr<Parser::AST> Parser::parseTokens(std::vector<AsmMacroLexer::Toke
     {
         auto node = _handleLine();
         _root->children.push_back(std::move(node));
+        _currIndex++;
     }
     _root->end = _root->children[_root->children.size() - 1]->end;
 
