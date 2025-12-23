@@ -469,3 +469,43 @@ TEST_CASE("Parse variable assigning")
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
+
+TEST_CASE("Parse variable assigning multiple lines")
+{
+    std::string sourceCode = R"(
+    $a = 4
+    $b = 5
+    )";
+
+    auto variable1 = createNode(Parser::NodeType::IDENTIFIER);
+    variable1->identifier = "$a";
+
+    auto integer1 = createNode(Parser::NodeType::INT);
+    integer1->intValue = 4;
+
+    auto assignmentNode1 = createNode(Parser::NodeType::ASSIGNMENT);
+    assignmentNode1->children.push_back(std::move(variable1));
+    assignmentNode1->children.push_back(std::move(integer1));
+
+    auto line1 = createNode(Parser::NodeType::LINE);
+    line1->children.push_back(std::move(assignmentNode1));
+
+    auto variable2 = createNode(Parser::NodeType::IDENTIFIER);
+    variable2->identifier = "$b";
+
+    auto integer2 = createNode(Parser::NodeType::INT);
+    integer2->intValue = 5;
+
+    auto assignmentNode2 = createNode(Parser::NodeType::ASSIGNMENT);
+    assignmentNode2->children.push_back(std::move(variable2));
+    assignmentNode2->children.push_back(std::move(integer2));
+
+    auto line2 = createNode(Parser::NodeType::LINE);
+    line2->children.push_back(std::move(assignmentNode2));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line1));
+    program->children.push_back(std::move(line2));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}

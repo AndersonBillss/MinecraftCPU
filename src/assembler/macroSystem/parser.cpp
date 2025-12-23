@@ -148,7 +148,7 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
         {0, 0},
         Parser::NodeType::IDENTIFIER,
         {},
-        _tokens[0].data,
+        _tokens[_currIndex].data,
         0});
 
     _currIndex += 2;
