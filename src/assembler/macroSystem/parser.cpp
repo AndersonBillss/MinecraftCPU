@@ -332,8 +332,20 @@ bool Parser::_isExpressionEndingNonterminal()
         return true;
 
     auto type = _tokens[_currIndex].type;
-    return type == AsmMacroLexer::TokenType::ENDLINE ||
-           type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE;
+    if (type == AsmMacroLexer::TokenType::ENDLINE)
+    {
+        if (_currIndex + 1 >= _tokens.size())
+        {
+            return true;
+        }
+        if (_tokens[_currIndex + 1].type == AsmMacroLexer::TokenType::OPERATOR)
+        {
+            _currIndex++;
+            return false;
+        }
+        return true;
+    }
+    return type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Parser::AST> lhs, int minPrecedence)

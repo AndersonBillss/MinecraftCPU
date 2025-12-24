@@ -509,3 +509,38 @@ TEST_CASE("Parse variable assigning multiple lines")
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
+
+TEST_CASE("Parse expressions across multiple lines")
+{
+    std::string sourceCode = R"(
+    2      
+    +3
+
+    * 4
+    )";
+
+    auto factor1 = createNode(Parser::NodeType::INT);
+    factor1->intValue = 3;
+
+    auto factor2 = createNode(Parser::NodeType::INT);
+    factor2->intValue = 4;
+
+    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    multiply->children.push_back(std::move(factor1));
+    multiply->children.push_back(std::move(factor2));
+
+    auto term1 = createNode(Parser::NodeType::INT);
+    term1->intValue = 2;
+
+    auto add = createNode(Parser::NodeType::ADD);
+    add->children.push_back(std::move(term1));
+    add->children.push_back(std::move(multiply));
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(add));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
