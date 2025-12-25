@@ -186,6 +186,10 @@ std::unique_ptr<Parser::AST> Parser::_handleParentheses()
         }
         if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
         {
+            _currIndex++;
+            if(_tokens[_currIndex].type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE) {
+                break;
+            }
             blockNode->children.push_back(_handleLine());
         }
         else
@@ -277,6 +281,7 @@ std::unique_ptr<Parser::AST> Parser::_parseAtom()
     if (token.type == AsmMacroLexer::TokenType::SYMBOL)
     {
         nodeType = Parser::NodeType::IDENTIFIER;
+        stringValue = token.data;
     }
     else
     {

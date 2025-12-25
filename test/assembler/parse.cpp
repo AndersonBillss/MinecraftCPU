@@ -544,3 +544,64 @@ TEST_CASE("Parse expressions across multiple lines")
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
+
+TEST_CASE("Test")
+{
+    std::string sourceCode = R"(
+        LDI R1 (
+           $test = 2
+           1 + $test
+        )
+    )";
+    auto assignedVariable = createNode(Parser::NodeType::IDENTIFIER);
+    assignedVariable->identifier = "$test";
+
+    auto assignedInt = createNode(Parser::NodeType::INT);
+    assignedInt->intValue = 2;
+
+    auto assignmentNode = createNode(Parser::NodeType::ASSIGNMENT);
+    assignmentNode->children.push_back(std::move(assignedVariable));
+    assignmentNode->children.push_back(std::move(assignedInt));
+
+    auto blockLine1 = createNode(Parser::NodeType::LINE);
+    blockLine1->children.push_back(std::move(assignmentNode));
+
+    auto addInt = createNode(Parser::NodeType::INT);
+    addInt->intValue = 1;
+
+    auto addVariable = createNode(Parser::NodeType::IDENTIFIER);
+    addVariable->identifier = "$test";
+
+    auto addNode = createNode(Parser::NodeType::ADD);
+    addNode->children.push_back(std::move(addInt));
+    addNode->children.push_back(std::move(addVariable));
+
+    auto blockLine2 = createNode(Parser::NodeType::LINE);
+    blockLine2->children.push_back(std::move(addNode));
+
+    auto blockNode = createNode(Parser::NodeType::BLOCK);
+    blockNode->children.push_back(std::move(blockLine1));
+    blockNode->children.push_back(std::move(blockLine2));
+
+    auto string1 = createNode(Parser::NodeType::STRING);
+    string1->identifier = "LDI";
+
+    auto string2 = createNode(Parser::NodeType::STRING);
+    string2->identifier = "R1";
+
+    auto concat1 = createNode(Parser::NodeType::CONCAT);
+    concat1->children.push_back(std::move(string1));
+    concat1->children.push_back(std::move(string2));
+
+    auto concat2 = createNode(Parser::NodeType::CONCAT);
+    concat2->children.push_back(std::move(concat1));
+    concat2->children.push_back(std::move(blockNode));
+
+    auto line = createNode(Parser::NodeType::LINE);
+    line->children.push_back(std::move(concat2));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
