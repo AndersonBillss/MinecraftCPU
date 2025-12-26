@@ -54,56 +54,33 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction()
         "",
         0});
 
-    auto blockNode = std::make_unique<Parser::AST>(Parser::AST{
-        _tokens[_currIndex].begin,
-        {0, 0},
-        Parser::NodeType::BLOCK,
-        {},
-        "",
-        0});
 
-    functionNode->children.push_back(std::move(parameterNode));
-    functionNode->children.push_back(std::move(blockNode));
-
-    bool isParameter = true;
-    while (_currIndex < _tokens.size())
+    while (_tokens[_currIndex].type != AsmMacroLexer::TokenType::OPERATOR &&
+           _tokens[_currIndex].data != "=>")
     {
-        if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
+        if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE || _currIndex >= _tokens.size())
         {
             throw CompilationError(ErrorStage::Parsing,
                                    _tokens[_currIndex].begin,
                                    _tokens[_currIndex].end,
                                    "Function terminated too soon");
         }
-        if (isParameter)
-        {
-            parameterNode->children.push_back(
-                std::make_unique<Parser::AST>(Parser::AST{
-                    _tokens[_currIndex].begin,
-                    {0, 0},
-                    Parser::NodeType::IDENTIFIER,
-                    {},
-                    _tokens[0].data,
-                    0}));
-        }
-        else if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::OPERATOR &&
-                 _tokens[_currIndex].data == "=>")
-        {
-            _currIndex++;
-            if (_tokens.size() >= _currIndex || _tokens[_currIndex + 1].type == AsmMacroLexer::TokenType::ENDLINE)
-            {
-                throw CompilationError(ErrorStage::Parsing,
-                                       _tokens[_currIndex].begin,
-                                       _tokens[_currIndex].end,
-                                       "Function has no output");
-            }
-            _handleLine();
-        }
-
+        auto param = std::make_unique<Parser::AST>(Parser::AST{
+            _tokens[_currIndex].begin,
+            _tokens[_currIndex].end,
+            Parser::NodeType::IDENTIFIER,
+            {},
+            _tokens[_currIndex].data,
+            0});
+        parameterNode->children.push_back(std::move(param));
         _currIndex++;
     }
+    _currIndex++;
+    functionNode->children.push_back(std::move(parameterNode));
+    functionNode->children.push_back(_handleExpression());
     return functionNode;
 }
+
 std::unique_ptr<Parser::AST> Parser::_handleAssignment()
 {
     // Assignment AST structure
@@ -187,7 +164,8 @@ std::unique_ptr<Parser::AST> Parser::_handleParentheses()
         if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
         {
             _currIndex++;
-            if(_tokens[_currIndex].type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE) {
+            if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
+            {
                 break;
             }
             blockNode->children.push_back(_handleLine());
@@ -422,20 +400,7 @@ std::unique_ptr<Parser::AST> Parser::_handleLine()
         0});
 
     std::unique_ptr<Parser::AST> node;
-    if (_isFunction())
-    {
-        if (!_isAssignment())
-        {
-            throw CompilationError(
-                ErrorStage::Parsing,
-                _tokens[_currIndex].begin,
-                _tokens[_currIndex].end,
-                "A function must be assigned to a variable");
-        }
-        node = _handleFunction();
-        lineNode->end = node->end;
-    }
-    else if (_isAssignment())
+    if (_isAssignment())
     {
         node = _handleAssignment();
     }

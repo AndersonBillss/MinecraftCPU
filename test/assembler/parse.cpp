@@ -513,7 +513,7 @@ TEST_CASE("Parse variable assigning multiple lines")
 TEST_CASE("Parse expressions across multiple lines")
 {
     std::string sourceCode = R"(
-    2      
+    2
     +3
 
     * 4
@@ -545,7 +545,7 @@ TEST_CASE("Parse expressions across multiple lines")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Test")
+TEST_CASE("Multiple lines in block node")
 {
     std::string sourceCode = R"(
         LDI R1 (
@@ -602,6 +602,52 @@ TEST_CASE("Test")
 
     auto program = createNode(Parser::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
+
+TEST_CASE("TESTING")
+{
+    std::string sourceCode = R"(
+        $myFn = $1 $2 => $1 * $2
+    )";
+
+    auto param1 = createNode(Parser::NodeType::IDENTIFIER);
+    param1->identifier = "$1";
+
+    auto param2 = createNode(Parser::NodeType::IDENTIFIER);
+    param2->identifier = "$2";
+
+    auto paramList = createNode(Parser::NodeType::PARAMETER_LIST);
+    paramList->children.push_back(std::move(param1));
+    paramList->children.push_back(std::move(param2));
+
+    auto product1 = createNode(Parser::NodeType::IDENTIFIER);
+    product1->identifier = "$1";
+
+    auto product2 = createNode(Parser::NodeType::IDENTIFIER);
+    product2->identifier = "$2";
+
+    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    multiply->children.push_back(std::move(product1));
+    multiply->children.push_back(std::move(product2));
+
+    auto functionIdentifier = createNode(Parser::NodeType::IDENTIFIER);
+    functionIdentifier->identifier = "$myFn";
+
+    auto function = createNode(Parser::NodeType::FUNCTION);
+    function->children.push_back(std::move(paramList));
+    function->children.push_back(std::move(multiply));
+
+    auto assignmentNode = createNode(Parser::NodeType::ASSIGNMENT);
+    assignmentNode->children.push_back(std::move(functionIdentifier));
+    assignmentNode->children.push_back(std::move(function));
+
+    auto lineNode = createNode(Parser::NodeType::LINE);
+    lineNode->children.push_back(std::move(assignmentNode));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(lineNode));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
