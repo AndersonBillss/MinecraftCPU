@@ -545,7 +545,7 @@ TEST_CASE("Parse expressions across multiple lines")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Multiple lines in block node")
+TEST_CASE("Parse multiple lines in block node")
 {
     std::string sourceCode = R"(
         LDI R1 (
@@ -606,7 +606,7 @@ TEST_CASE("Multiple lines in block node")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("TESTING")
+TEST_CASE("Parse function")
 {
     std::string sourceCode = R"(
         $myFn = $1 $2 => $1 * $2
