@@ -28,7 +28,12 @@ bool Parser::_isAssignment()
     AsmMacroLexer::Token equalToken = _tokens[_currIndex + 1];
     return equalToken.type == AsmMacroLexer::TokenType::OPERATOR && equalToken.data == "=";
 }
-std::unique_ptr<Parser::AST> Parser::_handleFunction()
+bool Parser::_functionExists(std::string functionName)
+{
+    auto fn = _functions.find(functionName);
+    return fn != _functions.end();
+}
+std::unique_ptr<Parser::AST> Parser::_handleFunction(std::string functionName)
 {
     //   Function AST structure
     //
@@ -44,7 +49,6 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction()
         {},
         "",
         0});
-    // _functions.emplace(functionNode->identifier, functionNode); // TODO: Implement function calls
 
     auto parameterNode = std::make_unique<Parser::AST>(Parser::AST{
         _tokens[_currIndex + 2].begin,
@@ -53,7 +57,6 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction()
         {},
         "",
         0});
-
 
     while (_tokens[_currIndex].type != AsmMacroLexer::TokenType::OPERATOR &&
            _tokens[_currIndex].data != "=>")
@@ -78,7 +81,66 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction()
     _currIndex++;
     functionNode->children.push_back(std::move(parameterNode));
     functionNode->children.push_back(_handleExpression());
+
+    _functions.emplace(functionName, functionNode.get());
     return functionNode;
+}
+
+bool Parser::_isFunctionCallEndingNonterminal()
+{
+    if (_currIndex >= _tokens.size())
+    {
+        return true;
+    }
+    auto currToken = _tokens[_currIndex];
+    return currToken.type != AsmMacroLexer::TokenType::SYMBOL && currToken.type != AsmMacroLexer::VALUE;
+}
+
+std::unique_ptr<Parser::AST> Parser::_handleFunctionCall()
+{
+    auto functionCallNode = std::make_unique<Parser::AST>(Parser::AST{
+        _tokens[_currIndex].begin,
+        {0, 0},
+        Parser::NodeType::CALL,
+        {},
+        "",
+        0});
+
+    std::string functionName = _tokens[_currIndex].data;
+    auto it = _functions.find(functionName);
+    if (it == _functions.end())
+    {
+        throw CompilationError(ErrorStage::Parsing,
+                               _tokens[_currIndex].begin,
+                               _tokens[_currIndex].end,
+                               "Function does not exist: '" + functionName + "'");
+    }
+
+    auto functionIdentifier = std::make_unique<Parser::AST>(Parser::AST{
+        _tokens[_currIndex].begin,
+        {0, 0},
+        Parser::NodeType::IDENTIFIER,
+        {},
+        _tokens[_currIndex].data,
+        0});
+
+    _currIndex++;
+
+    functionCallNode->children.push_back(std::move(functionIdentifier));
+
+    auto argList = std::make_unique<Parser::AST>(Parser::AST{
+        _tokens[_currIndex].begin,
+        {0, 0},
+        Parser::NodeType::ARGUMENT_LIST,
+        {},
+        "",
+        0});
+
+    while (!_isFunctionCallEndingNonterminal())
+        argList->children.push_back(_parseAtom());
+
+    functionCallNode->children.push_back(std::move(argList));
+    return functionCallNode;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleAssignment()
@@ -129,10 +191,11 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
         0});
 
     _currIndex += 2;
+    auto labelIdentifier = labelNode->identifier;
     assignmentNode->children.push_back(std::move(labelNode));
     if (_isFunction())
     {
-        assignmentNode->children.push_back(_handleFunction());
+        assignmentNode->children.push_back(_handleFunction(labelIdentifier));
     }
     else
     {
@@ -248,6 +311,10 @@ int parseNumeric(AsmMacroLexer::Token token)
 std::unique_ptr<Parser::AST> Parser::_parseAtom()
 {
     AsmMacroLexer::Token token = _tokens[_currIndex];
+    if (token.type == AsmMacroLexer::TokenType::SYMBOL && _functionExists(token.data))
+    {
+        return _handleFunctionCall();
+    }
     if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
     {
         return _handleParentheses();

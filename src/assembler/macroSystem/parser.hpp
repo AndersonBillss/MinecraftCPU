@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <memory>
 #include <iostream>
 #include "sourceLocation.hpp"
@@ -27,7 +28,8 @@ public:
         ASSIGNMENT,
         FUNCTION,
         PARAMETER_LIST,
-        RETURN,
+        CALL,
+        ARGUMENT_LIST,
 
         IDENTIFIER,
         STRING,
@@ -48,16 +50,20 @@ public:
     };
     std::unique_ptr<Parser::AST> parseTokens(std::vector<AsmMacroLexer::Token> &tokens);
 
+
 private:
     std::unique_ptr<Parser::AST> _root;
     size_t _currIndex;
     std::vector<AsmMacroLexer::Token> _tokens;
-    std::unordered_map<std::string, std::unique_ptr<AST>> _functions;
+    std::unordered_map<std::string, AST*> _functions;
 
     bool _isFunction();
     bool _isAssignment();
+    bool _functionExists(std::string functionName);
     NodeType _handleOpType();
-    std::unique_ptr<Parser::AST> _handleFunction();
+    std::unique_ptr<Parser::AST> _handleFunction(std::string functionName);
+    bool _isFunctionCallEndingNonterminal();
+    std::unique_ptr<Parser::AST> _handleFunctionCall();
     std::unique_ptr<Parser::AST> _handleAssignment();
     std::unique_ptr<Parser::AST> _handleParentheses();
     std::unique_ptr<Parser::AST> _parseAtom();

@@ -22,7 +22,8 @@ std::string stringifyTree(const Parser::AST &tree, std::string tabs)
         {Parser::NodeType::ASSIGNMENT, "ASSIGNMENT"},
         {Parser::NodeType::FUNCTION, "FUNCTION"},
         {Parser::NodeType::PARAMETER_LIST, "PARAMETER_LIST"},
-        {Parser::NodeType::RETURN, "RETURN"},
+        {Parser::NodeType::CALL, "CALL"},
+        {Parser::NodeType::ARGUMENT_LIST, "ARGUMENT_LIST"},
 
         {Parser::NodeType::IDENTIFIER, "IDENTIFIER"},
         {Parser::NodeType::STRING, "STRING"},
@@ -648,6 +649,88 @@ TEST_CASE("Parse function")
 
     auto program = createNode(Parser::NodeType::PROGRAM);
     program->children.push_back(std::move(lineNode));
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
+}
+
+TEST_CASE("Parse function calls")
+{
+    std::string sourceCode = R"(
+        $myFn = $1 $2 => $1 * $2
+        LDI R1 $myFn 1 2
+    )";
+
+    auto param1 = createNode(Parser::NodeType::IDENTIFIER);
+    param1->identifier = "$1";
+
+    auto param2 = createNode(Parser::NodeType::IDENTIFIER);
+    param2->identifier = "$2";
+
+    auto paramList = createNode(Parser::NodeType::PARAMETER_LIST);
+    paramList->children.push_back(std::move(param1));
+    paramList->children.push_back(std::move(param2));
+
+    auto product1 = createNode(Parser::NodeType::IDENTIFIER);
+    product1->identifier = "$1";
+
+    auto product2 = createNode(Parser::NodeType::IDENTIFIER);
+    product2->identifier = "$2";
+
+    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    multiply->children.push_back(std::move(product1));
+    multiply->children.push_back(std::move(product2));
+
+    auto functionNode = createNode(Parser::NodeType::FUNCTION);
+    functionNode->children.push_back(std::move(paramList));
+    functionNode->children.push_back(std::move(multiply));
+
+    auto functionName = createNode(Parser::NodeType::IDENTIFIER);
+    functionName->identifier = "$myFn";
+
+    auto functionAssignment = createNode(Parser::NodeType::ASSIGNMENT);
+    functionAssignment->children.push_back(std::move(functionName));
+    functionAssignment->children.push_back(std::move(functionNode));
+
+    auto line1 = createNode(Parser::NodeType::LINE);
+    line1->children.push_back(std::move(functionAssignment));
+
+    auto arg1 = createNode(Parser::NodeType::INT);
+    arg1->intValue = 1;
+
+    auto arg2 = createNode(Parser::NodeType::INT);
+    arg2->intValue = 2;
+
+    auto functionCallIdentifier = createNode(Parser::NodeType::IDENTIFIER);
+    functionCallIdentifier->identifier = "$myFn";
+
+    auto argList = createNode(Parser::NodeType::ARGUMENT_LIST);
+    argList->children.push_back(std::move(arg1));
+    argList->children.push_back(std::move(arg2));
+
+    auto functionCallNode = createNode(Parser::NodeType::CALL);
+    functionCallNode->children.push_back(std::move(functionCallIdentifier));
+    functionCallNode->children.push_back(std::move(argList));
+
+    auto string1 = createNode(Parser::NodeType::STRING);
+    string1->identifier = "LDI";
+
+    auto string2 = createNode(Parser::NodeType::STRING);
+    string2->identifier = "R1";
+
+    auto concat1 = createNode(Parser::NodeType::CONCAT);
+    concat1->children.push_back(std::move(string1));
+    concat1->children.push_back(std::move(string2));
+
+    auto concat2 = createNode(Parser::NodeType::CONCAT);
+    concat2->children.push_back(std::move(concat1));
+    concat2->children.push_back(std::move(functionCallNode));
+    
+    auto line2 = createNode(Parser::NodeType::LINE);
+    line2->children.push_back(std::move(concat2));
+
+    auto program = createNode(Parser::NodeType::PROGRAM);
+    program->children.push_back(std::move(line1));
+    program->children.push_back(std::move(line2));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
