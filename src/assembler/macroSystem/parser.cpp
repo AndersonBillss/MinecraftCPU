@@ -8,11 +8,11 @@ bool Parser::_isFunction()
 {
     for (size_t i = _currIndex; i < _tokens.size(); i++)
     {
-        if (_tokens[i].type == AsmMacroLexer::TokenType::ENDLINE)
+        if (_tokens[i].type == Lexer::TokenType::ENDLINE)
         {
             return false;
         }
-        else if (_tokens[i].type == AsmMacroLexer::TokenType::OPERATOR && _tokens[i].data == "=>")
+        else if (_tokens[i].type == Lexer::TokenType::OPERATOR && _tokens[i].data == "=>")
         {
             return true;
         }
@@ -25,8 +25,8 @@ bool Parser::_isAssignment()
     {
         return false;
     }
-    AsmMacroLexer::Token equalToken = _tokens[_currIndex + 1];
-    return equalToken.type == AsmMacroLexer::TokenType::OPERATOR && equalToken.data == "=";
+    Lexer::Token equalToken = _tokens[_currIndex + 1];
+    return equalToken.type == Lexer::TokenType::OPERATOR && equalToken.data == "=";
 }
 bool Parser::_functionExists(std::string functionName)
 {
@@ -58,10 +58,10 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction(std::string functionName)
         "",
         0});
 
-    while (_tokens[_currIndex].type != AsmMacroLexer::TokenType::OPERATOR &&
+    while (_tokens[_currIndex].type != Lexer::TokenType::OPERATOR &&
            _tokens[_currIndex].data != "=>")
     {
-        if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE || _currIndex >= _tokens.size())
+        if (_tokens[_currIndex].type == Lexer::TokenType::ENDLINE || _currIndex >= _tokens.size())
         {
             throw CompilationError(ErrorStage::Parsing,
                                    _tokens[_currIndex].begin,
@@ -93,7 +93,7 @@ bool Parser::_isFunctionCallEndingNonterminal()
         return true;
     }
     auto currToken = _tokens[_currIndex];
-    return currToken.type != AsmMacroLexer::TokenType::SYMBOL && currToken.type != AsmMacroLexer::VALUE;
+    return currToken.type != Lexer::TokenType::SYMBOL && currToken.type != Lexer::VALUE;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleFunctionCall()
@@ -159,7 +159,7 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
     //     |           |
     //   label       function
 
-    if (_tokens.size() <= _currIndex + 1 || _tokens[_currIndex + 1].type == AsmMacroLexer::TokenType::ENDLINE)
+    if (_tokens.size() <= _currIndex + 1 || _tokens[_currIndex + 1].type == Lexer::TokenType::ENDLINE)
     {
         throw CompilationError(ErrorStage::Parsing,
                                _tokens[_tokens.size() - 1].begin,
@@ -214,7 +214,7 @@ std::unique_ptr<Parser::AST> Parser::_handleParentheses()
         0});
 
     _currIndex++;
-    while (_tokens[_currIndex].type != AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
+    while (_tokens[_currIndex].type != Lexer::TokenType::CLOSINGPARENTHESE)
     {
         if (_currIndex >= _tokens.size())
         {
@@ -224,10 +224,10 @@ std::unique_ptr<Parser::AST> Parser::_handleParentheses()
                 _tokens[_currIndex].end,
                 "Unmatched parentheses");
         }
-        if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::ENDLINE)
+        if (_tokens[_currIndex].type == Lexer::TokenType::ENDLINE)
         {
             _currIndex++;
-            if (_tokens[_currIndex].type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE)
+            if (_tokens[_currIndex].type == Lexer::TokenType::CLOSINGPARENTHESE)
             {
                 break;
             }
@@ -263,9 +263,9 @@ int operatorPrecedence(Parser::NodeType opType)
     return 0;
 }
 
-Parser::NodeType operatorType(AsmMacroLexer::Token token)
+Parser::NodeType operatorType(Lexer::Token token)
 {
-    if (token.type != AsmMacroLexer::TokenType::OPERATOR)
+    if (token.type != Lexer::TokenType::OPERATOR)
     {
         return Parser::NodeType::CONCAT;
     }
@@ -291,7 +291,7 @@ Parser::NodeType operatorType(AsmMacroLexer::Token token)
     return it->second;
 }
 
-int parseNumeric(AsmMacroLexer::Token token)
+int parseNumeric(Lexer::Token token)
 {
     try
     {
@@ -310,12 +310,12 @@ int parseNumeric(AsmMacroLexer::Token token)
 /// @brief Returns the next operand token and advances the current index
 std::unique_ptr<Parser::AST> Parser::_parseAtom()
 {
-    AsmMacroLexer::Token token = _tokens[_currIndex];
-    if (token.type == AsmMacroLexer::TokenType::SYMBOL && _functionExists(token.data))
+    Lexer::Token token = _tokens[_currIndex];
+    if (token.type == Lexer::TokenType::SYMBOL && _functionExists(token.data))
     {
         return _handleFunctionCall();
     }
-    if (token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE)
+    if (token.type == Lexer::TokenType::OPENINGPARENTHESE)
     {
         return _handleParentheses();
     }
@@ -323,7 +323,7 @@ std::unique_ptr<Parser::AST> Parser::_parseAtom()
     Parser::NodeType nodeType;
     int intValue = 0;
     std::string stringValue = "";
-    if (token.type == AsmMacroLexer::TokenType::SYMBOL)
+    if (token.type == Lexer::TokenType::SYMBOL)
     {
         nodeType = Parser::NodeType::IDENTIFIER;
         stringValue = token.data;
@@ -360,16 +360,16 @@ Parser::NodeType Parser::_handleOpType()
         return Parser::NodeType::UNDEFINED;
     }
     auto token = _tokens[_currIndex];
-    if (token.type == AsmMacroLexer::TokenType::OPERATOR)
+    if (token.type == Lexer::TokenType::OPERATOR)
     {
         _currIndex++;
         return operatorType(token);
     }
     else if (
-        token.type == AsmMacroLexer::TokenType::SYMBOL ||
-        token.type == AsmMacroLexer::TokenType::VALUE ||
-        token.type == AsmMacroLexer::TokenType::OPENINGPARENTHESE ||
-        token.type == AsmMacroLexer::TokenType::LOCATIONMARKER)
+        token.type == Lexer::TokenType::SYMBOL ||
+        token.type == Lexer::TokenType::VALUE ||
+        token.type == Lexer::TokenType::OPENINGPARENTHESE ||
+        token.type == Lexer::TokenType::LOCATIONMARKER)
     {
         return Parser::NodeType::CONCAT;
     }
@@ -382,20 +382,20 @@ bool Parser::_isExpressionEndingNonterminal()
         return true;
 
     auto type = _tokens[_currIndex].type;
-    if (type == AsmMacroLexer::TokenType::ENDLINE)
+    if (type == Lexer::TokenType::ENDLINE)
     {
         if (_currIndex + 1 >= _tokens.size())
         {
             return true;
         }
-        if (_tokens[_currIndex + 1].type == AsmMacroLexer::TokenType::OPERATOR)
+        if (_tokens[_currIndex + 1].type == Lexer::TokenType::OPERATOR)
         {
             _currIndex++;
             return false;
         }
         return true;
     }
-    return type == AsmMacroLexer::TokenType::CLOSINGPARENTHESE;
+    return type == Lexer::TokenType::CLOSINGPARENTHESE;
 }
 
 std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Parser::AST> lhs, int minPrecedence)
@@ -409,7 +409,7 @@ std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Par
            operatorPrecedence(operatorType(lookahead)) >= minPrecedence)
     {
         auto op = lookahead;
-        if (op.type == AsmMacroLexer::TokenType::OPERATOR)
+        if (op.type == Lexer::TokenType::OPERATOR)
             _currIndex++;
 
         if (_isExpressionEndingNonterminal())
@@ -480,7 +480,7 @@ std::unique_ptr<Parser::AST> Parser::_handleLine()
     return lineNode;
 }
 
-std::unique_ptr<Parser::AST> Parser::parseTokens(std::vector<AsmMacroLexer::Token> &tokens)
+std::unique_ptr<Parser::AST> Parser::parseTokens(std::vector<Lexer::Token> &tokens)
 {
     this->_tokens = tokens;
     _root = std::make_unique<Parser::AST>(

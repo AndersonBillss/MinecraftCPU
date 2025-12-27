@@ -84,7 +84,7 @@ inline bool operator==(const std::unique_ptr<Parser::AST> &a, const std::unique_
 
 std::unique_ptr<Parser::AST> parseWithoutSourceLocationHelper(std::string sourceCode)
 {
-    AsmMacroLexer lexer;
+    Lexer lexer;
     Parser parser;
     auto tokens = lexer.tokenize(sourceCode);
     for (auto &t : tokens)

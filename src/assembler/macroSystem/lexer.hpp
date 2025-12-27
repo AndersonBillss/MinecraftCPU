@@ -4,7 +4,7 @@
 #include <iostream>
 #include "sourceLocation.hpp"
 
-class AsmMacroLexer
+class Lexer
 {
 public:
     enum TokenType

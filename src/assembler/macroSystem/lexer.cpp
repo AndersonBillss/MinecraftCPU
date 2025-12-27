@@ -17,7 +17,7 @@ std::set<char> operatorTokens = {
     ',',
 };
 
-void AsmMacroLexer::_advanceIndex(size_t n)
+void Lexer::_advanceIndex(size_t n)
 {
     for (size_t i = 0; i < n; i++)
     {
@@ -35,7 +35,7 @@ void AsmMacroLexer::_advanceIndex(size_t n)
     }
 }
 
-void AsmMacroLexer::_pushToken(std::string data, TokenType type)
+void Lexer::_pushToken(std::string data, TokenType type)
 {
     SourceLocation begin = _currLocation;
     _advanceIndex(data.size() - 1);
@@ -48,7 +48,7 @@ void AsmMacroLexer::_pushToken(std::string data, TokenType type)
     _advanceIndex(1);
 }
 
-void AsmMacroLexer::_handleOperator()
+void Lexer::_handleOperator()
 {
     std::string fullOperator = "";
     size_t i = _currIndex;
@@ -68,9 +68,9 @@ void AsmMacroLexer::_handleOperator()
     _pushToken(fullOperator, TokenType::OPERATOR);
 }
 
-void AsmMacroLexer::_handleFullWord()
+void Lexer::_handleFullWord()
 {
-    AsmMacroLexer::TokenType type = _sourceCode[_currIndex] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
+    Lexer::TokenType type = _sourceCode[_currIndex] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
     std::string fullWord = "";
     size_t i = _currIndex;
     while (i < _endIndex)
@@ -91,7 +91,7 @@ void AsmMacroLexer::_handleFullWord()
     _pushToken(fullWord, type);
 }
 
-void AsmMacroLexer::_handleLocationMarker()
+void Lexer::_handleLocationMarker()
 {
     std::string fullWord = "";
     size_t i = _currIndex;
@@ -111,7 +111,7 @@ void AsmMacroLexer::_handleLocationMarker()
     _pushToken(fullWord, t);
 }
 
-void AsmMacroLexer::_handleComment()
+void Lexer::_handleComment()
 {
     for (size_t i = _currIndex; i < _endIndex; i++)
     {
@@ -123,7 +123,7 @@ void AsmMacroLexer::_handleComment()
     }
 }
 
-void AsmMacroLexer::_handleNewLine()
+void Lexer::_handleNewLine()
 {
     if (_tokens.size() == 0)
     {
@@ -139,7 +139,7 @@ void AsmMacroLexer::_handleNewLine()
     }
 }
 
-std::vector<AsmMacroLexer::Token> AsmMacroLexer::tokenize(const std::string &block)
+std::vector<Lexer::Token> Lexer::tokenize(const std::string &block)
 {
     _currIndex = 0;
     _currLocation = {

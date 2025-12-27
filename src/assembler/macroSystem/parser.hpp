@@ -48,13 +48,13 @@ public:
         std::string identifier;
         int intValue;
     };
-    std::unique_ptr<Parser::AST> parseTokens(std::vector<AsmMacroLexer::Token> &tokens);
+    std::unique_ptr<Parser::AST> parseTokens(std::vector<Lexer::Token> &tokens);
 
 
 private:
     std::unique_ptr<Parser::AST> _root;
     size_t _currIndex;
-    std::vector<AsmMacroLexer::Token> _tokens;
+    std::vector<Lexer::Token> _tokens;
     std::unordered_map<std::string, AST*> _functions;
 
     bool _isFunction();
