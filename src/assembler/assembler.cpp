@@ -1,6 +1,6 @@
 #include "assembler.hpp"
 #include "tokenizer/tokenizer.hpp"
-#include "macroSystem/macroSystem.hpp"
+#include "macroSystem/oldMacroSystem.hpp"
 #include "instruction.hpp"
 #include "../utils/syntaxError.hpp"
 #include "../utils/stringUtils.hpp"
@@ -10,10 +10,9 @@
 
 std::string Assembler::compile(const std::string &sourceCode)
 {
-    MacroSystem macroSystem;
-    std::string expanded = macroSystem.evaluate(sourceCode);
-    std::string linked = macroSystem.replaceLocationSymbols(expanded);
-    // std::cout << linked << std::endl;
+    OldMacroSystem m;
+    std::string expanded = m.evaluate(sourceCode);
+    std::string linked = m.replaceLocationSymbols(expanded);
 
     Tokenizer::InstructionList instructions = Tokenizer::tokenize(linked);
     std::vector<std::string> compiled;

@@ -15,10 +15,10 @@ enum VariableType
 using Operand = std::variant<unsigned int, std::string>; 
 using VariableMap = std::unordered_map<std::string, Operand>;
 
-class MacroSystem
+class OldMacroSystem
 {
 public:
-    MacroSystem();
+    OldMacroSystem();
     std::string evaluate(const std::string &block);
     std::string replaceLocationSymbols(const std::string &block);
 
