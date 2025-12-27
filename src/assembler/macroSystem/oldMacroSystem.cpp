@@ -5,35 +5,35 @@
 #include "oldLexer.hpp"
 #include "operations.hpp"
 
-OldMacroSystem::OldMacroSystem()
+MacroSystem::MacroSystem()
 {
     _currentStack = -1; // pushStack automatically increments this
     pushStack();
 }
 
-void OldMacroSystem::setNumber(std::string symbol, unsigned int value)
+void MacroSystem::setNumber(std::string symbol, unsigned int value)
 {
     _setVariableHelper(symbol, value, _currentStack);
 }
 
-void OldMacroSystem::setMacro(std::string symbol, std::string value)
+void MacroSystem::setString(std::string symbol, std::string value)
 {
     _setVariableHelper(symbol, value, _currentStack);
 }
 
-void OldMacroSystem::setLabel(std::string symbol, unsigned int value)
+void MacroSystem::setLabel(std::string symbol, unsigned int value)
 {
     _setVariableHelper(symbol, value);
 }
 
-void OldMacroSystem::pushStack()
+void MacroSystem::pushStack()
 {
     VariableMap variables;
     _variables.push_back(variables);
     _currentStack++;
 }
 
-void OldMacroSystem::popStack()
+void MacroSystem::popStack()
 {
     if (_currentStack <= 0)
     {
@@ -43,12 +43,12 @@ void OldMacroSystem::popStack()
     _currentStack--;
 }
 
-Operand OldMacroSystem::getVariable(std::string symbol)
+Operand MacroSystem::getVariable(std::string symbol)
 {
     return _getVariableHelper(symbol, _currentStack);
 }
 
-Operand OldMacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
+Operand MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
 {
     VariableMap &scope = _variables[stackIndex];
     auto it = scope.find(symbol);
@@ -66,7 +66,7 @@ Operand OldMacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex
     }
 }
 
-void OldMacroSystem::_setVariableHelper(std::string symbol, Operand value, size_t stackIndex)
+void MacroSystem::_setVariableHelper(std::string symbol, Operand value, size_t stackIndex)
 {
     VariableMap &scope = _variables[0];
     auto it = scope.find(symbol);
@@ -109,7 +109,7 @@ bool isFunctionAssignment(const std::vector<std::string> &tokens, size_t index)
     return false;
 }
 
-void OldMacroSystem::_handleAssignment(std::vector<std::string> &tokens, size_t &index)
+void MacroSystem::_handleAssignment(std::vector<std::string> &tokens, size_t &index)
 {
     std::string variableKey = tokens[index];
     index += 2; // Move the index past the equal sign
@@ -139,12 +139,12 @@ bool isInteger(const std::string &str)
     }
 }
 
-Operand OldMacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &index)
+Operand MacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &index)
 {
     std::string token = tokens[index];
     if (token[0] == '$')
     {
-        Operand result = OldMacroSystem::getVariable(token);
+        Operand result = MacroSystem::getVariable(token);
         if (std::holds_alternative<std::string>(result))
         {
             std::string &strResult = std::get<std::string>(result);
@@ -173,7 +173,7 @@ Operand OldMacroSystem::_parseOperand(std::vector<std::string> &tokens, size_t &
     return token;
 }
 
-std::string OldMacroSystem::_evaluateHelper(const std::string &block, size_t startingIndex, size_t endingIndex)
+std::string MacroSystem::_evaluateHelper(const std::string &block, size_t startingIndex, size_t endingIndex)
 {
     std::vector<std::string> tokens = OldAsmMacroLexer::tokenize(block, startingIndex, endingIndex);
     std::string evaluation = "";
@@ -206,7 +206,7 @@ std::string OldMacroSystem::_evaluateHelper(const std::string &block, size_t sta
     return stringUtils::trim(evaluation);
 }
 
-Operand OldMacroSystem::_evaluateFunction(std::string function, std::vector<std::string> &tokens, size_t &index)
+Operand MacroSystem::_evaluateFunction(std::string function, std::vector<std::string> &tokens, size_t &index)
 {
     pushStack();
     std::vector<std::string> split = stringUtils::split(function, "=>");
@@ -237,7 +237,7 @@ Operand OldMacroSystem::_evaluateFunction(std::string function, std::vector<std:
     return result;
 }
 
-Operand OldMacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t &index)
+Operand MacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size_t &index)
 {
     if (tokens[index] == "\n")
     {
@@ -268,7 +268,7 @@ Operand OldMacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size
     return evaluation;
 }
 
-std::string OldMacroSystem::replaceLocationSymbols(const std::string &block)
+std::string MacroSystem::replaceLocationSymbols(const std::string &block)
 {
     std::unordered_map<std::string, int> symbols;
     std::string result = "";
@@ -326,7 +326,7 @@ std::string OldMacroSystem::replaceLocationSymbols(const std::string &block)
     return stringUtils::trim(result);
 }
 
-std::string OldMacroSystem::evaluate(const std::string &block)
+std::string MacroSystem::evaluate(const std::string &block)
 {
     return _evaluateHelper(block, 0, block.size());
 }

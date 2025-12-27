@@ -7,7 +7,7 @@
 
 TEST_CASE("Variables can be stored across stacks")
 {
-    OldMacroSystem program;
+    MacroSystem program;
     program.setNumber("$test1", 43);
     int value = std::get<unsigned int>(program.getVariable("$test1"));
     REQUIRE(value == 43);
@@ -135,7 +135,7 @@ TEST_CASE("Tokenization logic works correctly (old)")
 
 TEST_CASE("Evaluate variables and symbols")
 {
-    OldMacroSystem *m = new OldMacroSystem();
+    MacroSystem *m = new MacroSystem();
     std::string sourceCode = R"(
         $test = 10
         $test
@@ -144,7 +144,7 @@ TEST_CASE("Evaluate variables and symbols")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         $test = hello there
         $test   
@@ -153,7 +153,7 @@ TEST_CASE("Evaluate variables and symbols")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         $test1 = hello
         $test2 = world 
@@ -163,7 +163,7 @@ TEST_CASE("Evaluate variables and symbols")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         $test1 = hello
         $test2 = 1 
@@ -173,7 +173,7 @@ TEST_CASE("Evaluate variables and symbols")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         $test1 = hello
         $test2 = world 
@@ -186,7 +186,7 @@ TEST_CASE("Evaluate variables and symbols")
 
 TEST_CASE("Evaluate variables with expressions")
 {
-    OldMacroSystem *m = new OldMacroSystem();
+    MacroSystem *m = new MacroSystem();
     std::string sourceCode = R"(
         3 + 4
     )";
@@ -194,7 +194,7 @@ TEST_CASE("Evaluate variables with expressions")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
        $three = 3
        $three + 8 
@@ -203,7 +203,7 @@ TEST_CASE("Evaluate variables with expressions")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
        $five = 5
        $eleven = 11
@@ -213,7 +213,7 @@ TEST_CASE("Evaluate variables with expressions")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
        $thrirteen = 13
        $four = 4
@@ -226,7 +226,7 @@ TEST_CASE("Evaluate variables with expressions")
 
 TEST_CASE("Evaluate parentheses")
 {
-    OldMacroSystem *m = new OldMacroSystem();
+    MacroSystem *m = new MacroSystem();
     std::string sourceCode = R"(
         $test = (4 + 5)
         $test
@@ -235,7 +235,7 @@ TEST_CASE("Evaluate parentheses")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
     $test = (
         4 + 8
@@ -246,7 +246,7 @@ TEST_CASE("Evaluate parentheses")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
     (
         4 + 8
@@ -256,7 +256,7 @@ TEST_CASE("Evaluate parentheses")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
     (2 + 3) * 7
     )";
@@ -264,7 +264,7 @@ TEST_CASE("Evaluate parentheses")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
     2 + (3 * 7)
     )";
@@ -272,7 +272,7 @@ TEST_CASE("Evaluate parentheses")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
     $test = 2 + (3 * 7)
     $test2 = (($test + 1) * 4) / 5
@@ -284,7 +284,7 @@ TEST_CASE("Evaluate parentheses")
 
 TEST_CASE("Evaluate functions")
 {
-    OldMacroSystem *m = new OldMacroSystem();
+    MacroSystem *m = new MacroSystem();
     std::string sourceCode = R"(
         $testFn = $a => Hello $a
         $testFn 4
@@ -293,7 +293,7 @@ TEST_CASE("Evaluate functions")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         $testFn = $a $b => $a + $b
         $test = $testFn 1 4
@@ -303,7 +303,7 @@ TEST_CASE("Evaluate functions")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         $testFn = $a $b => (
             $three = 3
@@ -316,7 +316,7 @@ TEST_CASE("Evaluate functions")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         $testFn = $a $b $c => (
             ($a + $b) * $c
@@ -329,7 +329,7 @@ TEST_CASE("Evaluate functions")
     REQUIRE(m->evaluate(sourceCode) == expected);
 
     delete m;
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         $a = 3
         $testFn = $a $b $c => (
@@ -345,7 +345,7 @@ TEST_CASE("Evaluate functions")
 
 TEST_CASE("replace location symbols")
 {
-    OldMacroSystem *m = new OldMacroSystem();
+    MacroSystem *m = new MacroSystem();
     std::string sourceCode = R"(
         .testSymbol
         hello .testSymbol
@@ -353,7 +353,7 @@ TEST_CASE("replace location symbols")
     std::string expected = "hello 0";
     REQUIRE(m->replaceLocationSymbols(m->evaluate(sourceCode)) == expected);
 
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
         hello
         hello
@@ -377,7 +377,7 @@ hello 4
 hello)";
     REQUIRE(m->replaceLocationSymbols(m->evaluate(sourceCode)) == expected);
 
-    m = new OldMacroSystem();
+    m = new MacroSystem();
     sourceCode = R"(
             hello
             hello
