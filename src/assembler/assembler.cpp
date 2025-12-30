@@ -10,7 +10,7 @@
 
 std::string Assembler::compile(const std::string &sourceCode)
 {
-    MacroSystem m;
+    OldMacroSystem m;
     std::string expanded = m.evaluate(sourceCode);
     std::string linked = m.replaceLocationSymbols(expanded);
 

@@ -5,28 +5,24 @@
 #include <variant>
 #include <set>
 #include <functional>
-
-enum VariableType
-{
-    number,
-    macro,
-};
-
-using Operand = std::variant<unsigned int, std::string>; 
-using VariableMap = std::unordered_map<std::string, Operand>;
+#include "parser.hpp"
 
 class MacroSystem
 {
 public:
+    using VariableMap = std::unordered_map<std::string, Parser::AST *>;
     MacroSystem();
     std::string evaluate(const std::string &block);
-    std::string replaceLocationSymbols(const std::string &block);
 
-    void setNumber(std::string symbol, unsigned int value);
-    void setString(std::string symbol, std::string value);
-    void setLabel(std::string symbol, unsigned int value);
-    Operand getVariable(std::string symbol);
+    void setVariable(std::string symbol, Parser::AST *value, size_t stackIndex = 0);
+    Parser::AST *getVariable(std::string symbol);
 
     void pushStack();
     void popStack();
+
+private:
+    std::vector<VariableMap> _variables;
+    size_t _currentStack;
+
+    Parser::AST *_getVariableHelper(std::string symbol, size_t stackIndex = 0);
 };
