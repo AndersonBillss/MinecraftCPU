@@ -3,32 +3,32 @@
 #include "../../src/assembler/macroSystem/parser.hpp"
 #include <string>
 
-std::string stringifyTree(const Parser::AST &tree, std::string tabs)
+std::string stringifyTree(const AST::Node &tree, std::string tabs)
 {
-    std::unordered_map<Parser::NodeType, std::string> nodeToString{
-        {Parser::NodeType::PROGRAM, "PROGRAM"},
-        {Parser::NodeType::BLOCK, "BLOCK"},
-        {Parser::NodeType::LINE, "LINE"},
+    std::unordered_map<AST::NodeType, std::string> nodeToString{
+        {AST::NodeType::PROGRAM, "PROGRAM"},
+        {AST::NodeType::BLOCK, "BLOCK"},
+        {AST::NodeType::LINE, "LINE"},
 
-        {Parser::NodeType::ADD, "ADD"},
-        {Parser::NodeType::SUB, "SUB"},
-        {Parser::NodeType::OR, "OR"},
-        {Parser::NodeType::AND, "AND"},
-        {Parser::NodeType::XOR, "XOR"},
-        {Parser::NodeType::MULTIPLY, "MULTIPLY"},
-        {Parser::NodeType::DIVIDE, "DIVIDE"},
-        {Parser::NodeType::CONCAT, "CONCAT"},
+        {AST::NodeType::ADD, "ADD"},
+        {AST::NodeType::SUB, "SUB"},
+        {AST::NodeType::OR, "OR"},
+        {AST::NodeType::AND, "AND"},
+        {AST::NodeType::XOR, "XOR"},
+        {AST::NodeType::MULTIPLY, "MULTIPLY"},
+        {AST::NodeType::DIVIDE, "DIVIDE"},
+        {AST::NodeType::CONCAT, "CONCAT"},
 
-        {Parser::NodeType::ASSIGNMENT, "ASSIGNMENT"},
-        {Parser::NodeType::FUNCTION, "FUNCTION"},
-        {Parser::NodeType::PARAMETER_LIST, "PARAMETER_LIST"},
-        {Parser::NodeType::CALL, "CALL"},
-        {Parser::NodeType::ARGUMENT_LIST, "ARGUMENT_LIST"},
+        {AST::NodeType::ASSIGNMENT, "ASSIGNMENT"},
+        {AST::NodeType::FUNCTION, "FUNCTION"},
+        {AST::NodeType::PARAMETER_LIST, "PARAMETER_LIST"},
+        {AST::NodeType::CALL, "CALL"},
+        {AST::NodeType::ARGUMENT_LIST, "ARGUMENT_LIST"},
 
-        {Parser::NodeType::IDENTIFIER, "IDENTIFIER"},
-        {Parser::NodeType::STRING, "STRING"},
-        {Parser::NodeType::INT, "INT"},
-        {Parser::NodeType::UNDEFINED, "UNDEFINED"},
+        {AST::NodeType::IDENTIFIER, "IDENTIFIER"},
+        {AST::NodeType::STRING, "STRING"},
+        {AST::NodeType::INT, "INT"},
+        {AST::NodeType::UNDEFINED, "UNDEFINED"},
     };
     std::string stringifiedNodeType = "?????";
     auto it = nodeToString.find(tree.nodeType);
@@ -37,7 +37,7 @@ std::string stringifyTree(const Parser::AST &tree, std::string tabs)
         stringifiedNodeType = it->second;
     }
     std::string stringifiedNumber = "";
-    if (tree.nodeType == Parser::INT)
+    if (tree.nodeType == AST::NodeType::INT)
     {
         stringifiedNumber = std::to_string(tree.intValue) + " ";
     }
@@ -51,38 +51,41 @@ std::string stringifyTree(const Parser::AST &tree, std::string tabs)
     return stringified;
 }
 
-inline std::ostream &operator<<(std::ostream &os,
-                                const std::unique_ptr<Parser::AST> &tree)
+namespace AST
 {
-    return os << stringifyTree(*tree, "");
-}
-
-inline bool operator==(const std::unique_ptr<Parser::AST> &a, const std::unique_ptr<Parser::AST> &b)
-{
-    if (
-        !(
-            a->begin == b->begin &&
-            a->end == b->end &&
-            a->identifier == b->identifier &&
-            a->intValue == b->intValue &&
-            a->nodeType == b->nodeType))
-        return false;
-
-    if (a->children.size() != b->children.size())
-        return false;
-
-    for (size_t i = 0; i < a->children.size(); i++)
+    inline std::ostream &operator<<(std::ostream &os,
+                                    const std::unique_ptr<AST::Node> &tree)
     {
-        auto &childA = a->children[i];
-        auto &childB = b->children[i];
-        bool childrenMatch = childA == childB;
-        if (!childrenMatch)
-            return false;
+        return os << stringifyTree(*tree, "");
     }
-    return true;
+
+    inline bool operator==(const std::unique_ptr<AST::Node> &a, const std::unique_ptr<AST::Node> &b)
+    {
+        if (
+            !(
+                a->begin == b->begin &&
+                a->end == b->end &&
+                a->identifier == b->identifier &&
+                a->intValue == b->intValue &&
+                a->nodeType == b->nodeType))
+            return false;
+
+        if (a->children.size() != b->children.size())
+            return false;
+
+        for (size_t i = 0; i < a->children.size(); i++)
+        {
+            auto &childA = a->children[i];
+            auto &childB = b->children[i];
+            bool childrenMatch = childA == childB;
+            if (!childrenMatch)
+                return false;
+        }
+        return true;
+    }
 }
 
-std::unique_ptr<Parser::AST> parseWithoutSourceLocationHelper(std::string sourceCode)
+std::unique_ptr<AST::Node> parseWithoutSourceLocationHelper(std::string sourceCode)
 {
     Lexer lexer;
     Parser parser;
@@ -98,9 +101,9 @@ std::unique_ptr<Parser::AST> parseWithoutSourceLocationHelper(std::string source
     return tree;
 }
 
-std::unique_ptr<Parser::AST> createNode(Parser::NodeType type)
+std::unique_ptr<AST::Node> createNode(AST::NodeType type)
 {
-    auto tree = std::make_unique<Parser::AST>();
+    auto tree = std::make_unique<AST::Node>();
     tree->begin = {0, 0};
     tree->end = {0, 0};
     tree->nodeType = type;
@@ -113,20 +116,20 @@ TEST_CASE("Parse simple addition: 1 + 2")
 {
     std::string sourceCode = "1 + 2";
 
-    auto left = createNode(Parser::NodeType::INT);
+    auto left = createNode(AST::NodeType::INT);
     left->intValue = 1;
 
-    auto right = createNode(Parser::NodeType::INT);
+    auto right = createNode(AST::NodeType::INT);
     right->intValue = 2;
 
-    auto add = createNode(Parser::NodeType::ADD);
+    auto add = createNode(AST::NodeType::ADD);
     add->children.push_back(std::move(left));
     add->children.push_back(std::move(right));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(add));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
     //  PROGRAM
     //      LINE:
@@ -141,27 +144,27 @@ TEST_CASE("Parse left-associtive addition: 1 + 2 + 3")
 {
     std::string sourceCode = "1 + 2 + 3";
 
-    auto term1 = createNode(Parser::NodeType::INT);
+    auto term1 = createNode(AST::NodeType::INT);
     term1->intValue = 1;
 
-    auto term2 = createNode(Parser::NodeType::INT);
+    auto term2 = createNode(AST::NodeType::INT);
     term2->intValue = 2;
 
-    auto term3 = createNode(Parser::NodeType::INT);
+    auto term3 = createNode(AST::NodeType::INT);
     term3->intValue = 3;
 
-    auto add1 = createNode(Parser::NodeType::ADD);
+    auto add1 = createNode(AST::NodeType::ADD);
     add1->children.push_back(std::move(term1));
     add1->children.push_back(std::move(term2));
 
-    auto add2 = createNode(Parser::NodeType::ADD);
+    auto add2 = createNode(AST::NodeType::ADD);
     add2->children.push_back(std::move(add1));
     add2->children.push_back(std::move(term3));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(add2));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
     //  PROGRAM
     //      LINE:
@@ -178,27 +181,27 @@ TEST_CASE("Parse associativity with higher precedence operator: 1 + 2 * 3")
 {
     std::string sourceCode = "1 + 2 * 3";
 
-    auto term1 = createNode(Parser::NodeType::INT);
+    auto term1 = createNode(AST::NodeType::INT);
     term1->intValue = 1;
 
-    auto factor1 = createNode(Parser::NodeType::INT);
+    auto factor1 = createNode(AST::NodeType::INT);
     factor1->intValue = 2;
 
-    auto factor2 = createNode(Parser::NodeType::INT);
+    auto factor2 = createNode(AST::NodeType::INT);
     factor2->intValue = 3;
 
-    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    auto multiply = createNode(AST::NodeType::MULTIPLY);
     multiply->children.push_back(std::move(factor1));
     multiply->children.push_back(std::move(factor2));
 
-    auto add = createNode(Parser::NodeType::ADD);
+    auto add = createNode(AST::NodeType::ADD);
     add->children.push_back(std::move(term1));
     add->children.push_back(std::move(multiply));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(add));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
     //  PROGRAM
     //      LINE:
@@ -215,34 +218,34 @@ TEST_CASE("Parse associativity with higher and lower precedence operator: 1 + 2 
 {
     std::string sourceCode = "1 + 2 * 3 + 4";
 
-    auto term1 = createNode(Parser::NodeType::INT);
+    auto term1 = createNode(AST::NodeType::INT);
     term1->intValue = 1;
 
-    auto factor1 = createNode(Parser::NodeType::INT);
+    auto factor1 = createNode(AST::NodeType::INT);
     factor1->intValue = 2;
 
-    auto factor2 = createNode(Parser::NodeType::INT);
+    auto factor2 = createNode(AST::NodeType::INT);
     factor2->intValue = 3;
 
-    auto term2 = createNode(Parser::NodeType::INT);
+    auto term2 = createNode(AST::NodeType::INT);
     term2->intValue = 4;
 
-    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    auto multiply = createNode(AST::NodeType::MULTIPLY);
     multiply->children.push_back(std::move(factor1));
     multiply->children.push_back(std::move(factor2));
 
-    auto add1 = createNode(Parser::NodeType::ADD);
+    auto add1 = createNode(AST::NodeType::ADD);
     add1->children.push_back(std::move(term1));
     add1->children.push_back(std::move(multiply));
 
-    auto add2 = createNode(Parser::NodeType::ADD);
+    auto add2 = createNode(AST::NodeType::ADD);
     add2->children.push_back(std::move(add1));
     add2->children.push_back(std::move(term2));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(add2));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
     //  PROGRAM
     //      LINE:
@@ -253,26 +256,28 @@ TEST_CASE("Parse associativity with higher and lower precedence operator: 1 + 2 
     //                      INT: 2
     //                      INT: 3
     //              INT: 4
+
+    REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
 TEST_CASE("Parse concatenation expression: 1 2")
 {
     std::string sourceCode = "1 2";
 
-    auto concatOperand1 = createNode(Parser::NodeType::INT);
+    auto concatOperand1 = createNode(AST::NodeType::INT);
     concatOperand1->intValue = 1;
 
-    auto concatOperand2 = createNode(Parser::NodeType::INT);
+    auto concatOperand2 = createNode(AST::NodeType::INT);
     concatOperand2->intValue = 2;
 
-    auto concat = createNode(Parser::NodeType::CONCAT);
+    auto concat = createNode(AST::NodeType::CONCAT);
     concat->children.push_back(std::move(concatOperand1));
     concat->children.push_back(std::move(concatOperand2));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(concat));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -282,26 +287,26 @@ TEST_CASE("Parse concatenation expression with operators: 1 + 2 3")
 {
     std::string sourceCode = "1 + 2 3";
 
-    auto term1 = createNode(Parser::NodeType::INT);
+    auto term1 = createNode(AST::NodeType::INT);
     term1->intValue = 1;
-    auto term2 = createNode(Parser::NodeType::INT);
+    auto term2 = createNode(AST::NodeType::INT);
     term2->intValue = 2;
 
-    auto concatOperand1 = createNode(Parser::NodeType::ADD);
+    auto concatOperand1 = createNode(AST::NodeType::ADD);
     concatOperand1->children.push_back(std::move(term1));
     concatOperand1->children.push_back(std::move(term2));
 
-    auto concatOperand2 = createNode(Parser::NodeType::INT);
+    auto concatOperand2 = createNode(AST::NodeType::INT);
     concatOperand2->intValue = 3;
 
-    auto concat = createNode(Parser::NodeType::CONCAT);
+    auto concat = createNode(AST::NodeType::CONCAT);
     concat->children.push_back(std::move(concatOperand1));
     concat->children.push_back(std::move(concatOperand2));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(concat));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -311,13 +316,13 @@ TEST_CASE("Parse single operand expression: 1")
 {
     std::string sourceCode = "1";
 
-    auto operand = createNode(Parser::NodeType::INT);
+    auto operand = createNode(AST::NodeType::INT);
     operand->intValue = 1;
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(operand));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -330,33 +335,33 @@ TEST_CASE("Parse multi-line expression")
         2 + 3
     )";
 
-    auto ex1Term1 = createNode(Parser::NodeType::INT);
+    auto ex1Term1 = createNode(AST::NodeType::INT);
     ex1Term1->intValue = 1;
 
-    auto ex1Term2 = createNode(Parser::NodeType::INT);
+    auto ex1Term2 = createNode(AST::NodeType::INT);
     ex1Term2->intValue = 2;
 
-    auto add1 = createNode(Parser::NodeType::ADD);
+    auto add1 = createNode(AST::NodeType::ADD);
     add1->children.push_back(std::move(ex1Term1));
     add1->children.push_back(std::move(ex1Term2));
 
-    auto line1 = createNode(Parser::NodeType::LINE);
+    auto line1 = createNode(AST::NodeType::LINE);
     line1->children.push_back(std::move(add1));
 
-    auto ex2Term1 = createNode(Parser::NodeType::INT);
+    auto ex2Term1 = createNode(AST::NodeType::INT);
     ex2Term1->intValue = 2;
 
-    auto ex2Term2 = createNode(Parser::NodeType::INT);
+    auto ex2Term2 = createNode(AST::NodeType::INT);
     ex2Term2->intValue = 3;
 
-    auto add2 = createNode(Parser::NodeType::ADD);
+    auto add2 = createNode(AST::NodeType::ADD);
     add2->children.push_back(std::move(ex2Term1));
     add2->children.push_back(std::move(ex2Term2));
 
-    auto line2 = createNode(Parser::NodeType::LINE);
+    auto line2 = createNode(AST::NodeType::LINE);
     line2->children.push_back(std::move(add2));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line1));
     program->children.push_back(std::move(line2));
 
@@ -367,16 +372,16 @@ TEST_CASE("Parse single values within parentheses")
 {
     std::string sourceCode = "(1)";
 
-    auto operand = createNode(Parser::NodeType::INT);
+    auto operand = createNode(AST::NodeType::INT);
     operand->intValue = 1;
 
-    auto block = createNode(Parser::NodeType::BLOCK);
+    auto block = createNode(AST::NodeType::BLOCK);
     block->children.push_back(std::move(operand));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(block));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -386,30 +391,30 @@ TEST_CASE("Parse expression within parentheses")
 {
     std::string sourceCode = "(1 + 2 * 3)";
 
-    auto term1 = createNode(Parser::NodeType::INT);
+    auto term1 = createNode(AST::NodeType::INT);
     term1->intValue = 1;
 
-    auto factor1 = createNode(Parser::NodeType::INT);
+    auto factor1 = createNode(AST::NodeType::INT);
     factor1->intValue = 2;
 
-    auto factor2 = createNode(Parser::NodeType::INT);
+    auto factor2 = createNode(AST::NodeType::INT);
     factor2->intValue = 3;
 
-    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    auto multiply = createNode(AST::NodeType::MULTIPLY);
     multiply->children.push_back(std::move(factor1));
     multiply->children.push_back(std::move(factor2));
 
-    auto add = createNode(Parser::NodeType::ADD);
+    auto add = createNode(AST::NodeType::ADD);
     add->children.push_back(std::move(term1));
     add->children.push_back(std::move(multiply));
 
-    auto block = createNode(Parser::NodeType::BLOCK);
+    auto block = createNode(AST::NodeType::BLOCK);
     block->children.push_back(std::move(add));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(block));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -419,30 +424,30 @@ TEST_CASE("Parse expression with lower precedence operators in parentheses")
 {
     std::string sourceCode = "3 * (1 + 2)";
 
-    auto factor1 = createNode(Parser::NodeType::INT);
+    auto factor1 = createNode(AST::NodeType::INT);
     factor1->intValue = 3;
 
-    auto term1 = createNode(Parser::NodeType::INT);
+    auto term1 = createNode(AST::NodeType::INT);
     term1->intValue = 1;
 
-    auto term2 = createNode(Parser::NodeType::INT);
+    auto term2 = createNode(AST::NodeType::INT);
     term2->intValue = 2;
 
-    auto add = createNode(Parser::NodeType::ADD);
+    auto add = createNode(AST::NodeType::ADD);
     add->children.push_back(std::move(term1));
     add->children.push_back(std::move(term2));
 
-    auto factor2 = createNode(Parser::NodeType::BLOCK);
+    auto factor2 = createNode(AST::NodeType::BLOCK);
     factor2->children.push_back(std::move(add));
 
-    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    auto multiply = createNode(AST::NodeType::MULTIPLY);
     multiply->children.push_back(std::move(factor1));
     multiply->children.push_back(std::move(factor2));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(multiply));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -452,20 +457,20 @@ TEST_CASE("Parse variable assigning")
 {
     std::string sourceCode = "$a = 4";
 
-    auto variable = createNode(Parser::NodeType::IDENTIFIER);
+    auto variable = createNode(AST::NodeType::IDENTIFIER);
     variable->identifier = "$a";
 
-    auto integer = createNode(Parser::NodeType::INT);
+    auto integer = createNode(AST::NodeType::INT);
     integer->intValue = 4;
 
-    auto assignmentNode = createNode(Parser::NodeType::ASSIGNMENT);
+    auto assignmentNode = createNode(AST::NodeType::ASSIGNMENT);
     assignmentNode->children.push_back(std::move(variable));
     assignmentNode->children.push_back(std::move(integer));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(assignmentNode));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -478,33 +483,33 @@ TEST_CASE("Parse variable assigning multiple lines")
     $b = 5
     )";
 
-    auto variable1 = createNode(Parser::NodeType::IDENTIFIER);
+    auto variable1 = createNode(AST::NodeType::IDENTIFIER);
     variable1->identifier = "$a";
 
-    auto integer1 = createNode(Parser::NodeType::INT);
+    auto integer1 = createNode(AST::NodeType::INT);
     integer1->intValue = 4;
 
-    auto assignmentNode1 = createNode(Parser::NodeType::ASSIGNMENT);
+    auto assignmentNode1 = createNode(AST::NodeType::ASSIGNMENT);
     assignmentNode1->children.push_back(std::move(variable1));
     assignmentNode1->children.push_back(std::move(integer1));
 
-    auto line1 = createNode(Parser::NodeType::LINE);
+    auto line1 = createNode(AST::NodeType::LINE);
     line1->children.push_back(std::move(assignmentNode1));
 
-    auto variable2 = createNode(Parser::NodeType::IDENTIFIER);
+    auto variable2 = createNode(AST::NodeType::IDENTIFIER);
     variable2->identifier = "$b";
 
-    auto integer2 = createNode(Parser::NodeType::INT);
+    auto integer2 = createNode(AST::NodeType::INT);
     integer2->intValue = 5;
 
-    auto assignmentNode2 = createNode(Parser::NodeType::ASSIGNMENT);
+    auto assignmentNode2 = createNode(AST::NodeType::ASSIGNMENT);
     assignmentNode2->children.push_back(std::move(variable2));
     assignmentNode2->children.push_back(std::move(integer2));
 
-    auto line2 = createNode(Parser::NodeType::LINE);
+    auto line2 = createNode(AST::NodeType::LINE);
     line2->children.push_back(std::move(assignmentNode2));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line1));
     program->children.push_back(std::move(line2));
 
@@ -520,27 +525,27 @@ TEST_CASE("Parse expressions across multiple lines")
     * 4
     )";
 
-    auto factor1 = createNode(Parser::NodeType::INT);
+    auto factor1 = createNode(AST::NodeType::INT);
     factor1->intValue = 3;
 
-    auto factor2 = createNode(Parser::NodeType::INT);
+    auto factor2 = createNode(AST::NodeType::INT);
     factor2->intValue = 4;
 
-    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    auto multiply = createNode(AST::NodeType::MULTIPLY);
     multiply->children.push_back(std::move(factor1));
     multiply->children.push_back(std::move(factor2));
 
-    auto term1 = createNode(Parser::NodeType::INT);
+    auto term1 = createNode(AST::NodeType::INT);
     term1->intValue = 2;
 
-    auto add = createNode(Parser::NodeType::ADD);
+    auto add = createNode(AST::NodeType::ADD);
     add->children.push_back(std::move(term1));
     add->children.push_back(std::move(multiply));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(add));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -554,54 +559,54 @@ TEST_CASE("Parse multiple lines in block node")
            1 + $test
         )
     )";
-    auto assignedVariable = createNode(Parser::NodeType::IDENTIFIER);
+    auto assignedVariable = createNode(AST::NodeType::IDENTIFIER);
     assignedVariable->identifier = "$test";
 
-    auto assignedInt = createNode(Parser::NodeType::INT);
+    auto assignedInt = createNode(AST::NodeType::INT);
     assignedInt->intValue = 2;
 
-    auto assignmentNode = createNode(Parser::NodeType::ASSIGNMENT);
+    auto assignmentNode = createNode(AST::NodeType::ASSIGNMENT);
     assignmentNode->children.push_back(std::move(assignedVariable));
     assignmentNode->children.push_back(std::move(assignedInt));
 
-    auto blockLine1 = createNode(Parser::NodeType::LINE);
+    auto blockLine1 = createNode(AST::NodeType::LINE);
     blockLine1->children.push_back(std::move(assignmentNode));
 
-    auto addInt = createNode(Parser::NodeType::INT);
+    auto addInt = createNode(AST::NodeType::INT);
     addInt->intValue = 1;
 
-    auto addVariable = createNode(Parser::NodeType::IDENTIFIER);
+    auto addVariable = createNode(AST::NodeType::IDENTIFIER);
     addVariable->identifier = "$test";
 
-    auto addNode = createNode(Parser::NodeType::ADD);
+    auto addNode = createNode(AST::NodeType::ADD);
     addNode->children.push_back(std::move(addInt));
     addNode->children.push_back(std::move(addVariable));
 
-    auto blockLine2 = createNode(Parser::NodeType::LINE);
+    auto blockLine2 = createNode(AST::NodeType::LINE);
     blockLine2->children.push_back(std::move(addNode));
 
-    auto blockNode = createNode(Parser::NodeType::BLOCK);
+    auto blockNode = createNode(AST::NodeType::BLOCK);
     blockNode->children.push_back(std::move(blockLine1));
     blockNode->children.push_back(std::move(blockLine2));
 
-    auto string1 = createNode(Parser::NodeType::STRING);
+    auto string1 = createNode(AST::NodeType::STRING);
     string1->identifier = "LDI";
 
-    auto string2 = createNode(Parser::NodeType::STRING);
+    auto string2 = createNode(AST::NodeType::STRING);
     string2->identifier = "R1";
 
-    auto concat1 = createNode(Parser::NodeType::CONCAT);
+    auto concat1 = createNode(AST::NodeType::CONCAT);
     concat1->children.push_back(std::move(string1));
     concat1->children.push_back(std::move(string2));
 
-    auto concat2 = createNode(Parser::NodeType::CONCAT);
+    auto concat2 = createNode(AST::NodeType::CONCAT);
     concat2->children.push_back(std::move(concat1));
     concat2->children.push_back(std::move(blockNode));
 
-    auto line = createNode(Parser::NodeType::LINE);
+    auto line = createNode(AST::NodeType::LINE);
     line->children.push_back(std::move(concat2));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -613,41 +618,41 @@ TEST_CASE("Parse function")
         $myFn = $1 $2 => $1 * $2
     )";
 
-    auto param1 = createNode(Parser::NodeType::IDENTIFIER);
+    auto param1 = createNode(AST::NodeType::IDENTIFIER);
     param1->identifier = "$1";
 
-    auto param2 = createNode(Parser::NodeType::IDENTIFIER);
+    auto param2 = createNode(AST::NodeType::IDENTIFIER);
     param2->identifier = "$2";
 
-    auto paramList = createNode(Parser::NodeType::PARAMETER_LIST);
+    auto paramList = createNode(AST::NodeType::PARAMETER_LIST);
     paramList->children.push_back(std::move(param1));
     paramList->children.push_back(std::move(param2));
 
-    auto product1 = createNode(Parser::NodeType::IDENTIFIER);
+    auto product1 = createNode(AST::NodeType::IDENTIFIER);
     product1->identifier = "$1";
 
-    auto product2 = createNode(Parser::NodeType::IDENTIFIER);
+    auto product2 = createNode(AST::NodeType::IDENTIFIER);
     product2->identifier = "$2";
 
-    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    auto multiply = createNode(AST::NodeType::MULTIPLY);
     multiply->children.push_back(std::move(product1));
     multiply->children.push_back(std::move(product2));
 
-    auto functionIdentifier = createNode(Parser::NodeType::IDENTIFIER);
+    auto functionIdentifier = createNode(AST::NodeType::IDENTIFIER);
     functionIdentifier->identifier = "$myFn";
 
-    auto function = createNode(Parser::NodeType::FUNCTION);
+    auto function = createNode(AST::NodeType::FUNCTION);
     function->children.push_back(std::move(paramList));
     function->children.push_back(std::move(multiply));
 
-    auto assignmentNode = createNode(Parser::NodeType::ASSIGNMENT);
+    auto assignmentNode = createNode(AST::NodeType::ASSIGNMENT);
     assignmentNode->children.push_back(std::move(functionIdentifier));
     assignmentNode->children.push_back(std::move(function));
 
-    auto lineNode = createNode(Parser::NodeType::LINE);
+    auto lineNode = createNode(AST::NodeType::LINE);
     lineNode->children.push_back(std::move(assignmentNode));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(lineNode));
 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
@@ -660,75 +665,75 @@ TEST_CASE("Parse function calls")
         LDI R1 $myFn 1 2
     )";
 
-    auto param1 = createNode(Parser::NodeType::IDENTIFIER);
+    auto param1 = createNode(AST::NodeType::IDENTIFIER);
     param1->identifier = "$1";
 
-    auto param2 = createNode(Parser::NodeType::IDENTIFIER);
+    auto param2 = createNode(AST::NodeType::IDENTIFIER);
     param2->identifier = "$2";
 
-    auto paramList = createNode(Parser::NodeType::PARAMETER_LIST);
+    auto paramList = createNode(AST::NodeType::PARAMETER_LIST);
     paramList->children.push_back(std::move(param1));
     paramList->children.push_back(std::move(param2));
 
-    auto product1 = createNode(Parser::NodeType::IDENTIFIER);
+    auto product1 = createNode(AST::NodeType::IDENTIFIER);
     product1->identifier = "$1";
 
-    auto product2 = createNode(Parser::NodeType::IDENTIFIER);
+    auto product2 = createNode(AST::NodeType::IDENTIFIER);
     product2->identifier = "$2";
 
-    auto multiply = createNode(Parser::NodeType::MULTIPLY);
+    auto multiply = createNode(AST::NodeType::MULTIPLY);
     multiply->children.push_back(std::move(product1));
     multiply->children.push_back(std::move(product2));
 
-    auto functionNode = createNode(Parser::NodeType::FUNCTION);
+    auto functionNode = createNode(AST::NodeType::FUNCTION);
     functionNode->children.push_back(std::move(paramList));
     functionNode->children.push_back(std::move(multiply));
 
-    auto functionName = createNode(Parser::NodeType::IDENTIFIER);
+    auto functionName = createNode(AST::NodeType::IDENTIFIER);
     functionName->identifier = "$myFn";
 
-    auto functionAssignment = createNode(Parser::NodeType::ASSIGNMENT);
+    auto functionAssignment = createNode(AST::NodeType::ASSIGNMENT);
     functionAssignment->children.push_back(std::move(functionName));
     functionAssignment->children.push_back(std::move(functionNode));
 
-    auto line1 = createNode(Parser::NodeType::LINE);
+    auto line1 = createNode(AST::NodeType::LINE);
     line1->children.push_back(std::move(functionAssignment));
 
-    auto arg1 = createNode(Parser::NodeType::INT);
+    auto arg1 = createNode(AST::NodeType::INT);
     arg1->intValue = 1;
 
-    auto arg2 = createNode(Parser::NodeType::INT);
+    auto arg2 = createNode(AST::NodeType::INT);
     arg2->intValue = 2;
 
-    auto functionCallIdentifier = createNode(Parser::NodeType::IDENTIFIER);
+    auto functionCallIdentifier = createNode(AST::NodeType::IDENTIFIER);
     functionCallIdentifier->identifier = "$myFn";
 
-    auto argList = createNode(Parser::NodeType::ARGUMENT_LIST);
+    auto argList = createNode(AST::NodeType::ARGUMENT_LIST);
     argList->children.push_back(std::move(arg1));
     argList->children.push_back(std::move(arg2));
 
-    auto functionCallNode = createNode(Parser::NodeType::CALL);
+    auto functionCallNode = createNode(AST::NodeType::CALL);
     functionCallNode->children.push_back(std::move(functionCallIdentifier));
     functionCallNode->children.push_back(std::move(argList));
 
-    auto string1 = createNode(Parser::NodeType::STRING);
+    auto string1 = createNode(AST::NodeType::STRING);
     string1->identifier = "LDI";
 
-    auto string2 = createNode(Parser::NodeType::STRING);
+    auto string2 = createNode(AST::NodeType::STRING);
     string2->identifier = "R1";
 
-    auto concat1 = createNode(Parser::NodeType::CONCAT);
+    auto concat1 = createNode(AST::NodeType::CONCAT);
     concat1->children.push_back(std::move(string1));
     concat1->children.push_back(std::move(string2));
 
-    auto concat2 = createNode(Parser::NodeType::CONCAT);
+    auto concat2 = createNode(AST::NodeType::CONCAT);
     concat2->children.push_back(std::move(concat1));
     concat2->children.push_back(std::move(functionCallNode));
-    
-    auto line2 = createNode(Parser::NodeType::LINE);
+
+    auto line2 = createNode(AST::NodeType::LINE);
     line2->children.push_back(std::move(concat2));
 
-    auto program = createNode(Parser::NodeType::PROGRAM);
+    auto program = createNode(AST::NodeType::PROGRAM);
     program->children.push_back(std::move(line1));
     program->children.push_back(std::move(line2));
 
