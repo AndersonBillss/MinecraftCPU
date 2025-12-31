@@ -33,7 +33,7 @@ bool Parser::_functionExists(std::string functionName)
     auto fn = _functions.find(functionName);
     return fn != _functions.end();
 }
-std::unique_ptr<Parser::AST> Parser::_handleFunction(std::string functionName)
+std::unique_ptr<AST::Node> Parser::_handleFunction(std::string functionName)
 {
     //   Function AST structure
     //
@@ -42,18 +42,18 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction(std::string functionName)
     //        |           |
     //   parameters     block
 
-    auto functionNode = std::make_unique<Parser::AST>(Parser::AST{
+    auto functionNode = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
         {0, 0},
-        Parser::NodeType::FUNCTION,
+        AST::NodeType::FUNCTION,
         {},
         "",
         0});
 
-    auto parameterNode = std::make_unique<Parser::AST>(Parser::AST{
+    auto parameterNode = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex + 2].begin,
         {0, 0},
-        Parser::NodeType::PARAMETER_LIST,
+        AST::NodeType::PARAMETER_LIST,
         {},
         "",
         0});
@@ -68,10 +68,10 @@ std::unique_ptr<Parser::AST> Parser::_handleFunction(std::string functionName)
                                    _tokens[_currIndex].end,
                                    "Function terminated too soon");
         }
-        auto param = std::make_unique<Parser::AST>(Parser::AST{
+        auto param = std::make_unique<AST::Node>(AST::Node{
             _tokens[_currIndex].begin,
             _tokens[_currIndex].end,
-            Parser::NodeType::IDENTIFIER,
+            AST::NodeType::IDENTIFIER,
             {},
             _tokens[_currIndex].data,
             0});
@@ -96,12 +96,12 @@ bool Parser::_isFunctionCallEndingNonterminal()
     return currToken.type != Lexer::TokenType::SYMBOL && currToken.type != Lexer::VALUE;
 }
 
-std::unique_ptr<Parser::AST> Parser::_handleFunctionCall()
+std::unique_ptr<AST::Node> Parser::_handleFunctionCall()
 {
-    auto functionCallNode = std::make_unique<Parser::AST>(Parser::AST{
+    auto functionCallNode = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
         {0, 0},
-        Parser::NodeType::CALL,
+        AST::NodeType::CALL,
         {},
         "",
         0});
@@ -116,10 +116,10 @@ std::unique_ptr<Parser::AST> Parser::_handleFunctionCall()
                                "Function does not exist: '" + functionName + "'");
     }
 
-    auto functionIdentifier = std::make_unique<Parser::AST>(Parser::AST{
+    auto functionIdentifier = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
         {0, 0},
-        Parser::NodeType::IDENTIFIER,
+        AST::NodeType::IDENTIFIER,
         {},
         _tokens[_currIndex].data,
         0});
@@ -128,10 +128,10 @@ std::unique_ptr<Parser::AST> Parser::_handleFunctionCall()
 
     functionCallNode->children.push_back(std::move(functionIdentifier));
 
-    auto argList = std::make_unique<Parser::AST>(Parser::AST{
+    auto argList = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
         {0, 0},
-        Parser::NodeType::ARGUMENT_LIST,
+        AST::NodeType::ARGUMENT_LIST,
         {},
         "",
         0});
@@ -143,7 +143,7 @@ std::unique_ptr<Parser::AST> Parser::_handleFunctionCall()
     return functionCallNode;
 }
 
-std::unique_ptr<Parser::AST> Parser::_handleAssignment()
+std::unique_ptr<AST::Node> Parser::_handleAssignment()
 {
     // Assignment AST structure
     //
@@ -174,18 +174,18 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
                                "Label not assigned to value");
     }
 
-    auto assignmentNode = std::make_unique<Parser::AST>(Parser::AST{
+    auto assignmentNode = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
         {0, 0},
-        Parser::NodeType::ASSIGNMENT,
+        AST::NodeType::ASSIGNMENT,
         {},
         "",
         0});
 
-    auto labelNode = std::make_unique<Parser::AST>(Parser::AST{
+    auto labelNode = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
         {0, 0},
-        Parser::NodeType::IDENTIFIER,
+        AST::NodeType::IDENTIFIER,
         {},
         _tokens[_currIndex].data,
         0});
@@ -203,12 +203,12 @@ std::unique_ptr<Parser::AST> Parser::_handleAssignment()
     }
     return assignmentNode;
 }
-std::unique_ptr<Parser::AST> Parser::_handleParentheses()
+std::unique_ptr<AST::Node> Parser::_handleParentheses()
 {
-    auto blockNode = std::make_unique<Parser::AST>(Parser::AST{
+    auto blockNode = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
         {0, 0},
-        Parser::NodeType::BLOCK,
+        AST::NodeType::BLOCK,
         {},
         "",
         0});
@@ -243,19 +243,19 @@ std::unique_ptr<Parser::AST> Parser::_handleParentheses()
     return blockNode;
 }
 
-int operatorPrecedence(Parser::NodeType opType)
+int operatorPrecedence(AST::NodeType opType)
 {
-    const std::vector<std::unordered_set<Parser::NodeType>> orderOfOperations = {
-        {Parser::NodeType::MULTIPLY, Parser::NodeType::DIVIDE},
-        {Parser::NodeType::ADD, Parser::NodeType::SUB},
-        {Parser::NodeType::AND},
-        {Parser::NodeType::XOR},
-        {Parser::NodeType::OR},
-        {Parser::NodeType::CONCAT},
+    const std::vector<std::unordered_set<AST::NodeType>> orderOfOperations = {
+        {AST::NodeType::MULTIPLY, AST::NodeType::DIVIDE},
+        {AST::NodeType::ADD, AST::NodeType::SUB},
+        {AST::NodeType::AND},
+        {AST::NodeType::XOR},
+        {AST::NodeType::OR},
+        {AST::NodeType::CONCAT},
     };
     for (size_t i = 0; i < orderOfOperations.size(); i++)
     {
-        std::unordered_set<Parser::NodeType> set = orderOfOperations[i];
+        std::unordered_set<AST::NodeType> set = orderOfOperations[i];
         auto it = set.find(opType);
         if (it != set.end())
             return orderOfOperations.size() - i; // Operation is found
@@ -263,20 +263,20 @@ int operatorPrecedence(Parser::NodeType opType)
     return 0;
 }
 
-Parser::NodeType operatorType(Lexer::Token token)
+AST::NodeType operatorType(Lexer::Token token)
 {
     if (token.type != Lexer::TokenType::OPERATOR)
     {
-        return Parser::NodeType::CONCAT;
+        return AST::NodeType::CONCAT;
     }
-    const std::unordered_map<std::string, Parser::NodeType> stringToOperator = {
-        {"*", Parser::NodeType::MULTIPLY},
-        {"/", Parser::NodeType::DIVIDE},
-        {"+", Parser::NodeType::ADD},
-        {"-", Parser::NodeType::SUB},
-        {"&", Parser::NodeType::AND},
-        {"^", Parser::NodeType::XOR},
-        {"|", Parser::NodeType::OR},
+    const std::unordered_map<std::string, AST::NodeType> stringToOperator = {
+        {"*", AST::NodeType::MULTIPLY},
+        {"/", AST::NodeType::DIVIDE},
+        {"+", AST::NodeType::ADD},
+        {"-", AST::NodeType::SUB},
+        {"&", AST::NodeType::AND},
+        {"^", AST::NodeType::XOR},
+        {"|", AST::NodeType::OR},
     };
 
     auto it = stringToOperator.find(token.data);
@@ -308,7 +308,7 @@ int parseNumeric(Lexer::Token token)
 }
 
 /// @brief Returns the next operand token and advances the current index
-std::unique_ptr<Parser::AST> Parser::_parseAtom()
+std::unique_ptr<AST::Node> Parser::_parseAtom()
 {
     Lexer::Token token = _tokens[_currIndex];
     if (token.type == Lexer::TokenType::SYMBOL && _functionExists(token.data))
@@ -320,18 +320,18 @@ std::unique_ptr<Parser::AST> Parser::_parseAtom()
         return _handleParentheses();
     }
 
-    Parser::NodeType nodeType;
+    AST::NodeType nodeType;
     int intValue = 0;
     std::string stringValue = "";
     if (token.type == Lexer::TokenType::SYMBOL)
     {
-        nodeType = Parser::NodeType::IDENTIFIER;
+        nodeType = AST::NodeType::IDENTIFIER;
         stringValue = token.data;
     }
     else
     {
-        nodeType = ParseUtils::isNumeric(token.data) ? Parser::NodeType::INT : Parser::NodeType::STRING;
-        if (nodeType == Parser::NodeType::INT)
+        nodeType = ParseUtils::isNumeric(token.data) ? AST::NodeType::INT : AST::NodeType::STRING;
+        if (nodeType == AST::NodeType::INT)
         {
             intValue = parseNumeric(token);
         }
@@ -341,7 +341,7 @@ std::unique_ptr<Parser::AST> Parser::_parseAtom()
         }
     }
 
-    auto operandNode = std::make_unique<Parser::AST>(Parser::AST{
+    auto operandNode = std::make_unique<AST::Node>(AST::Node{
         token.begin,
         token.end,
         nodeType,
@@ -353,11 +353,11 @@ std::unique_ptr<Parser::AST> Parser::_parseAtom()
     return operandNode;
 }
 
-Parser::NodeType Parser::_handleOpType()
+AST::NodeType Parser::_handleOpType()
 {
     if (_currIndex >= _tokens.size())
     {
-        return Parser::NodeType::UNDEFINED;
+        return AST::NodeType::UNDEFINED;
     }
     auto token = _tokens[_currIndex];
     if (token.type == Lexer::TokenType::OPERATOR)
@@ -371,9 +371,9 @@ Parser::NodeType Parser::_handleOpType()
         token.type == Lexer::TokenType::OPENINGPARENTHESE ||
         token.type == Lexer::TokenType::LOCATIONMARKER)
     {
-        return Parser::NodeType::CONCAT;
+        return AST::NodeType::CONCAT;
     }
-    return Parser::NodeType::UNDEFINED;
+    return AST::NodeType::UNDEFINED;
 }
 
 bool Parser::_isExpressionEndingNonterminal()
@@ -398,7 +398,7 @@ bool Parser::_isExpressionEndingNonterminal()
     return type == Lexer::TokenType::CLOSINGPARENTHESE;
 }
 
-std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Parser::AST> lhs, int minPrecedence)
+std::unique_ptr<AST::Node> Parser::_handleExpressionHelper(std::unique_ptr<AST::Node> lhs, int minPrecedence)
 {
     if (_isExpressionEndingNonterminal())
     {
@@ -438,10 +438,10 @@ std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Par
                 break;
             }
         }
-        std::vector<std::unique_ptr<Parser::AST>> operands = {};
+        std::vector<std::unique_ptr<AST::Node>> operands = {};
         operands.push_back(std::move(lhs));
         operands.push_back(std::move(rhs));
-        lhs = std::make_unique<Parser::AST>(Parser::AST{
+        lhs = std::make_unique<AST::Node>(AST::Node{
             lookahead.begin,
             {0, 0},
             operatorType(op),
@@ -451,22 +451,22 @@ std::unique_ptr<Parser::AST> Parser::_handleExpressionHelper(std::unique_ptr<Par
     }
     return lhs;
 }
-std::unique_ptr<Parser::AST> Parser::_handleExpression()
+std::unique_ptr<AST::Node> Parser::_handleExpression()
 {
     return _handleExpressionHelper(_parseAtom(), 0);
 }
 
-std::unique_ptr<Parser::AST> Parser::_handleLine()
+std::unique_ptr<AST::Node> Parser::_handleLine()
 {
-    std::unique_ptr<Parser::AST> lineNode = std::make_unique<Parser::AST>(Parser::AST{
+    std::unique_ptr<AST::Node> lineNode = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
         {0, 0},
-        Parser::NodeType::LINE,
+        AST::NodeType::LINE,
         {},
         "",
         0});
 
-    std::unique_ptr<Parser::AST> node;
+    std::unique_ptr<AST::Node> node;
     if (_isAssignment())
     {
         node = _handleAssignment();
@@ -480,13 +480,13 @@ std::unique_ptr<Parser::AST> Parser::_handleLine()
     return lineNode;
 }
 
-std::unique_ptr<Parser::AST> Parser::parseTokens(std::vector<Lexer::Token> &tokens)
+std::unique_ptr<AST::Node> Parser::parseTokens(std::vector<Lexer::Token> &tokens)
 {
     this->_tokens = tokens;
-    _root = std::make_unique<Parser::AST>(
-        Parser::AST{tokens[_currIndex].begin,
+    _root = std::make_unique<AST::Node>(
+        AST::Node{tokens[_currIndex].begin,
                     {0, 0},
-                    Parser::NodeType::PROGRAM,
+                    AST::NodeType::PROGRAM,
                     {},
                     "",
                     0});

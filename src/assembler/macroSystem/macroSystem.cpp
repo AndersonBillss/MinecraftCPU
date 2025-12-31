@@ -2,7 +2,6 @@
 #include "../../utils/runtimeError.hpp"
 #include "../../utils/syntaxError.hpp"
 #include "../../utils/stringUtils.hpp"
-#include "oldLexer.hpp"
 #include "operations.hpp"
 
 MacroSystem::MacroSystem()
@@ -28,7 +27,7 @@ void MacroSystem::popStack()
     _currentStack--;
 }
 
-void MacroSystem::setVariable(std::string symbol, Parser::AST *value, size_t stackIndex)
+void MacroSystem::setVariable(std::string symbol, AST::Node *value, size_t stackIndex)
 {
     VariableMap &scope = _variables[0];
     auto it = scope.find(symbol);
@@ -42,12 +41,12 @@ void MacroSystem::setVariable(std::string symbol, Parser::AST *value, size_t sta
     }
 }
 
-Parser::AST *MacroSystem::getVariable(std::string symbol)
+AST::Node *MacroSystem::getVariable(std::string symbol)
 {
     return _getVariableHelper(symbol, _currentStack);
 }
 
-Parser::AST *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
+AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
 {
     VariableMap &scope = _variables[stackIndex];
     auto it = scope.find(symbol);
