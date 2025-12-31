@@ -39,12 +39,10 @@ void Lexer::_pushToken(std::string data, TokenType type)
 {
     SourceLocation begin = _currLocation;
     _advanceIndex(data.size() - 1);
-    _tokens.push_back({
-        begin : begin,
-        end : _currLocation,
-        type : type,
-        data : data
-    });
+    _tokens.push_back({begin,
+                       _currLocation,
+                       type,
+                       data});
     _advanceIndex(1);
 }
 
@@ -143,9 +141,8 @@ std::vector<Lexer::Token> Lexer::tokenize(const std::string &block)
 {
     _currIndex = 0;
     _currLocation = {
-        line : 0,
-        column : 0
-    };
+        0,
+        0};
     _endIndex = block.size();
     _sourceCode = block;
     while (_currIndex < _endIndex)
