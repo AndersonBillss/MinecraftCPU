@@ -12,7 +12,6 @@ public:
         OPERATOR,
         SYMBOL,
         VALUE,
-        LOCATIONMARKER,
         OPENINGPARENTHESE,
         CLOSINGPARENTHESE,
         ENDLINE

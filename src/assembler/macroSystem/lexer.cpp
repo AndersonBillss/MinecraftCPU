@@ -89,26 +89,6 @@ void Lexer::_handleFullWord()
     _pushToken(fullWord, type);
 }
 
-void Lexer::_handleLocationMarker()
-{
-    std::string fullWord = "";
-    size_t i = _currIndex;
-    while (i < _endIndex)
-    {
-        if (
-            (std::isspace(_sourceCode[i])) ||
-            (i >= _endIndex))
-        {
-            TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
-            _pushToken(fullWord, t);
-        }
-        fullWord += _sourceCode[i];
-        i++;
-    }
-    TokenType t = _sourceCode[i] == '$' ? TokenType::SYMBOL : TokenType::VALUE;
-    _pushToken(fullWord, t);
-}
-
 void Lexer::_handleComment()
 {
     for (size_t i = _currIndex; i < _endIndex; i++)
@@ -154,10 +134,6 @@ std::vector<Lexer::Token> Lexer::tokenize(const std::string &block)
         else if (stringUtils::subSectionEqual(_sourceCode, _currIndex, "//"))
         {
             _handleComment();
-        }
-        else if (_sourceCode[_currIndex] == '.')
-        {
-            _handleLocationMarker();
         }
         else if (operatorTokens.find(_sourceCode[_currIndex]) != operatorTokens.end())
         {

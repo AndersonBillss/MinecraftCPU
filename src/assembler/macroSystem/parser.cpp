@@ -368,8 +368,7 @@ AST::NodeType Parser::_handleOpType()
     else if (
         token.type == Lexer::TokenType::SYMBOL ||
         token.type == Lexer::TokenType::VALUE ||
-        token.type == Lexer::TokenType::OPENINGPARENTHESE ||
-        token.type == Lexer::TokenType::LOCATIONMARKER)
+        token.type == Lexer::TokenType::OPENINGPARENTHESE)
     {
         return AST::NodeType::CONCAT;
     }
@@ -485,11 +484,11 @@ std::unique_ptr<AST::Node> Parser::parseTokens(std::vector<Lexer::Token> &tokens
     this->_tokens = tokens;
     _root = std::make_unique<AST::Node>(
         AST::Node{tokens[_currIndex].begin,
-                    {0, 0},
-                    AST::NodeType::PROGRAM,
-                    {},
-                    "",
-                    0});
+                  {0, 0},
+                  AST::NodeType::PROGRAM,
+                  {},
+                  "",
+                  0});
 
     _currIndex = 0;
     while (_currIndex < _tokens.size())
