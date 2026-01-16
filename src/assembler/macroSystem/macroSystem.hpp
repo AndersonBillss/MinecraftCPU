@@ -12,9 +12,8 @@ class MacroSystem
 {
 public:
     using VariableMap = std::unordered_map<std::string, AST::Node *>;
-    MacroSystem();
+    MacroSystem(AST::Node *node);
 
-    MacroSystem setASTNode(AST::Node *node);
     std::string getLine(const std::string &block);
 
     void setVariable(std::string symbol, AST::Node *value, size_t stackIndex = 0);

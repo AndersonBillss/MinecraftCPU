@@ -4,8 +4,9 @@
 #include "../../utils/stringUtils.hpp"
 #include "operations.hpp"
 
-MacroSystem::MacroSystem()
+MacroSystem::MacroSystem(AST::Node *node)
 {
+    _astNode = node;
     _currentStack = -1; // pushStack automatically increments this
     pushStack();
 }
@@ -63,8 +64,3 @@ AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex
         return _getVariableHelper(symbol, 0);
     }
 }
-
-std::string MacroSystem::evaluate(const std::string &block)
-{
-    return "";
-};
