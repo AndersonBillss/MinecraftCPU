@@ -7,8 +7,21 @@
 MacroSystem::MacroSystem(AST::Node *node)
 {
     _astNode = node;
+    _astStack.push(AstLocation{
+        node,
+        0});
     _currentStack = -1; // pushStack automatically increments this
     pushStack();
+}
+
+std::string MacroSystem::getLine()
+{
+    auto currNode = _getCurrNode();
+
+    if (currNode->nodeType == AST::NodeType::ASSIGNMENT)
+    {
+        
+    }
 }
 
 void MacroSystem::pushStack()
@@ -26,6 +39,11 @@ void MacroSystem::popStack()
     }
     _variables.pop_back();
     _currentStack--;
+}
+
+bool MacroSystem::done()
+{
+    return _astStack.size() == 0;
 }
 
 void MacroSystem::setVariable(std::string symbol, AST::Node *value, size_t stackIndex)
@@ -63,4 +81,11 @@ AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex
         }
         return _getVariableHelper(symbol, 0);
     }
+}
+
+AST::Node *MacroSystem::_getCurrNode()
+{
+    auto loc = this->_astStack.top();
+    auto child = loc.node->children[loc.index].get();
+    return child;
 }

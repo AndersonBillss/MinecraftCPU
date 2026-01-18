@@ -6,7 +6,16 @@
 
 TEST_CASE("MacroSystem stores variables across stacks")
 {
-    MacroSystem program;
+    std::unique_ptr<AST::Node> node = std::make_unique<AST::Node>(AST::Node{
+        begin : {0, 0},
+        end : {0, 0},
+        nodeType: AST::NodeType::PROGRAM,
+        {},
+        "",
+        0
+    });
+    MacroSystem program(node.get());
+
     auto val1 = createNode(AST::NodeType::INT);
     val1->intValue = 43;
     program.setVariable("$test1", val1.get());

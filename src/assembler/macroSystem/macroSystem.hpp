@@ -14,13 +14,15 @@ public:
     using VariableMap = std::unordered_map<std::string, AST::Node *>;
     MacroSystem(AST::Node *node);
 
-    std::string getLine(const std::string &block);
+    std::string getLine();
 
     void setVariable(std::string symbol, AST::Node *value, size_t stackIndex = 0);
     AST::Node *getVariable(std::string symbol);
 
     void pushStack();
     void popStack();
+
+    bool done();
 
 private:
     struct AstLocation
@@ -31,9 +33,10 @@ private:
 
     std::stack<AstLocation> _astStack;
 
-    AST::Node * _astNode;
+    AST::Node *_astNode;
     std::vector<VariableMap> _variables;
     size_t _currentStack;
 
     AST::Node *_getVariableHelper(std::string symbol, size_t stackIndex = 0);
+    AST::Node *_getCurrNode();
 };
