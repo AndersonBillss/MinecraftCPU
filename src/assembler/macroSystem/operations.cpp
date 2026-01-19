@@ -17,86 +17,82 @@ Operand mulStrInt(std::string a, unsigned int b)
 }
 Operand mulOperation(Operand a, Operand b)
 {
-    if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<unsigned int>(b))
+    if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b))
     {
-        return std::get<unsigned int>(a) * std::get<unsigned int>(b);
+        return std::get<int>(a) * std::get<int>(b);
     }
-    else if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<std::string>(b))
+    else if (std::holds_alternative<int>(a) && std::holds_alternative<std::string>(b))
     {
-        return mulStrInt(std::get<std::string>(b), std::get<unsigned int>(a));
+        return mulStrInt(std::get<std::string>(b), std::get<int>(a));
     }
-    else if (std::holds_alternative<std::string>(a) && std::holds_alternative<unsigned int>(b))
+    else if (std::holds_alternative<std::string>(a) && std::holds_alternative<int>(b))
     {
-        return mulStrInt(std::get<std::string>(a), std::get<unsigned int>(b));
+        return mulStrInt(std::get<std::string>(a), std::get<int>(b));
     }
     throw TypeError("Cannot multiply two strings together");
 
-    return (unsigned int)0;
+    return 0;
 }
 
 Operand divOperation(Operand a, Operand b)
 {
-    if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<unsigned int>(b))
+    if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b))
     {
-        return std::get<unsigned int>(a) / std::get<unsigned int>(b);
+        return std::get<int>(a) / std::get<int>(b);
     }
     throw TypeError("Can only divide two integers");
 }
 
 Operand addOperation(Operand a, Operand b)
 {
-    if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<unsigned int>(b))
+    if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b))
     {
-        return std::get<unsigned int>(a) + std::get<unsigned int>(b);
+        return std::get<int>(a) + std::get<int>(b);
     }
-    else if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<std::string>(b))
+    else if (std::holds_alternative<int>(a) && std::holds_alternative<std::string>(b))
     {
-        return std::get<std::string>(b) + std::to_string(std::get<unsigned int>(a));
+        return std::get<std::string>(b) + std::to_string(std::get<int>(a));
     }
-    else if (std::holds_alternative<std::string>(a) && std::holds_alternative<unsigned int>(b))
+    else if (std::holds_alternative<std::string>(a) && std::holds_alternative<int>(b))
     {
-        return std::get<std::string>(a) + std::to_string(std::get<unsigned int>(b));
+        return std::get<std::string>(a) + std::to_string(std::get<int>(b));
     }
     return std::get<std::string>(a) + std::get<std::string>(b);
 }
 
 Operand subOperation(Operand a, Operand b)
 {
-    if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<unsigned int>(b))
+    if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b))
     {
-        int result = std::get<unsigned int>(a) - std::get<unsigned int>(b);
-        while (result < 0)
-        {
-            result = 256 + result;
-        }
-        return (unsigned int)result;
+        int result = std::get<int>(a) - std::get<int>(b);
+        return result;
     }
     throw TypeError("Can only subtract two integers");
 }
 
 Operand orOperation(Operand a, Operand b)
 {
-    if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<unsigned int>(b))
+    if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b))
     {
-        return std::get<unsigned int>(a) | std::get<unsigned int>(b);
+        return std::get<int>(a) | std::get<int>(b);
     }
     throw TypeError("Can only OR two integers together");
 }
 
 Operand andOperation(Operand a, Operand b)
 {
-    if (std::holds_alternative<unsigned int>(a) && std::holds_alternative<unsigned int>(b))
+    if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b))
     {
-        return std::get<unsigned int>(a) & std::get<unsigned int>(b);
+        return std::get<int>(a) & std::get<int>(b);
     }
     throw TypeError("Can only AND two integers together");
 }
 
-std::unordered_map<std::string, std::function<Operand(Operand, Operand)>> operations = {
-    {"*", mulOperation},
-    {"/", divOperation},
-    {"+", addOperation},
-    {"-", subOperation},
-    {"|", orOperation},
-    {"&", andOperation},
+std::unordered_map<AST::NodeType, std::function<Operand(Operand, Operand)>> operations = {
+    {AST::NodeType::MULTIPLY, mulOperation},
+    {AST::NodeType::DIVIDE, divOperation},
+    {AST::NodeType::ADD, addOperation},
+    {AST::NodeType::SUB, subOperation},
+    {AST::NodeType::OR, orOperation},
+    {AST::NodeType::AND, andOperation},
 };

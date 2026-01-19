@@ -3,7 +3,7 @@
 #include "../../utils/syntaxError.hpp"
 #include "../../utils/stringUtils.hpp"
 #include "oldLexer.hpp"
-#include "operations.hpp"
+#include "oldOperations.hpp"
 
 OldMacroSystem::OldMacroSystem()
 {

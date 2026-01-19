@@ -1,5 +1,8 @@
-#include "oldMacroSystem.hpp"
 #include <unordered_map>
+#include <variant>
+#include <string>
+#include <functional>
+#include "AST.hpp"
 
-extern std::unordered_map<std::string, std::function<Operand(Operand, Operand)>> operations;
-Operand addOperation(Operand a, Operand b);
+using Operand = std::variant<int, std::string>; 
+extern std::unordered_map<AST::NodeType, std::function<Operand(Operand, Operand)>> operations;
