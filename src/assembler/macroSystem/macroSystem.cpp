@@ -70,7 +70,10 @@ std::string MacroSystem::getLine()
 {
     auto currNode = _getCurrNode();
 
-    auto result = evaluateExpression(currNode->children[0]->children[0].get());
+    auto result = evaluateExpression(currNode->children[0].get());
+
+    _astStack.pop();
+
     if(std::holds_alternative<int>(result)) {
         return std::to_string(std::get<int>(result));
     } else {

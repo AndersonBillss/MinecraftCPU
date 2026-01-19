@@ -92,7 +92,7 @@ Operand andOperation(Operand a, Operand b)
     throw TypeError("Can only AND two integers together");
 }
 
-std::unordered_map<std::string, std::function<Operand(Operand, Operand)>> operations = {
+std::unordered_map<std::string, std::function<Operand(Operand, Operand)>> oldOperations = {
     {"*", mulOperation},
     {"/", divOperation},
     {"+", addOperation},

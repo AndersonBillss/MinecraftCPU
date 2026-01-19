@@ -247,8 +247,8 @@ Operand OldMacroSystem::_handleEvaluation(std::vector<std::string> &tokens, size
     index++;
     while (index < tokens.size() && tokens[index] != "\n")
     {
-        auto it = operations.find(tokens[index]);
-        if (it != operations.end())
+        auto it = oldOperations.find(tokens[index]);
+        if (it != oldOperations.end())
         {
             index++;
             if ((tokens[index] == "\n") || (tokens.size() < index))
