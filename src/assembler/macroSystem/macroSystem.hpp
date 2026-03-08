@@ -31,7 +31,7 @@ private:
         size_t index;
     };
 
-    std::stack<AstLocation> _astStack;
+    std::stack<AstLocation> _callStack;
 
     AST::Node *_astNode;
     std::vector<VariableMap> _variables;
@@ -39,4 +39,5 @@ private:
 
     AST::Node *_getVariableHelper(std::string symbol, size_t stackIndex = 0);
     AST::Node *_getCurrNode();
+    void _nextNode();
 };

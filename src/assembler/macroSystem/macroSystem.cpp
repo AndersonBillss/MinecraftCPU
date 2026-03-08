@@ -55,11 +55,10 @@ Operand evaluateExpression(AST::Node *node)
     }
 }
 
-
 MacroSystem::MacroSystem(AST::Node *node)
 {
     _astNode = node;
-    _astStack.push(AstLocation{
+    _callStack.push(AstLocation{
         node,
         0});
     _currentStack = -1; // pushStack automatically increments this
@@ -72,12 +71,15 @@ std::string MacroSystem::getLine()
 
     auto result = evaluateExpression(currNode->children[0].get());
 
-    _astStack.pop();
+    _nextNode();
 
-    if(std::holds_alternative<int>(result)) {
-        return std::to_string(std::get<int>(result));
-    } else {
-        return std::get<std::string>(result);
+    if (std::holds_alternative<int>(result))
+    {
+        return std::to_string(std::get<int>(result)) + "\n";
+    }
+    else
+    {
+        return std::get<std::string>(result) + "\n";
     }
 }
 
@@ -100,7 +102,7 @@ void MacroSystem::popStack()
 
 bool MacroSystem::done()
 {
-    return _astStack.size() == 0;
+    return _callStack.size() == 0;
 }
 
 void MacroSystem::setVariable(std::string symbol, AST::Node *value, size_t stackIndex)
@@ -142,7 +144,21 @@ AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex
 
 AST::Node *MacroSystem::_getCurrNode()
 {
-    auto loc = this->_astStack.top();
+    auto loc = this->_callStack.top();
     auto child = loc.node->children[loc.index].get();
     return child;
+}
+
+void MacroSystem::_nextNode()
+{
+    auto &loc = this->_callStack.top();
+    bool isLastNode = loc.index >= loc.node->children.size() - 1;
+    if (isLastNode)
+    {
+        _callStack.pop();
+    }
+    else
+    {
+        loc.index++;
+    }
 }

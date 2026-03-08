@@ -67,6 +67,16 @@ TEST_CASE("MacroSystem stores variables across stacks")
 TEST_CASE("MacroSystem evaluates simple expressions")
 {
     std::string sourceCode = "1 + 2";
-    std::string result = "3";
+    std::string result = "3\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem evaluates multiple lines")
+{
+    std::string sourceCode = R"(
+        1 + 2
+        2 + 3
+    )";
+    std::string result = "3\n5\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
