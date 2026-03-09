@@ -16,7 +16,7 @@ std::string evaluateMacroHelper(std::string &sourceCode)
     std::string result = "";
     auto macroSystem = MacroSystem(ast.get());
     while (!macroSystem.done())
-        result += macroSystem.getLine();
+        result += macroSystem.getLine() + "\n";
 
     return result;
 }
@@ -78,5 +78,15 @@ TEST_CASE("MacroSystem evaluates multiple lines")
         2 + 3
     )";
     std::string result = "3\n5\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem stores variables")
+{
+    std::string sourceCode = R"(
+        $hello = 1
+        $hello
+    )";
+    std::string result = "1\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }

@@ -4,29 +4,35 @@
 #include "../../utils/stringUtils.hpp"
 #include "../../utils/typeError.hpp"
 #include "compilationError.hpp"
-#include "operations.hpp"
 #include <variant>
 
-Operand evaluateExpression(AST::Node *node)
+Operand getNodeValue(AST::Node *node)
+{
+    if (node->nodeType == AST::NodeType::INT)
+    {
+        return node->intValue;
+    }
+    else if (node->nodeType == AST::NodeType::STRING)
+    {
+        return node->identifier;
+    }
+    throw CompilationError(ErrorStage::Codegen,
+                           node->begin,
+                           node->end,
+                           "Operand cannot be part of an expression");
+}
+
+Operand MacroSystem::_evaluateExpression(AST::Node *node)
 {
     auto it = operations.find(node->nodeType);
     if (it == operations.end())
     {
-        if (node->nodeType == AST::NodeType::INT)
+        if (node->nodeType == AST::NodeType::IDENTIFIER)
         {
-            return node->intValue;
+            AST::Node *variableValue = getVariable(node->identifier);
+            return getNodeValue(variableValue);
         }
-        else if (node->nodeType == AST::NodeType::STRING)
-        {
-            return node->identifier;
-        }
-        else
-        {
-            throw CompilationError(ErrorStage::Codegen,
-                                   node->begin,
-                                   node->end,
-                                   "Operand cannot be part of an expression");
-        }
+        return getNodeValue(node);
     }
 
     if (node->children.size() != 2)
@@ -37,8 +43,8 @@ Operand evaluateExpression(AST::Node *node)
                                "Expressions must have two operands");
     }
 
-    auto lhs = evaluateExpression(node->children[0].get());
-    auto rhs = evaluateExpression(node->children[1].get());
+    auto lhs = _evaluateExpression(node->children[0].get());
+    auto rhs = _evaluateExpression(node->children[1].get());
 
     auto fn = it->second;
     try
@@ -68,18 +74,28 @@ MacroSystem::MacroSystem(AST::Node *node)
 std::string MacroSystem::getLine()
 {
     auto currNode = _getCurrNode();
+    auto firstChild = currNode->children[0].get();
 
-    auto result = evaluateExpression(currNode->children[0].get());
+    if (firstChild->nodeType == AST::NodeType::ASSIGNMENT)
+    {
+        std::string identifier = firstChild->children[0]->identifier;
+        auto val = firstChild->children[1].get();
+        setVariable(identifier, val);
+        _nextNode();
+        return getLine();
+    }
+
+    auto result = _evaluateExpression(firstChild);
 
     _nextNode();
 
     if (std::holds_alternative<int>(result))
     {
-        return std::to_string(std::get<int>(result)) + "\n";
+        return std::to_string(std::get<int>(result));
     }
     else
     {
-        return std::get<std::string>(result) + "\n";
+        return std::get<std::string>(result);
     }
 }
 

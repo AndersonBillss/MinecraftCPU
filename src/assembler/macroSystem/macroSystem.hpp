@@ -7,6 +7,7 @@
 #include <set>
 #include <functional>
 #include "AST.hpp"
+#include "operations.hpp"
 
 class MacroSystem
 {
@@ -37,6 +38,7 @@ private:
     std::vector<VariableMap> _variables;
     size_t _currentStack;
 
+    Operand _evaluateExpression(AST::Node *node);
     AST::Node *_getVariableHelper(std::string symbol, size_t stackIndex = 0);
     AST::Node *_getCurrNode();
     void _nextNode();
