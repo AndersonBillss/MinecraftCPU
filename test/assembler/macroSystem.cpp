@@ -85,6 +85,13 @@ TEST_CASE("MacroSystem evaluates right-associative expressions", "macroSystem")
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
+TEST_CASE("MacroSystem evaluates expressions mixed with strings", "macroSystem")
+{
+    std::string sourceCode = "LDI R1 1 + 2 * 3 TEST";
+    std::string result = "LDI R1 7 TEST\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
 TEST_CASE("MacroSystem evaluates multiple lines", "macroSystem")
 {
     std::string sourceCode = R"(

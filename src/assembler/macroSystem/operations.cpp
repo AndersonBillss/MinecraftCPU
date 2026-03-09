@@ -4,6 +4,23 @@
 
 namespace Operations
 {
+    Operand concatOperation(Operand a, Operand b)
+    {
+        if (std::holds_alternative<int>(a) && std::holds_alternative<int>(b))
+        {
+            return std::to_string(std::get<int>(a)) + " " + std::to_string(std::get<int>(b));
+        }
+        else if (std::holds_alternative<int>(a) && std::holds_alternative<std::string>(b))
+        {
+            return std::to_string(std::get<int>(a)) + " " + std::get<std::string>(b);
+        }
+        else if (std::holds_alternative<std::string>(a) && std::holds_alternative<int>(b))
+        {
+            return std::get<std::string>(a) + " " + std::to_string(std::get<int>(b));
+        }
+        return std::get<std::string>(a) + " " + std::get<std::string>(b);
+    }
+    
     Operand mulStrInt(std::string a, unsigned int b)
     {
         std::string result = "";
@@ -92,6 +109,7 @@ namespace Operations
 }
 
 std::unordered_map<AST::NodeType, std::function<Operand(Operand, Operand)>> operations = {
+    {AST::NodeType::CONCAT, Operations::concatOperation},
     {AST::NodeType::MULTIPLY, Operations::mulOperation},
     {AST::NodeType::DIVIDE, Operations::divOperation},
     {AST::NodeType::ADD, Operations::addOperation},
