@@ -64,10 +64,24 @@ TEST_CASE("MacroSystem stores variables across stacks", "macroSystem")
     REQUIRE(program.getVariable("$test1")->intValue == 43);
 }
 
+TEST_CASE("MacroSystem evaluates single variabeles", "macroSystem")
+{
+    std::string sourceCode = "1";
+    std::string result = "1\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
 TEST_CASE("MacroSystem evaluates simple expressions", "macroSystem")
 {
     std::string sourceCode = "1 + 2";
     std::string result = "3\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem evaluates right-associative expressions", "macroSystem")
+{
+    std::string sourceCode = "1 + 2 * 3";
+    std::string result = "7\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
