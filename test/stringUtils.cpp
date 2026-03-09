@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-TEST_CASE("StringUtils join", "stringUtils")
+TEST_CASE("StringUtils join", "[stringUtils]")
 {
     std::vector<std::string> testVec;
     std::string expected;
@@ -25,7 +25,7 @@ TEST_CASE("StringUtils join", "stringUtils")
     REQUIRE(stringUtils::join(testVec, delimiter) == expected);
 }
 
-TEST_CASE("StringUtils trim", "stringUtils")
+TEST_CASE("StringUtils trim", "[stringUtils]")
 {
     std::string testString;
     std::string expected;
@@ -59,7 +59,7 @@ TEST_CASE("StringUtils trim", "stringUtils")
     REQUIRE(stringUtils::trim(testString) == expected);
 }
 
-TEST_CASE("StringUtils Split (white space)", "stringUtils")
+TEST_CASE("StringUtils Split (white space)", "[stringUtils]")
 {
     std::string testString;
     std::vector<std::string> expected;
@@ -77,7 +77,7 @@ TEST_CASE("StringUtils Split (white space)", "stringUtils")
     REQUIRE(stringUtils::split(testString) == expected);
 }
 
-TEST_CASE("StringUtils Split (delimiter)", "stringUtils")
+TEST_CASE("StringUtils Split (delimiter)", "[stringUtils]")
 {
     std::string testString;
     std::string delimiter;
@@ -119,7 +119,7 @@ TEST_CASE("StringUtils Split (delimiter)", "stringUtils")
     REQUIRE(stringUtils::split(testString, delimiter) == expected);
 }
 
-TEST_CASE("StringUtils getBlock", "stringUtils")
+TEST_CASE("StringUtils getBlock", "[stringUtils]")
 {
     std::string testString = "Hello, (this is a test string) in parentheses";
     std::string expected = "(this is a test string)";
@@ -141,7 +141,7 @@ TEST_CASE("StringUtils getBlock", "stringUtils")
     REQUIRE(stringUtils::getBlock(testString, "\"", "\"") == expected);
 }
 
-TEST_CASE("StringUtils getOccurrences", "stringUtils")
+TEST_CASE("StringUtils getOccurrences", "[stringUtils]")
 {
     std::string testString = "Hello, this is a test string with some letters";
     std::string subSection = " ";
@@ -154,7 +154,7 @@ TEST_CASE("StringUtils getOccurrences", "stringUtils")
     REQUIRE(stringUtils::getOccurrences(testString, subSection) == expected);
 }
 
-TEST_CASE("StringUtils indexOfFirst", "stringUtils")
+TEST_CASE("StringUtils indexOfFirst", "[stringUtils]")
 {
     std::string testString = "hello 123 543 = 123435 = 2";
     std::string section = "=";
@@ -162,7 +162,7 @@ TEST_CASE("StringUtils indexOfFirst", "stringUtils")
     REQUIRE(stringUtils::indexOfFirst(testString, section) == expected);
 }
 
-TEST_CASE("StringUtils parseEsc", "stringUtils")
+TEST_CASE("StringUtils parseEsc", "[stringUtils]")
 {
     std::string src = "Hello \\n world!";
     std::string expected = "Hello \n world!";

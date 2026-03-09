@@ -25,7 +25,7 @@ std::vector<Lexer::Token> tokenizeHelper(std::string sourceCode)
     return l.tokenize(sourceCode);
 }
 
-TEST_CASE("Tokenize single line", "lexer")
+TEST_CASE("Tokenize single line", "[lexer]")
 {
     std::string sourceCode = R"(
         LDI R1 1
@@ -47,7 +47,7 @@ TEST_CASE("Tokenize single line", "lexer")
     REQUIRE(tokenizeHelper(sourceCode) == expected);
 }
 
-TEST_CASE("Tokenize variable assignment", "lexer")
+TEST_CASE("Tokenize variable assignment", "[lexer]")
 {
     std::string sourceCode = R"(
         $test = 4
@@ -69,7 +69,7 @@ TEST_CASE("Tokenize variable assignment", "lexer")
     REQUIRE(tokenizeHelper(sourceCode) == expected);
 }
 
-TEST_CASE("Tokenize multiple lines", "lexer")
+TEST_CASE("Tokenize multiple lines", "[lexer]")
 {
     std::string sourceCode = R"(
         LDI R1 1
@@ -107,7 +107,7 @@ TEST_CASE("Tokenize multiple lines", "lexer")
     REQUIRE(tokenizeHelper(sourceCode) == expected);
 }
 
-TEST_CASE("Tokenize functions", "lexer")
+TEST_CASE("Tokenize functions", "[lexer]")
 {
     std::string sourceCode = R"(
         LDI R1 1
@@ -166,7 +166,7 @@ TEST_CASE("Tokenize functions", "lexer")
     REQUIRE(tokenizeHelper(sourceCode) == expected);
 }
 
-TEST_CASE("Tokenize parentheses", "lexer")
+TEST_CASE("Tokenize parentheses", "[lexer]")
 {
     std::string sourceCode = R"(
         (hello there)

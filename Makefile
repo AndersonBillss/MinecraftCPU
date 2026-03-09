@@ -39,7 +39,7 @@ run: build
 	$(BIN_DIR)/$(TARGET)$(EXE_SUFFIX) $(RUN_ARGS)
 
 test: build build_test
-	$(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX) $(NAME)
+	$(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX) [$(NAME)]
 
 build: build_lib $(BIN_DIR) $(OBJ_FILES)
 	$(CXX) -o $(BIN_DIR)/$(TARGET)$(EXE_SUFFIX) $(OBJ_FILES) $(CXX_FLAGS) $(CXX_INCLUDE_FLAGS)

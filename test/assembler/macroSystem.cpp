@@ -21,7 +21,7 @@ std::string evaluateMacroHelper(std::string &sourceCode)
     return result;
 }
 
-TEST_CASE("MacroSystem stores variables across stacks", "macroSystem")
+TEST_CASE("MacroSystem stores variables across stacks", "[macroSystem]")
 {
     std::unique_ptr<AST::Node> node = std::make_unique<AST::Node>(AST::Node{
         begin : {0, 0},
@@ -64,35 +64,35 @@ TEST_CASE("MacroSystem stores variables across stacks", "macroSystem")
     REQUIRE(program.getVariable("$test1")->intValue == 43);
 }
 
-TEST_CASE("MacroSystem evaluates single variabeles", "macroSystem")
+TEST_CASE("MacroSystem evaluates single variabeles", "[macroSystem]")
 {
     std::string sourceCode = "1";
     std::string result = "1\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem evaluates simple expressions", "macroSystem")
+TEST_CASE("MacroSystem evaluates simple expressions", "[macroSystem]")
 {
     std::string sourceCode = "1 + 2";
     std::string result = "3\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem evaluates right-associative expressions", "macroSystem")
+TEST_CASE("MacroSystem evaluates right-associative expressions", "[macroSystem]")
 {
     std::string sourceCode = "1 + 2 * 3";
     std::string result = "7\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem evaluates expressions mixed with strings", "macroSystem")
+TEST_CASE("MacroSystem evaluates expressions mixed with strings", "[macroSystem]")
 {
     std::string sourceCode = "LDI R1 1 + 2 * 3 TEST";
     std::string result = "LDI R1 7 TEST\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem evaluates multiple lines", "macroSystem")
+TEST_CASE("MacroSystem evaluates multiple lines", "[macroSystem]")
 {
     std::string sourceCode = R"(
         1 + 2
@@ -102,7 +102,7 @@ TEST_CASE("MacroSystem evaluates multiple lines", "macroSystem")
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem stores variables", "macroSystem")
+TEST_CASE("MacroSystem stores variables", "[macroSystem]")
 {
     std::string sourceCode = R"(
         $hello = 1
