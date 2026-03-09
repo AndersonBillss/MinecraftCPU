@@ -21,7 +21,7 @@ std::string evaluateMacroHelper(std::string &sourceCode)
     return result;
 }
 
-TEST_CASE("MacroSystem stores variables across stacks")
+TEST_CASE("MacroSystem stores variables across stacks", "macroSystem")
 {
     std::unique_ptr<AST::Node> node = std::make_unique<AST::Node>(AST::Node{
         begin : {0, 0},
@@ -64,14 +64,14 @@ TEST_CASE("MacroSystem stores variables across stacks")
     REQUIRE(program.getVariable("$test1")->intValue == 43);
 }
 
-TEST_CASE("MacroSystem evaluates simple expressions")
+TEST_CASE("MacroSystem evaluates simple expressions", "macroSystem")
 {
     std::string sourceCode = "1 + 2";
     std::string result = "3\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem evaluates multiple lines")
+TEST_CASE("MacroSystem evaluates multiple lines", "macroSystem")
 {
     std::string sourceCode = R"(
         1 + 2
@@ -81,7 +81,7 @@ TEST_CASE("MacroSystem evaluates multiple lines")
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem stores variables")
+TEST_CASE("MacroSystem stores variables", "macroSystem")
 {
     std::string sourceCode = R"(
         $hello = 1

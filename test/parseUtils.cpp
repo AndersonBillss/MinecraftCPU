@@ -3,7 +3,7 @@
 #include "catch_amalgamated.hpp"
 #include "../src/utils/parseUtils.hpp"
 
-TEST_CASE("Parse hexadecimal integers")
+TEST_CASE("Parse hexadecimal integers", "parseUtils")
 {
     std::string hexString = "0x3";
     int expected = 0x3;
@@ -30,7 +30,7 @@ TEST_CASE("Parse hexadecimal integers")
     REQUIRE(ParseUtils::parseInt(hexString, 32) == expected);
 }
 
-TEST_CASE("Parse signed hexadecimal integers")
+TEST_CASE("Parse signed hexadecimal integers", "parseUtils")
 {
     std::string hexString = "0xff";
     int expected = (int)(char)0xff;
@@ -45,7 +45,7 @@ TEST_CASE("Parse signed hexadecimal integers")
     REQUIRE(ParseUtils::parseInt(hexString, 8, true) == expected);
 }
 
-TEST_CASE("Parse unsigned hexadecimal integers")
+TEST_CASE("Parse unsigned hexadecimal integers", "parseUtils")
 {
     std::string hexString = "0xff";
     int expected = (int)(unsigned char)0xff;
@@ -60,7 +60,7 @@ TEST_CASE("Parse unsigned hexadecimal integers")
     REQUIRE(ParseUtils::parseInt(hexString, 8, false) == expected);
 }
 
-TEST_CASE("Parse signed binary integers")
+TEST_CASE("Parse signed binary integers", "parseUtils")
 {
     std::string binString = "0b11111111";
     int expected = (int)(char)0b11111111;
@@ -75,7 +75,7 @@ TEST_CASE("Parse signed binary integers")
     REQUIRE(ParseUtils::parseInt(binString, 8, true) == expected);
 }
 
-TEST_CASE("Parse unsigned binary integers")
+TEST_CASE("Parse unsigned binary integers", "parseUtils")
 {
     std::string binString = "0b11111111";
     int expected = (int)(unsigned char)0b11111111;
@@ -90,7 +90,7 @@ TEST_CASE("Parse unsigned binary integers")
     REQUIRE(ParseUtils::parseInt(binString, 8, false) == expected);
 }
 
-TEST_CASE("Parse signed decimal integers")
+TEST_CASE("Parse signed decimal integers", "parseUtils")
 {
     std::string decimalString = "-1";
     int expected = (int)(char)-1;
@@ -109,7 +109,7 @@ TEST_CASE("Parse signed decimal integers")
     REQUIRE(ParseUtils::parseInt(decimalString, 8, true) == expected);
 }
 
-TEST_CASE("Parse unsigned decimal integers")
+TEST_CASE("Parse unsigned decimal integers", "parseUtils")
 {
     std::string decimalString = "-1";
     int expected = (int)(unsigned char)-1;

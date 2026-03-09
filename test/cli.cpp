@@ -30,7 +30,7 @@ Cli::Parsed parseHelper(std::initializer_list<std::string> args, std::function<v
       return options.parse(argv.argc(), argv.argv());
 }
 
-TEST_CASE("CLI flags")
+TEST_CASE("CLI flags", "cli")
 {
       Cli::Parsed parsed;
 

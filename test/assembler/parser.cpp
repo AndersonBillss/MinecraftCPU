@@ -21,7 +21,7 @@ std::unique_ptr<AST::Node> parseWithoutSourceLocationHelper(std::string sourceCo
     return tree;
 }
 
-TEST_CASE("Parse simple addition: 1 + 2")
+TEST_CASE("Parse simple addition: 1 + 2", "parser")
 {
     std::string sourceCode = "1 + 2";
 
@@ -49,7 +49,7 @@ TEST_CASE("Parse simple addition: 1 + 2")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse left-associtive addition: 1 + 2 + 3")
+TEST_CASE("Parse left-associtive addition: 1 + 2 + 3", "parser")
 {
     std::string sourceCode = "1 + 2 + 3";
 
@@ -86,7 +86,7 @@ TEST_CASE("Parse left-associtive addition: 1 + 2 + 3")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse associativity with higher precedence operator: 1 + 2 * 3")
+TEST_CASE("Parse associativity with higher precedence operator: 1 + 2 * 3", "parser")
 {
     std::string sourceCode = "1 + 2 * 3";
 
@@ -123,7 +123,7 @@ TEST_CASE("Parse associativity with higher precedence operator: 1 + 2 * 3")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse associativity with higher and lower precedence operator: 1 + 2 * 3 + 4")
+TEST_CASE("Parse associativity with higher and lower precedence operator: 1 + 2 * 3 + 4", "parser")
 {
     std::string sourceCode = "1 + 2 * 3 + 4";
 
@@ -169,7 +169,7 @@ TEST_CASE("Parse associativity with higher and lower precedence operator: 1 + 2 
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse concatenation expression: 1 2")
+TEST_CASE("Parse concatenation expression: 1 2", "parser")
 {
     std::string sourceCode = "1 2";
 
@@ -192,7 +192,7 @@ TEST_CASE("Parse concatenation expression: 1 2")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse concatenation expression with operators: 1 + 2 3")
+TEST_CASE("Parse concatenation expression with operators: 1 + 2 3", "parser")
 {
     std::string sourceCode = "1 + 2 3";
 
@@ -221,7 +221,7 @@ TEST_CASE("Parse concatenation expression with operators: 1 + 2 3")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse single operand expression: 1")
+TEST_CASE("Parse single operand expression: 1", "parser")
 {
     std::string sourceCode = "1";
 
@@ -237,7 +237,7 @@ TEST_CASE("Parse single operand expression: 1")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse multi-line expression")
+TEST_CASE("Parse multi-line expression", "parser")
 {
     std::string sourceCode = R"(
         1 + 2
@@ -277,7 +277,7 @@ TEST_CASE("Parse multi-line expression")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse single values within parentheses")
+TEST_CASE("Parse single values within parentheses", "parser")
 {
     std::string sourceCode = "(1)";
 
@@ -296,7 +296,7 @@ TEST_CASE("Parse single values within parentheses")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse expression within parentheses")
+TEST_CASE("Parse expression within parentheses", "parser")
 {
     std::string sourceCode = "(1 + 2 * 3)";
 
@@ -329,7 +329,7 @@ TEST_CASE("Parse expression within parentheses")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse expression with lower precedence operators in parentheses")
+TEST_CASE("Parse expression with lower precedence operators in parentheses", "parser")
 {
     std::string sourceCode = "3 * (1 + 2)";
 
@@ -362,7 +362,7 @@ TEST_CASE("Parse expression with lower precedence operators in parentheses")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse variable assigning")
+TEST_CASE("Parse variable assigning", "parser")
 {
     std::string sourceCode = "$a = 4";
 
@@ -385,7 +385,7 @@ TEST_CASE("Parse variable assigning")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse variable assigning multiple lines")
+TEST_CASE("Parse variable assigning multiple lines", "parser")
 {
     std::string sourceCode = R"(
     $a = 4
@@ -425,7 +425,7 @@ TEST_CASE("Parse variable assigning multiple lines")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse expressions across multiple lines")
+TEST_CASE("Parse expressions across multiple lines", "parser")
 {
     std::string sourceCode = R"(
     2
@@ -460,7 +460,7 @@ TEST_CASE("Parse expressions across multiple lines")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse multiple lines in block node")
+TEST_CASE("Parse multiple lines in block node", "parser")
 {
     std::string sourceCode = R"(
         LDI R1 (
@@ -521,7 +521,7 @@ TEST_CASE("Parse multiple lines in block node")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse function")
+TEST_CASE("Parse function", "parser")
 {
     std::string sourceCode = R"(
         $myFn = $1 $2 => $1 * $2
@@ -567,7 +567,7 @@ TEST_CASE("Parse function")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse function calls")
+TEST_CASE("Parse function calls", "parser")
 {
     std::string sourceCode = R"(
         $myFn = $1 $2 => $1 * $2
