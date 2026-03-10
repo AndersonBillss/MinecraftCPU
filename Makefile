@@ -33,18 +33,24 @@ SRC_OBJ_FILES_WITHOUT_MAIN := $(filter-out $(OBJ_DIR)/$(TARGET).o, $(OBJ_FILES))
 LIB_SRC_FILES := $(shell find include -name '*.hpp')
 LIB_OBJ_FILES := $(patsubst $(LIB_DIR)/%.hpp, $(LIB_DIR)/%.hpp.gch, $(LIB_SRC_FILES))
 
+DEBUG ?= 0
+
+ifeq ($(DEBUG),1)
+    CXX_FLAGS += -g -O0
+endif
+
 all: run
 
 run: build
 	$(BIN_DIR)/$(TARGET)$(EXE_SUFFIX) $(RUN_ARGS)
 
-test: build build_test
+test: build_test
 	$(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX) [$(NAME)]
 
 build: build_lib $(BIN_DIR) $(OBJ_FILES)
 	$(CXX) -o $(BIN_DIR)/$(TARGET)$(EXE_SUFFIX) $(OBJ_FILES) $(CXX_FLAGS) $(CXX_INCLUDE_FLAGS)
 
-build_test: $(TEST_BIN_DIR) $(TEST_OBJ_FILES)
+build_test: build $(TEST_BIN_DIR) $(TEST_OBJ_FILES)
 	$(CXX) -o $(TEST_BIN_DIR)/$(TEST_TARGET)$(EXE_SUFFIX) $(TEST_OBJ_FILES) $(SRC_OBJ_FILES_WITHOUT_MAIN) $(CXX_FLAGS) $(CXX_INCLUDE_FLAGS)
 
 build_lib: $(LIB_OBJ_FILES)
