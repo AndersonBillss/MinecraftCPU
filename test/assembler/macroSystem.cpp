@@ -132,3 +132,40 @@ TEST_CASE("MacroSystem evaluates multi-line blocks", "[macroSystem]")
     std::string result = "1\n2\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
+
+TEST_CASE("MacroSystem evaluates multi-line blocks with expressions", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+    (
+        1 + 2
+        2
+    )
+    )";
+    std::string result = "3\n2\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem evaluates multi-line blocks with expressions and variables", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+    (
+        $testNum = 50
+        1 
+        2 + $testNum
+    )
+    )";
+    std::string result = "1\n52\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem evaluates after expressions", "[macroSystem][only]")
+{
+    std::string sourceCode = R"(
+    LDI R1 (
+        $testNum = 50
+        2 + $testNum
+    )
+    )";
+    std::string result = "LDI R1 52\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
