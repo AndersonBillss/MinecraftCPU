@@ -158,7 +158,7 @@ TEST_CASE("MacroSystem evaluates multi-line blocks with expressions and variable
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem evaluates after expressions", "[macroSystem][only]")
+TEST_CASE("MacroSystem evaluates blocks in concat expressions", "[macroSystem]")
 {
     std::string sourceCode = R"(
     LDI R1 (
@@ -167,5 +167,18 @@ TEST_CASE("MacroSystem evaluates after expressions", "[macroSystem][only]")
     )
     )";
     std::string result = "LDI R1 52\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem evaluates outside concat expressions", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+    LDI R1 
+    (
+        $testNum = 50
+        2 + $testNum
+    )
+    )";
+    std::string result = "LDI R1\n52\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
