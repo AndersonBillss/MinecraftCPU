@@ -646,5 +646,26 @@ TEST_CASE("Parse function calls", "[parser]")
     program->children.push_back(std::move(line1));
     program->children.push_back(std::move(line2));
 
+    // PROGRAM:
+    //   LINE:
+    //     ASSIGNMENT:
+    //       IDENTIFIER: $myFn
+    //       FUNCTION:
+    //         PARAMETER_LIST:
+    //           IDENTIFIER: $1
+    //           IDENTIFIER: $2
+    //         MULTIPLY:
+    //           IDENTIFIER: $1
+    //           IDENTIFIER: $2
+    //   LINE:
+    //     CONCAT:
+    //       CONCAT:
+    //         STRING: LDI
+    //         STRING: R1
+    //       CALL:
+    //         IDENTIFIER: $myFn
+    //         ARGUMENT_LIST:
+    //           INT: 1
+    //           INT: 2
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }

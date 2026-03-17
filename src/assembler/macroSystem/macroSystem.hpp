@@ -41,7 +41,9 @@ private:
     std::string _getLineHelper(AST::Node *node);
     Operand _evaluateExpression(AST::Node *node);
     Operand _evaluateBlock(AST::Node *node);
+    Operand _evaluateFunction(AST::Node *node);
     void _evaluateAssignment(AST::Node *node);
+
     AST::Node *_getVariableHelper(std::string symbol, size_t stackIndex = 0);
     void _pushCallStack(AST::Node *node);
     void _popCallStack();

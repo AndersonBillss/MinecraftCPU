@@ -23,6 +23,18 @@ Operand getNodeValue(AST::Node *node)
                            "Operand cannot be part of an expression");
 }
 
+std::string operandToString(Operand op)
+{
+    if (std::holds_alternative<int>(op))
+    {
+        return std::to_string(std::get<int>(op));
+    }
+    else
+    {
+        return std::get<std::string>(op);
+    }
+}
+
 MacroSystem::MacroSystem(AST::Node *node)
 {
     _astNode = node;
@@ -85,25 +97,25 @@ bool MacroSystem::done()
 
 std::string MacroSystem::_getLineHelper(AST::Node *currNode)
 {
+    assert(currNode->children.size() > 0);
     auto firstChild = currNode->children[0].get();
 
     if (firstChild->nodeType == AST::NodeType::ASSIGNMENT)
     {
         _evaluateAssignment(firstChild);
         _nextNode();
+
         return _getLineHelper(_getCurrNode());
+    }
+    if (firstChild->nodeType == AST::NodeType::CALL)
+    {
+        auto result = _evaluateFunction(firstChild);
+        _nextNode();
+        return operandToString(result);
     }
 
     auto result = _evaluateExpression(firstChild);
-
-    if (std::holds_alternative<int>(result))
-    {
-        return std::to_string(std::get<int>(result));
-    }
-    else
-    {
-        return std::get<std::string>(result);
-    }
+    return operandToString(result);
 }
 
 Operand MacroSystem::_evaluateExpression(AST::Node *node)
@@ -165,6 +177,41 @@ Operand MacroSystem::_evaluateBlock(AST::Node *node)
     }
 }
 
+Operand MacroSystem::_evaluateFunction(AST::Node *node)
+{
+    assert(node->nodeType == AST::NodeType::CALL);
+    assert(node->children.size() == 2);
+
+    auto labelNode = node->children[0].get();
+    assert(labelNode->nodeType == AST::NodeType::IDENTIFIER);
+    auto argListNode = node->children[1].get();
+    assert(argListNode->nodeType == AST::NodeType::ARGUMENT_LIST);
+
+    std::string functionName = labelNode->identifier;
+    auto functionNode = getVariable(labelNode->identifier);
+    assert(functionNode->children.size() == 2);
+
+    auto paramListNode = functionNode->children[0].get();
+    assert(paramListNode->nodeType == AST::NodeType::PARAMETER_LIST);
+    auto functionBody = functionNode->children[1].get();
+
+    if (paramListNode->children.size() != argListNode->children.size())
+    {
+        throw RuntimeError("Calling function '" + functionName + "' with incorrect number of arguments");
+    }
+
+    _pushCallStack(functionBody);
+    for (size_t i = 0; i < paramListNode->children.size(); i++)
+    {
+        auto arg = paramListNode->children[i].get();
+        assert(arg->nodeType == AST::NodeType::IDENTIFIER);
+        auto param = argListNode->children[i].get();
+        setVariable(arg->identifier, param);
+    }
+
+    return _evaluateExpression(functionBody);
+}
+
 void MacroSystem::_evaluateAssignment(AST::Node *node)
 {
     assert(node->children.size() == 2);
@@ -222,6 +269,9 @@ void MacroSystem::_nextNode()
     while (loc.index >= loc.node->children.size() && !done())
     {
         _popCallStack();
+        if (done())
+            return;
+        loc = this->_callStack.top();
         loc.index++;
     }
 }

@@ -182,3 +182,13 @@ TEST_CASE("MacroSystem evaluates outside concat expressions", "[macroSystem]")
     std::string result = "LDI R1\n52\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
+
+TEST_CASE("MacroSystem evaluates function with one parameter", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+    $increment = $a => $a + 1
+    $increment 3
+    )";
+    std::string result = "4\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
