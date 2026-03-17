@@ -35,18 +35,7 @@ Operand MacroSystem::_evaluateExpression(AST::Node *node)
         }
         else if (node->nodeType == AST::NodeType::BLOCK)
         {
-            assert(node->children.size() > 0);
-            auto child = node->children[0].get();
-            if (child->nodeType == AST::NodeType::LINE)
-            {
-                _pushCallStack(node);
-                std::string resultLine = _getLineHelper(child);
-                return resultLine;
-            }
-            else
-            {
-                return _evaluateExpression(child);
-            }
+            return _evaluateBlock(node);
         }
         return getNodeValue(node);
     }
@@ -75,6 +64,30 @@ Operand MacroSystem::_evaluateExpression(AST::Node *node)
                                node->end,
                                e.what());
     }
+}
+
+Operand MacroSystem::_evaluateBlock(AST::Node *node)
+{
+    assert(node->children.size() > 0);
+    auto child = node->children[0].get();
+    if (child->nodeType == AST::NodeType::LINE)
+    {
+        _pushCallStack(node);
+        std::string resultLine = _getLineHelper(child);
+        return resultLine;
+    }
+    else
+    {
+        return _evaluateExpression(child);
+    }
+}
+
+void MacroSystem::_evaluateAssignment(AST::Node *node)
+{
+    assert(node->children.size() == 2);
+    std::string identifier = node->children[0]->identifier;
+    auto val = node->children[1].get();
+    setVariable(identifier, val);
 }
 
 MacroSystem::MacroSystem(AST::Node *node)
@@ -161,10 +174,7 @@ std::string MacroSystem::_getLineHelper(AST::Node *currNode)
 
     if (firstChild->nodeType == AST::NodeType::ASSIGNMENT)
     {
-        assert(firstChild->children.size() == 2);
-        std::string identifier = firstChild->children[0]->identifier;
-        auto val = firstChild->children[1].get();
-        setVariable(identifier, val);
+        _evaluateAssignment(firstChild);
         _nextNode();
         return _getLineHelper(_getCurrNode());
     }
@@ -201,20 +211,6 @@ AST::Node *MacroSystem::_getCurrNode()
     auto child = loc.node->children[loc.index].get();
     return child;
 }
-
-// void MacroSystem::_nextNode()
-// {
-//     if (done())
-//         return;
-
-//     auto &loc = this->_callStack.top();
-//     loc.index++;
-//     if (loc.index >= loc.node->children.size())
-//     {
-//         _popCallStack();
-//         _nextNode();
-//     }
-// }
 
 void MacroSystem::_nextNode()
 {
