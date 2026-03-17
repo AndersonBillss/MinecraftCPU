@@ -17,6 +17,7 @@ Operand getNodeValue(AST::Node *node)
     {
         return node->identifier;
     }
+    std::cout << node->nodeType << std::endl;
     throw CompilationError(ErrorStage::Codegen,
                            node->begin,
                            node->end,
@@ -110,7 +111,6 @@ std::string MacroSystem::_getLineHelper(AST::Node *currNode)
     if (firstChild->nodeType == AST::NodeType::CALL)
     {
         auto result = _evaluateFunction(firstChild);
-        _nextNode();
         return operandToString(result);
     }
 
@@ -126,11 +126,16 @@ Operand MacroSystem::_evaluateExpression(AST::Node *node)
         if (node->nodeType == AST::NodeType::IDENTIFIER)
         {
             AST::Node *variableValue = getVariable(node->identifier);
-            return getNodeValue(variableValue);
+            // return getNodeValue(variableValue);
+            return _evaluateExpression(variableValue);
         }
         else if (node->nodeType == AST::NodeType::BLOCK)
         {
             return _evaluateBlock(node);
+        }
+        else if (node->nodeType == AST::NodeType::CALL)
+        {
+            return _evaluateFunction(node);
         }
         return getNodeValue(node);
     }
@@ -209,7 +214,9 @@ Operand MacroSystem::_evaluateFunction(AST::Node *node)
         setVariable(arg->identifier, param);
     }
 
-    return _evaluateExpression(functionBody);
+    auto result = _evaluateExpression(functionBody);
+    _nextNode();
+    return result;
 }
 
 void MacroSystem::_evaluateAssignment(AST::Node *node)
