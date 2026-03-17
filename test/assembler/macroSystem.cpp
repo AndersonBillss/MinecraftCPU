@@ -212,3 +212,27 @@ TEST_CASE("MacroSystem evaluates concatenated functions", "[macroSystem]")
     std::string result = "LDI R1 6\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
+
+TEST_CASE("MacroSystem evaluates functions with variable arguments", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+    $mul = $a $b => $a * $b
+    $varA = 2
+    $varB = 3
+    $mul $varA $varB
+    )";
+    std::string result = "6\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem evaluates functions with exprssions on the right-hand side", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+    $mul = $a $b => $a * $b
+    $varA = 2
+    $varB = 3
+    $mul $varA $varB + 100
+    )";
+    std::string result = "106\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
