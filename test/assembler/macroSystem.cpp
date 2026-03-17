@@ -38,14 +38,14 @@ TEST_CASE("MacroSystem stores variables across stacks", "[macroSystem]")
     program.setVariable("$test1", val1.get());
     REQUIRE(program.getVariable("$test1")->intValue == 43);
 
-    program.pushStack();
+    program.pushVariableStack();
     auto val2 = createNode(AST::NodeType::INT);
     val2->intValue = 22;
     program.setVariable("$test2", val2.get());
     REQUIRE(program.getVariable("$test2")->intValue == 22);
     REQUIRE(program.getVariable("$test1")->intValue == 43);
 
-    program.pushStack();
+    program.pushVariableStack();
     auto val3 = createNode(AST::NodeType::INT);
     val3->intValue = 87;
     program.setVariable("$test3", val3.get());
@@ -53,12 +53,12 @@ TEST_CASE("MacroSystem stores variables across stacks", "[macroSystem]")
     REQUIRE_THROWS_AS(program.getVariable("$test2"), RuntimeError);
     REQUIRE(program.getVariable("$test1")->intValue == 43);
 
-    program.popStack();
+    program.popVariableStack();
     REQUIRE_THROWS_AS(program.getVariable("$test3"), RuntimeError);
     REQUIRE(program.getVariable("$test2")->intValue == 22);
     REQUIRE(program.getVariable("$test1")->intValue == 43);
 
-    program.popStack();
+    program.popVariableStack();
     REQUIRE_THROWS_AS(program.getVariable("$test3"), RuntimeError);
     REQUIRE_THROWS_AS(program.getVariable("$test2"), RuntimeError);
     REQUIRE(program.getVariable("$test1")->intValue == 43);
@@ -109,5 +109,26 @@ TEST_CASE("MacroSystem stores variables", "[macroSystem]")
         $hello
     )";
     std::string result = "1\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem evaluates blocks", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+        (1)
+    )";
+    std::string result = "1\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
+
+TEST_CASE("MacroSystem evaluates multi-line blocks", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+    (
+        1
+        2
+    )
+    )";
+    std::string result = "1\n2\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }

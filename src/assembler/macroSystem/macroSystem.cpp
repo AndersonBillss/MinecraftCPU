@@ -4,6 +4,7 @@
 #include "../../utils/stringUtils.hpp"
 #include "../../utils/typeError.hpp"
 #include "compilationError.hpp"
+#include <cassert>
 #include <variant>
 
 Operand getNodeValue(AST::Node *node)
@@ -31,6 +32,21 @@ Operand MacroSystem::_evaluateExpression(AST::Node *node)
         {
             AST::Node *variableValue = getVariable(node->identifier);
             return getNodeValue(variableValue);
+        }
+        else if (node->nodeType == AST::NodeType::BLOCK)
+        {
+            assert(node->children.size() > 0);
+            auto child = node->children[0].get();
+            if (child->nodeType == AST::NodeType::LINE)
+            {
+                _pushCallStack(node);
+                std::string resultLine = _getLineHelper(child);
+                return resultLine;
+            }
+            else
+            {
+                return _evaluateExpression(child);
+            }
         }
         return getNodeValue(node);
     }
@@ -68,45 +84,26 @@ MacroSystem::MacroSystem(AST::Node *node)
         node,
         0});
     _currentStack = -1; // pushStack automatically increments this
-    pushStack();
+    pushVariableStack();
 }
 
 std::string MacroSystem::getLine()
 {
     auto currNode = _getCurrNode();
-    auto firstChild = currNode->children[0].get();
 
-    if (firstChild->nodeType == AST::NodeType::ASSIGNMENT)
-    {
-        std::string identifier = firstChild->children[0]->identifier;
-        auto val = firstChild->children[1].get();
-        setVariable(identifier, val);
-        _nextNode();
-        return getLine();
-    }
-
-    auto result = _evaluateExpression(firstChild);
-
+    std::string result = _getLineHelper(currNode);
     _nextNode();
-
-    if (std::holds_alternative<int>(result))
-    {
-        return std::to_string(std::get<int>(result));
-    }
-    else
-    {
-        return std::get<std::string>(result);
-    }
+    return result;
 }
 
-void MacroSystem::pushStack()
+void MacroSystem::pushVariableStack()
 {
     VariableMap variables;
     _variables.push_back(variables);
     _currentStack++;
 }
 
-void MacroSystem::popStack()
+void MacroSystem::popVariableStack()
 {
     if (_currentStack <= 0)
     {
@@ -158,23 +155,77 @@ AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex
     }
 }
 
+std::string MacroSystem::_getLineHelper(AST::Node *currNode)
+{
+    auto firstChild = currNode->children[0].get();
+
+    if (firstChild->nodeType == AST::NodeType::ASSIGNMENT)
+    {
+        assert(firstChild->children.size() == 2);
+        std::string identifier = firstChild->children[0]->identifier;
+        auto val = firstChild->children[1].get();
+        setVariable(identifier, val);
+        _nextNode();
+        return _getLineHelper(_getCurrNode());
+    }
+
+    auto result = _evaluateExpression(firstChild);
+
+    if (std::holds_alternative<int>(result))
+    {
+        return std::to_string(std::get<int>(result));
+    }
+    else
+    {
+        return std::get<std::string>(result);
+    }
+}
+
+void MacroSystem::_pushCallStack(AST::Node *node)
+{
+    AstLocation loc = {
+        node,
+        0};
+    _callStack.push(loc);
+}
+
+void MacroSystem::_popCallStack()
+{
+    _callStack.pop();
+}
+
 AST::Node *MacroSystem::_getCurrNode()
 {
     auto loc = this->_callStack.top();
+    assert(loc.node->children.size() > 0);
     auto child = loc.node->children[loc.index].get();
     return child;
 }
 
+// void MacroSystem::_nextNode()
+// {
+//     if (done())
+//         return;
+
+//     auto &loc = this->_callStack.top();
+//     loc.index++;
+//     if (loc.index >= loc.node->children.size())
+//     {
+//         _popCallStack();
+//         _nextNode();
+//     }
+// }
+
 void MacroSystem::_nextNode()
 {
+    if (done())
+        return;
+
     auto &loc = this->_callStack.top();
-    bool isLastNode = loc.index >= loc.node->children.size() - 1;
-    if (isLastNode)
+    loc.index++;
+    while (loc.index >= loc.node->children.size() && !done())
     {
-        _callStack.pop();
-    }
-    else
-    {
+        _popCallStack();
         loc.index++;
     }
 }

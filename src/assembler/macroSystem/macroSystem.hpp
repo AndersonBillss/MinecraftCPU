@@ -20,8 +20,8 @@ public:
     void setVariable(std::string symbol, AST::Node *value, size_t stackIndex = 0);
     AST::Node *getVariable(std::string symbol);
 
-    void pushStack();
-    void popStack();
+    void pushVariableStack();
+    void popVariableStack();
 
     bool done();
 
@@ -38,6 +38,9 @@ private:
     std::vector<VariableMap> _variables;
     size_t _currentStack;
 
+    std::string _getLineHelper(AST::Node *node);
+    void _pushCallStack(AST::Node *node);
+    void _popCallStack();
     Operand _evaluateExpression(AST::Node *node);
     AST::Node *_getVariableHelper(std::string symbol, size_t stackIndex = 0);
     AST::Node *_getCurrNode();
