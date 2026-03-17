@@ -39,12 +39,12 @@ private:
     size_t _currentStack;
 
     std::string _getLineHelper(AST::Node *node);
-    void _pushCallStack(AST::Node *node);
-    void _popCallStack();
     Operand _evaluateExpression(AST::Node *node);
     Operand _evaluateBlock(AST::Node *node);
     void _evaluateAssignment(AST::Node *node);
     AST::Node *_getVariableHelper(std::string symbol, size_t stackIndex = 0);
+    void _pushCallStack(AST::Node *node);
+    void _popCallStack();
     AST::Node *_getCurrNode();
     void _nextNode();
 };

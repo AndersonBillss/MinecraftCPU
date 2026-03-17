@@ -23,6 +23,89 @@ Operand getNodeValue(AST::Node *node)
                            "Operand cannot be part of an expression");
 }
 
+MacroSystem::MacroSystem(AST::Node *node)
+{
+    _astNode = node;
+    _callStack.push(AstLocation{
+        node,
+        0});
+    _currentStack = -1; // pushStack automatically increments this
+    pushVariableStack();
+}
+
+std::string MacroSystem::getLine()
+{
+    auto currNode = _getCurrNode();
+
+    std::string result = _getLineHelper(currNode);
+    _nextNode();
+    return result;
+}
+
+void MacroSystem::setVariable(std::string symbol, AST::Node *value, size_t stackIndex)
+{
+    VariableMap &scope = _variables[0];
+    auto it = scope.find(symbol);
+    if (it != scope.end())
+    {
+        scope[symbol] = value;
+    }
+    else
+    {
+        _variables[_currentStack][symbol] = value;
+    }
+}
+
+void MacroSystem::pushVariableStack()
+{
+    VariableMap variables;
+    _variables.push_back(variables);
+    _currentStack++;
+}
+
+void MacroSystem::popVariableStack()
+{
+    if (_currentStack <= 0)
+    {
+        throw RuntimeError("Cannot pop a stack that doesn't exist");
+    }
+    _variables.pop_back();
+    _currentStack--;
+}
+
+AST::Node *MacroSystem::getVariable(std::string symbol)
+{
+    return _getVariableHelper(symbol, _currentStack);
+}
+
+bool MacroSystem::done()
+{
+    return _callStack.size() == 0;
+}
+
+std::string MacroSystem::_getLineHelper(AST::Node *currNode)
+{
+    auto firstChild = currNode->children[0].get();
+
+    if (firstChild->nodeType == AST::NodeType::ASSIGNMENT)
+    {
+        _evaluateAssignment(firstChild);
+        _nextNode();
+        return _getLineHelper(_getCurrNode());
+    }
+
+    auto result = _evaluateExpression(firstChild);
+
+    if (std::holds_alternative<int>(result))
+    {
+        return std::to_string(std::get<int>(result));
+    }
+    else
+    {
+        return std::get<std::string>(result);
+    }
+}
+
 Operand MacroSystem::_evaluateExpression(AST::Node *node)
 {
     auto it = operations.find(node->nodeType);
@@ -90,66 +173,6 @@ void MacroSystem::_evaluateAssignment(AST::Node *node)
     setVariable(identifier, val);
 }
 
-MacroSystem::MacroSystem(AST::Node *node)
-{
-    _astNode = node;
-    _callStack.push(AstLocation{
-        node,
-        0});
-    _currentStack = -1; // pushStack automatically increments this
-    pushVariableStack();
-}
-
-std::string MacroSystem::getLine()
-{
-    auto currNode = _getCurrNode();
-
-    std::string result = _getLineHelper(currNode);
-    _nextNode();
-    return result;
-}
-
-void MacroSystem::pushVariableStack()
-{
-    VariableMap variables;
-    _variables.push_back(variables);
-    _currentStack++;
-}
-
-void MacroSystem::popVariableStack()
-{
-    if (_currentStack <= 0)
-    {
-        throw RuntimeError("Cannot pop a stack that doesn't exist");
-    }
-    _variables.pop_back();
-    _currentStack--;
-}
-
-bool MacroSystem::done()
-{
-    return _callStack.size() == 0;
-}
-
-void MacroSystem::setVariable(std::string symbol, AST::Node *value, size_t stackIndex)
-{
-    VariableMap &scope = _variables[0];
-    auto it = scope.find(symbol);
-    if (it != scope.end())
-    {
-        scope[symbol] = value;
-    }
-    else
-    {
-        _variables[_currentStack][symbol] = value;
-    }
-}
-
-AST::Node *MacroSystem::getVariable(std::string symbol)
-{
-    return _getVariableHelper(symbol, _currentStack);
-}
-
 AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
 {
     VariableMap &scope = _variables[stackIndex];
@@ -165,29 +188,6 @@ AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex
             throw RuntimeError("Variable not found: '" + symbol + "'");
         }
         return _getVariableHelper(symbol, 0);
-    }
-}
-
-std::string MacroSystem::_getLineHelper(AST::Node *currNode)
-{
-    auto firstChild = currNode->children[0].get();
-
-    if (firstChild->nodeType == AST::NodeType::ASSIGNMENT)
-    {
-        _evaluateAssignment(firstChild);
-        _nextNode();
-        return _getLineHelper(_getCurrNode());
-    }
-
-    auto result = _evaluateExpression(firstChild);
-
-    if (std::holds_alternative<int>(result))
-    {
-        return std::to_string(std::get<int>(result));
-    }
-    else
-    {
-        return std::get<std::string>(result);
     }
 }
 
