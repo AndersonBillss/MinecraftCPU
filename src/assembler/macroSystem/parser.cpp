@@ -93,7 +93,9 @@ bool Parser::_isFunctionCallEndingNonterminal()
         return true;
     }
     auto currToken = _tokens[_currIndex];
-    return currToken.type != Lexer::TokenType::SYMBOL && currToken.type != Lexer::VALUE;
+    return currToken.type != Lexer::TokenType::SYMBOL &&
+           currToken.type != Lexer::VALUE &&
+           currToken.type != Lexer::OPENINGPARENTHESE;
 }
 
 std::unique_ptr<AST::Node> Parser::_handleFunctionCall()

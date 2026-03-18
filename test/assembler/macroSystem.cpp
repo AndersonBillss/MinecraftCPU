@@ -225,7 +225,7 @@ TEST_CASE("MacroSystem evaluates functions with variable arguments", "[macroSyst
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
 
-TEST_CASE("MacroSystem evaluates functions with exprssions on the right-hand side", "[macroSystem]")
+TEST_CASE("MacroSystem evaluates functions with expressions on the right-hand side", "[macroSystem]")
 {
     std::string sourceCode = R"(
     $mul = $a $b => $a * $b
