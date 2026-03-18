@@ -15,6 +15,7 @@ CXX_FLAGS := -Wall
 CXX_INCLUDE_FLAGS := -I$(LIB_DIR) -lz
 
 TARGET := mcScript
+MAIN := main
 TEST_TARGET := tests
 
 ifeq ($(shell uname -s), Windows_NT)
@@ -28,7 +29,7 @@ OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_FILES))
 
 TEST_SRC_FILES := $(shell find test -name '*.cpp')
 TEST_OBJ_FILES := $(patsubst $(TEST_SRC_DIR)/%.cpp, $(TEST_OBJ_DIR)/%.o, $(TEST_SRC_FILES))
-SRC_OBJ_FILES_WITHOUT_MAIN := $(filter-out $(OBJ_DIR)/$(TARGET).o, $(OBJ_FILES))
+SRC_OBJ_FILES_WITHOUT_MAIN := $(filter-out $(OBJ_DIR)/$(MAIN).o, $(OBJ_FILES))
 
 LIB_SRC_FILES := $(shell find include -name '*.hpp')
 LIB_OBJ_FILES := $(patsubst $(LIB_DIR)/%.hpp, $(LIB_DIR)/%.hpp.gch, $(LIB_SRC_FILES))
