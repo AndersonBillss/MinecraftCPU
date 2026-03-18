@@ -14,7 +14,7 @@ CXX := g++
 CXX_FLAGS := -Wall
 CXX_INCLUDE_FLAGS := -I$(LIB_DIR) -lz
 
-TARGET := mcScript
+TARGET := mcc
 MAIN := main
 TEST_TARGET := tests
 
