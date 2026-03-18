@@ -670,7 +670,7 @@ TEST_CASE("Parse function calls", "[parser]")
     REQUIRE(program == parseWithoutSourceLocationHelper(sourceCode));
 }
 
-TEST_CASE("Parse function with block arguments", "[parser][only]")
+TEST_CASE("Parse function with block arguments", "[parser]")
 {
     std::string sourceCode = R"(
         $myFn = $1 $2 => $1 * $2

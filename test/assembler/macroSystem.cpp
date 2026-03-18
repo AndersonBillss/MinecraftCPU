@@ -236,3 +236,15 @@ TEST_CASE("MacroSystem evaluates functions with expressions on the right-hand si
     std::string result = "106\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
+
+TEST_CASE("MacroSystem evaluates functions with block arguments", "[macroSystem][only]")
+{
+    std::string sourceCode = R"(
+    $mul = $a $b => $a * $b
+    $varA = 2
+    $varB = 3
+    $mul $varA ($varB + 100)
+    )";
+    std::string result = "206\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}
