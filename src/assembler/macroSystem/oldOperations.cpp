@@ -1,6 +1,7 @@
 #include "oldOperations.hpp"
 #include "../../utils/typeError.hpp"
 #include <variant>
+using Operand = std::variant<unsigned int, std::string>;
 
 Operand mulStrInt(std::string a, unsigned int b)
 {

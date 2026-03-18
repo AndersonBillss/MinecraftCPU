@@ -5,6 +5,8 @@
 #include "oldLexer.hpp"
 #include "oldOperations.hpp"
 
+using Operand = std::variant<unsigned int, std::string>; 
+
 OldMacroSystem::OldMacroSystem()
 {
     _currentStack = -1; // pushStack automatically increments this

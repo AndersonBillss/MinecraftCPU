@@ -4,6 +4,9 @@
 #include "instruction.hpp"
 #include "../utils/syntaxError.hpp"
 #include "../utils/stringUtils.hpp"
+#include "macroSystem/lexer.hpp"
+#include "macroSystem/parser.hpp"
+#include "macroSystem/macroSystem.hpp"
 
 #include <iostream>
 #include <iterator>
@@ -64,4 +67,19 @@ std::string Assembler::compile(const std::string &sourceCode)
     }
 
     return stringUtils::join(compiled, "\n");
+}
+
+std::string Assembler::expand(const std::string &sourceCode)
+{
+    auto lexer = Lexer();
+    auto tokens = lexer.tokenize(sourceCode);
+    auto parser = Parser();
+    auto ast = parser.parseTokens(tokens);
+
+    std::string result = "";
+    auto macroSystem = MacroSystem(ast.get());
+    while (!macroSystem.done())
+        result += macroSystem.getLine() + "\n";
+
+    return result;
 }

@@ -61,6 +61,35 @@ void handleAssembleArg(Cli::Parsed parsed)
     }
 }
 
+void handleExpandArg(Cli::Parsed parsed)
+{
+    if (!parsed.count("expand"))
+    {
+        std::cerr << "No input filepath provided" << std::endl;
+        exit(1);
+    }
+    if (!parsed.count("output"))
+    {
+        std::cerr << "No output filepath provided" << std::endl;
+        exit(1);
+    }
+    std::string inFilePath = parsed.get<std::string>("expand");
+    std::string outFilePath = parsed.get<std::string>("output");
+    std::string sourceCode = fileUtils::readFile(inFilePath);
+    std::string assembled;
+    try
+    {
+        assembled = Assembler::expand(sourceCode);
+    }
+    catch (const SyntaxError &e)
+    {
+        std::cerr << "Compilation error found in '" + inFilePath + "'\n -> " + e.what() << std::endl;
+        exit(1);
+    }
+
+    fileUtils::writeToFile(outFilePath, assembled);
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -86,8 +115,10 @@ int main(int argc, char *argv[])
     options.boolOption("help", "h").addHelp("Print usage");
     options.stringOption("compile", "c").addHelp("Compile .mcscript code into assembly (not implemented yet)");
     options.stringOption("assemble", "a").addHelp("Assemble .mcasm assembly code");
+    options.stringOption("expand", "e").addHelp("Assemble .mcasm assembly code");
     options.stringOption("execute", "x").addHelp("Execute .mcexe binary via an emulator (not implemented yet)");
-    options.stringOption("output-mcexe", "o").addHelp("Filepath for the output .mcexe file").addImplicit(configMcexePath);
+    options.stringOption("output", "o").addHelp("Filepath for output file").addImplicit(configMcexePath);
+    options.stringOption("output-mcexe", "m").addHelp("Filepath for the output .mcexe file").addImplicit(configMcexePath);
     options.stringOption("output-schem", "s").addHelp("Filepath for the output schematic file").addImplicit(configSchemPath);
     options.stringOption("set-schem-path").addHelp("Set a default schematic ouput path");
     options.boolOption("reset-schem-path").addHelp("reset default schematic ouput path");
@@ -98,7 +129,20 @@ int main(int argc, char *argv[])
     try
     {
         parsed = options.parse(argc, argv);
-        parsed.ensureExclusive({"compile", "assemble", "execute", "help", "set-schem-path", "reset-schem-path", "set-mcexe-path", "reset-mcexe-path"});
+        parsed.ensureExclusive({
+            "compile",
+            "assemble",
+            "execute",
+            "help",
+            "set-schem-path",
+            "reset-schem-path",
+            "set-mcexe-path",
+            "reset-mcexe-path",
+        });
+        parsed.ensureExclusive({
+            "assemble",
+            "output",
+        });
     }
     catch (CliError &e)
     {
@@ -119,6 +163,11 @@ int main(int argc, char *argv[])
     if (parsed.count("assemble"))
     {
         handleAssembleArg(parsed);
+        exit(0);
+    }
+    if (parsed.count("expand"))
+    {
+        handleExpandArg(parsed);
         exit(0);
     }
     if (parsed.count("set-schem-path"))
