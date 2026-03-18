@@ -2,7 +2,7 @@ bin/
 obj/
 test_bin/
 test_obj/
-mcScriptBuild/
+mcc_build/
 *.gch
 .config
 
