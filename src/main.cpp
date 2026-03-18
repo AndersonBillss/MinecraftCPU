@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     if (it != config.end())
         configMcexePath = config["mcexe-path"];
 
-    Cli::Options options("McScript", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
+    Cli::Options options("MCC (Minecraft Compiler)", "A tool for compiling and emulating code that runs on a custom Minecraft computer");
     options.boolOption("help", "h").addHelp("Print usage");
     options.stringOption("compile", "c").addHelp("Compile .mcscript code into assembly (not implemented yet)");
     options.stringOption("assemble", "a").addHelp("Assemble .mcasm assembly code");
