@@ -46,6 +46,7 @@ void CompilationError::printErrorIndicators(std::string line, size_t n)
     }
 
     printLeftSidePrefix();
+    bool printedCaret = false;
     for (size_t i = 0; i < line.size(); i++)
     {
         if (i > errEnd)
@@ -54,7 +55,15 @@ void CompilationError::printErrorIndicators(std::string line, size_t n)
         }
         else if (i >= errStart)
         {
-            std::cerr << "^";
+            if (!printedCaret)
+            {
+                std::cerr << "^";
+                printedCaret = true;
+            }
+            else
+            {
+                std::cerr << "~";
+            }
         }
         else
         {
