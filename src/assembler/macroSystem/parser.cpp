@@ -453,7 +453,7 @@ std::unique_ptr<AST::Node> Parser::_handleExpressionHelper(std::unique_ptr<AST::
         operands.push_back(std::move(rhs));
         lhs = std::make_unique<AST::Node>(AST::Node{
             lookahead.begin,
-            {0, 0},
+            rhs->end,
             operatorType(op),
             std::move(operands),
             "",
