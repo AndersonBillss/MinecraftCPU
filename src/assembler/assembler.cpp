@@ -59,7 +59,7 @@ std::string Assembler::compile(const std::string &sourceCode)
         }
 
         if (opCode == "STR" || opCode == "STR_PTR")
-        { // In hardware, the opcodes are switched for these two
+        { // In hardware, the operands are switched for these two
             line = {line[0], line[2], line[1]};
         }
 

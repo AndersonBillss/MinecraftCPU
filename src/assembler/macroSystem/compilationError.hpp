@@ -32,4 +32,6 @@ public:
     {
         return formatted.c_str();
     }
+
+    void printErr();
 };
