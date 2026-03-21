@@ -192,7 +192,7 @@ Operand MacroSystem::_evaluateFunction(AST::Node *node)
     assert(argListNode->nodeType == AST::NodeType::ARGUMENT_LIST);
 
     std::string functionName = labelNode->identifier;
-    auto functionNode = getVariable(node);
+    auto functionNode = getVariable(labelNode);
     assert(functionNode->children.size() == 2);
 
     auto paramListNode = functionNode->children[0].get();
