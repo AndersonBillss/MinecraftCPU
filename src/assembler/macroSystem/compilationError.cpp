@@ -2,10 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cmath>
 
 void CompilationError::printErr(std::string filePath)
 {
-    std::cerr << "In file " << filePath << "\n";
+    std::cerr << "File \"" << filePath << "\"" << "\n";
     std::cerr << this->what() << "\n\n";
     std::ifstream file(filePath);
 
@@ -17,12 +18,12 @@ void CompilationError::printErr(std::string filePath)
             lineCount == this->begin.line - 1 || lineCount == this->begin.line - 2 ||
             lineCount == this->end.line + 1 || lineCount == this->end.line + 2)
         {
-            std::cerr << lineCount + 1 << " |  ";
+            printLeftSidePrefix(lineCount);
             std::cerr << line << "\n";
         }
         else if (lineCount >= this->begin.line && lineCount <= this->end.line)
         {
-            std::cerr << lineCount + 1 << " |  ";
+            printLeftSidePrefix(lineCount);
             std::cerr << line << std::endl;
             size_t errStart = this->begin.column;
             size_t errEnd = this->end.column;
@@ -35,10 +36,14 @@ void CompilationError::printErr(std::string filePath)
                 errEnd = 0;
             }
 
-            std::cerr << "  |  ";
+            printLeftSidePrefix();
             for (size_t i = 0; i < line.size(); i++)
             {
-                if (i >= errStart && i <= errEnd)
+                if (i > errEnd)
+                {
+                    break;
+                }
+                else if (i >= errStart)
                 {
                     std::cerr << "^";
                 }
@@ -52,4 +57,36 @@ void CompilationError::printErr(std::string filePath)
 
         lineCount++;
     }
+}
+
+int countDigits(size_t num)
+{
+    if (num == 0)
+        return 1;
+    return static_cast<int>(std::log10(num)) + 1;
+}
+
+void CompilationError::printLeftSidePrefix()
+{
+    size_t maxLineNumber = this->end.line + 3;
+    size_t maxLineNumberDigits = countDigits(maxLineNumber);
+    for (size_t i = 0; i < maxLineNumberDigits; i++)
+    {
+        std::cerr << " ";
+    }
+    std::cerr << " |  ";
+}
+void CompilationError::printLeftSidePrefix(size_t n)
+{
+    n++;
+    size_t maxLineNumber = this->end.line + 3;
+    size_t maxLineNumberDigits = countDigits(maxLineNumber);
+    size_t nLineNumberDigits = countDigits(n);
+    size_t padding = maxLineNumberDigits - nLineNumberDigits;
+    std::cerr << n;
+    for (size_t i = 0; i < padding; i++)
+    {
+        std::cerr << " ";
+    }
+    std::cerr << " |  ";
 }

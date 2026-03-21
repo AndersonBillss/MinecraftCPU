@@ -34,4 +34,8 @@ public:
     }
 
     void printErr(std::string filePath);
+
+private:
+    void printLeftSidePrefix(); 
+    void printLeftSidePrefix(size_t n); 
 };

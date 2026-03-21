@@ -15,6 +15,7 @@ std::set<char> operatorTokens = {
     '<',
     '>',
     ',',
+    '%',
 };
 
 void Lexer::_advanceIndex(size_t n)
