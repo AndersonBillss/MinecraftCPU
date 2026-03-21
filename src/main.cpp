@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "assembler/assembler.hpp"
+#include "assembler/macroSystem/compilationError.hpp"
 #include "schematicBuilder/schematicBuilder.hpp"
 #include "configManager/configManager.hpp"
 #include "utils/stringUtils.hpp"
@@ -84,6 +85,11 @@ void handleExpandArg(Cli::Parsed parsed)
     catch (const SyntaxError &e)
     {
         std::cerr << "Compilation error found in '" + inFilePath + "'\n -> " + e.what() << std::endl;
+        exit(1);
+    }
+    catch (CompilationError &e)
+    {
+        e.printErr(inFilePath);
         exit(1);
     }
 

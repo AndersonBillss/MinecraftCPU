@@ -5,10 +5,11 @@
 
 void CompilationError::printErr(std::string filePath)
 {
-    std::cerr << this->what() << std::endl;
+    std::cerr << "In file " << filePath << "\n";
+    std::cerr << this->what() << "\n\n";
     std::ifstream file(filePath);
 
-    size_t lineCount = 1;
+    size_t lineCount = 0;
     std::string line;
     while (std::getline(file, line))
     {
@@ -16,10 +17,12 @@ void CompilationError::printErr(std::string filePath)
             lineCount == this->begin.line - 1 || lineCount == this->begin.line - 2 ||
             lineCount == this->end.line + 1 || lineCount == this->end.line + 2)
         {
+            std::cerr << lineCount + 1 << " |  ";
             std::cerr << line << "\n";
         }
-        if (lineCount >= this->begin.line && lineCount <= this->end.line)
+        else if (lineCount >= this->begin.line && lineCount <= this->end.line)
         {
+            std::cerr << lineCount + 1 << " |  ";
             std::cerr << line << std::endl;
             size_t errStart = this->begin.column;
             size_t errEnd = this->end.column;
@@ -32,17 +35,19 @@ void CompilationError::printErr(std::string filePath)
                 errEnd = 0;
             }
 
+            std::cerr << "  |  ";
             for (size_t i = 0; i < line.size(); i++)
             {
-                if (i >= errStart && i < errEnd)
+                if (i >= errStart && i <= errEnd)
                 {
-                    std::cout << "^" << std::endl;
+                    std::cerr << "^";
                 }
                 else
                 {
-                    std::cout << " " << std::endl;
+                    std::cerr << " ";
                 }
             }
+            std::cerr << "\n";
         }
 
         lineCount++;
