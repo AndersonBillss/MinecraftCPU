@@ -139,8 +139,13 @@ std::unique_ptr<AST::Node> Parser::_handleFunctionCall()
         0});
 
     while (!_isFunctionCallEndingNonterminal())
-        argList->children.push_back(_parseAtom());
+    {
+        auto arg = _parseAtom();
+        argList->end = arg->end;
+        argList->children.push_back(std::move(arg));
+    }
 
+    functionCallNode->end = argList->end;
     functionCallNode->children.push_back(std::move(argList));
     return functionCallNode;
 }
@@ -186,7 +191,7 @@ std::unique_ptr<AST::Node> Parser::_handleAssignment()
 
     auto labelNode = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
-        {0, 0},
+        _tokens[_currIndex].end,
         AST::NodeType::IDENTIFIER,
         {},
         _tokens[_currIndex].data,
@@ -197,11 +202,15 @@ std::unique_ptr<AST::Node> Parser::_handleAssignment()
     assignmentNode->children.push_back(std::move(labelNode));
     if (_isFunction())
     {
-        assignmentNode->children.push_back(_handleFunction(labelIdentifier));
+        auto fn = _handleFunction(labelIdentifier);
+        assignmentNode->end = fn->end;
+        assignmentNode->children.push_back(std::move(fn));
     }
     else
     {
-        assignmentNode->children.push_back(_handleExpression());
+        auto expr = _handleExpression();
+        assignmentNode->end = expr->end;
+        assignmentNode->children.push_back(std::move(expr));
     }
     return assignmentNode;
 }
