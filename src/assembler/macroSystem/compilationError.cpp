@@ -99,10 +99,10 @@ void CompilationError::printLeftSidePrefix(size_t n)
     size_t maxLineNumberDigits = countDigits(maxLineNumber);
     size_t nLineNumberDigits = countDigits(n);
     size_t padding = maxLineNumberDigits - nLineNumberDigits;
-    std::cerr << n;
     for (size_t i = 0; i < padding; i++)
     {
         std::cerr << " ";
     }
+    std::cerr << n;
     std::cerr << " |  ";
 }
