@@ -25,38 +25,43 @@ void CompilationError::printErr(std::string filePath)
         {
             printLeftSidePrefix(lineCount);
             std::cerr << line << std::endl;
-            size_t errStart = this->begin.column;
-            size_t errEnd = this->end.column;
-            if (lineCount > this->begin.line)
-            {
-                errStart = 0;
-            }
-            if (lineCount < this->end.line)
-            {
-                errEnd = 0;
-            }
-
-            printLeftSidePrefix();
-            for (size_t i = 0; i < line.size(); i++)
-            {
-                if (i > errEnd)
-                {
-                    break;
-                }
-                else if (i >= errStart)
-                {
-                    std::cerr << "^";
-                }
-                else
-                {
-                    std::cerr << " ";
-                }
-            }
-            std::cerr << "\n";
+            printErrorIndicators(line, lineCount);
         }
 
         lineCount++;
     }
+}
+
+void CompilationError::printErrorIndicators(std::string line, size_t n)
+{
+    size_t errStart = this->begin.column;
+    size_t errEnd = this->end.column;
+    if (n > this->begin.line)
+    {
+        errStart = 0;
+    }
+    if (n < this->end.line)
+    {
+        errEnd = 0;
+    }
+
+    printLeftSidePrefix();
+    for (size_t i = 0; i < line.size(); i++)
+    {
+        if (i > errEnd)
+        {
+            break;
+        }
+        else if (i >= errStart)
+        {
+            std::cerr << "^";
+        }
+        else
+        {
+            std::cerr << " ";
+        }
+    }
+    std::cerr << "\n";
 }
 
 int countDigits(size_t num)
@@ -68,6 +73,7 @@ int countDigits(size_t num)
 
 void CompilationError::printLeftSidePrefix()
 {
+    std::cerr << "  ";
     size_t maxLineNumber = this->end.line + 3;
     size_t maxLineNumberDigits = countDigits(maxLineNumber);
     for (size_t i = 0; i < maxLineNumberDigits; i++)
@@ -78,6 +84,7 @@ void CompilationError::printLeftSidePrefix()
 }
 void CompilationError::printLeftSidePrefix(size_t n)
 {
+    std::cerr << "  ";
     n++;
     size_t maxLineNumber = this->end.line + 3;
     size_t maxLineNumberDigits = countDigits(maxLineNumber);
