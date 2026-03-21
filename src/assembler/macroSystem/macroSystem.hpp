@@ -18,7 +18,7 @@ public:
     std::string getLine();
 
     void setVariable(std::string symbol, AST::Node *value, size_t stackIndex = 0);
-    AST::Node *getVariable(std::string symbol);
+    AST::Node *getVariable(AST::Node *node);
 
     void pushVariableStack();
     void popVariableStack();
@@ -44,7 +44,7 @@ private:
     Operand _evaluateFunction(AST::Node *node);
     void _evaluateAssignment(AST::Node *node);
 
-    AST::Node *_getVariableHelper(std::string symbol, size_t stackIndex = 0);
+    AST::Node *_getVariableHelper(AST::Node *node, size_t stackIndex = 0);
     void _pushCallStack(AST::Node *node);
     void _popCallStack();
     AST::Node *_getCurrNode();

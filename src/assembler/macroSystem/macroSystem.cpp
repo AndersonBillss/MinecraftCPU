@@ -86,9 +86,9 @@ void MacroSystem::popVariableStack()
     _currentStack--;
 }
 
-AST::Node *MacroSystem::getVariable(std::string symbol)
+AST::Node *MacroSystem::getVariable(AST::Node *node)
 {
-    return _getVariableHelper(symbol, _currentStack);
+    return _getVariableHelper(node, _currentStack);
 }
 
 bool MacroSystem::done()
@@ -125,8 +125,7 @@ Operand MacroSystem::_evaluateExpression(AST::Node *node)
     {
         if (node->nodeType == AST::NodeType::IDENTIFIER)
         {
-            AST::Node *variableValue = getVariable(node->identifier);
-            // return getNodeValue(variableValue);
+            AST::Node *variableValue = getVariable(node);
             return _evaluateExpression(variableValue);
         }
         else if (node->nodeType == AST::NodeType::BLOCK)
@@ -193,7 +192,7 @@ Operand MacroSystem::_evaluateFunction(AST::Node *node)
     assert(argListNode->nodeType == AST::NodeType::ARGUMENT_LIST);
 
     std::string functionName = labelNode->identifier;
-    auto functionNode = getVariable(labelNode->identifier);
+    auto functionNode = getVariable(node);
     assert(functionNode->children.size() == 2);
 
     auto paramListNode = functionNode->children[0].get();
@@ -202,7 +201,10 @@ Operand MacroSystem::_evaluateFunction(AST::Node *node)
 
     if (paramListNode->children.size() != argListNode->children.size())
     {
-        throw RuntimeError("Calling function '" + functionName + "' with incorrect number of arguments");
+        throw CompilationError(ErrorStage::Codegen,
+                               node->begin,
+                               node->end,
+                               "Calling function '" + functionName + "' with incorrect number of arguments");
     }
 
     _pushCallStack(functionBody);
@@ -227,8 +229,9 @@ void MacroSystem::_evaluateAssignment(AST::Node *node)
     setVariable(identifier, val);
 }
 
-AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex)
+AST::Node *MacroSystem::_getVariableHelper(AST::Node *node, size_t stackIndex)
 {
+    std::string symbol = node->identifier;
     VariableMap &scope = _variables[stackIndex];
     auto it = scope.find(symbol);
     if (it != scope.end())
@@ -239,9 +242,12 @@ AST::Node *MacroSystem::_getVariableHelper(std::string symbol, size_t stackIndex
     {
         if (stackIndex == 0)
         {
-            throw RuntimeError("Variable not found: '" + symbol + "'");
+            throw CompilationError(ErrorStage::Codegen,
+                                   node->begin,
+                                   node->end,
+                                   "Variable not found: '" + symbol + "'");
         }
-        return _getVariableHelper(symbol, 0);
+        return _getVariableHelper(node, 0);
     }
 }
 
