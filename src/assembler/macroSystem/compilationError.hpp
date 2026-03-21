@@ -33,5 +33,5 @@ public:
         return formatted.c_str();
     }
 
-    void printErr();
+    void printErr(std::string filePath);
 };
