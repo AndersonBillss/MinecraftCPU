@@ -205,3 +205,14 @@ TEST_CASE("MacroSystem evaluates functions with block arguments", "[macroSystem]
     std::string result = "206\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
+
+TEST_CASE("MacroSystem evaluates lines after returning from function", "[macroSystem]")
+{
+    std::string sourceCode = R"(
+    $mul = $a $b => $a * $b
+    $mul 2 3
+    LDI R1 1
+    )";
+    std::string result = "6\nLDI R1 1\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}

@@ -111,6 +111,7 @@ std::string MacroSystem::_getLineHelper(AST::Node *currNode)
     if (firstChild->nodeType == AST::NodeType::CALL)
     {
         auto result = _evaluateFunction(firstChild);
+        _nextNode();
         return operandToString(result);
     }
 
