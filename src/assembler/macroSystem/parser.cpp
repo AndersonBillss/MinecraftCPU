@@ -449,12 +449,13 @@ std::unique_ptr<AST::Node> Parser::_handleExpressionHelper(std::unique_ptr<AST::
             }
         }
         std::vector<std::unique_ptr<AST::Node>> operands = {};
-        auto lhsEnd = rhs->end;
+        auto lhsBegin = lhs->begin;
+        auto rhsEnd = rhs->end;
         operands.push_back(std::move(lhs));
         operands.push_back(std::move(rhs));
         lhs = std::make_unique<AST::Node>(AST::Node{
-            lookahead.begin,
-            lhsEnd,
+            lhsBegin,
+            rhsEnd,
             operatorType(op),
             std::move(operands),
             "",
