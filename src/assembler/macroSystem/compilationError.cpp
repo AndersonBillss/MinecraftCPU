@@ -32,14 +32,14 @@ void CompilationError::printErr(std::string filePath)
     size_t lineCount = 0;
     std::string line;
     std::cerr << "  ";
-    printPadding();
+    _printPadding();
     std::cerr << "--> "
               << filePath << ":"
               << this->begin.line + 1 << ":"
               << this->begin.column + 1
               << "\n";
 
-    printLeftSidePrefix();
+    _printLeftSidePrefix();
     std::cerr << "\n";
     while (std::getline(file, line))
     {
@@ -47,21 +47,21 @@ void CompilationError::printErr(std::string filePath)
             lineCount == this->begin.line - 1 || lineCount == this->begin.line - 2 ||
             lineCount == this->end.line + 1 || lineCount == this->end.line + 2)
         {
-            printLeftSidePrefix(lineCount);
+            _printLeftSidePrefix(lineCount);
             std::cerr << line << "\n";
         }
         else if (lineCount >= this->begin.line && lineCount <= this->end.line)
         {
-            printLeftSidePrefix(lineCount);
+            _printLeftSidePrefix(lineCount);
             std::cerr << line << std::endl;
-            printErrorIndicators(line, lineCount);
+            _printErrorIndicators(line, lineCount);
         }
 
         lineCount++;
     }
 }
 
-void CompilationError::printErrorIndicators(std::string line, size_t n)
+void CompilationError::_printErrorIndicators(std::string line, size_t n)
 {
     size_t errStart = this->begin.column;
     size_t errEnd = this->end.column;
@@ -74,7 +74,7 @@ void CompilationError::printErrorIndicators(std::string line, size_t n)
         errEnd = 0;
     }
 
-    printLeftSidePrefix();
+    _printLeftSidePrefix();
     bool printedCaret = false;
     for (size_t i = 0; i < line.size(); i++)
     {
@@ -109,33 +109,33 @@ int countDigits(size_t num)
     return static_cast<int>(std::log10(num)) + 1;
 }
 
-size_t CompilationError::getPaddingSize()
+size_t CompilationError::_getPaddingSize()
 {
     size_t maxLineNumber = this->end.line + 3;
     size_t maxLineNumberDigits = countDigits(maxLineNumber);
     return maxLineNumberDigits;
 }
 
-void CompilationError::printPadding()
+void CompilationError::_printPadding()
 {
-    size_t paddingSize = getPaddingSize();
+    size_t paddingSize = _getPaddingSize();
     for (size_t i = 0; i < paddingSize; i++)
     {
         std::cerr << " ";
     }
 }
 
-void CompilationError::printLeftSidePrefix()
+void CompilationError::_printLeftSidePrefix()
 {
     std::cerr << "  ";
-    printPadding();
+    _printPadding();
     std::cerr << " |  ";
 }
-void CompilationError::printLeftSidePrefix(size_t n)
+void CompilationError::_printLeftSidePrefix(size_t n)
 {
     std::cerr << "  ";
     n++;
-    size_t padding = getPaddingSize() - countDigits(n);
+    size_t padding = _getPaddingSize() - countDigits(n);
     for (size_t i = 0; i < padding; i++)
     {
         std::cerr << " ";

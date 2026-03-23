@@ -36,9 +36,9 @@ public:
     void printErr(std::string filePath);
 
 private:
-    void printPadding();
-    size_t getPaddingSize();
-    void printErrorIndicators(std::string line, size_t n);
-    void printLeftSidePrefix();
-    void printLeftSidePrefix(size_t n);
+    void _printPadding();
+    size_t _getPaddingSize();
+    void _printErrorIndicators(std::string line, size_t n);
+    void _printLeftSidePrefix();
+    void _printLeftSidePrefix(size_t n);
 };
