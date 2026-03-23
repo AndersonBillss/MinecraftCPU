@@ -4,14 +4,43 @@
 #include <string>
 #include <cmath>
 
+void printErrStage(ErrorStage stage)
+{
+    switch (stage)
+    {
+    case ErrorStage::Parsing:
+        std::cerr << "Parsing";
+        break;
+    case ErrorStage::Codegen:
+        std::cerr << "Codegen";
+        break;
+    case ErrorStage::Semantic:
+        std::cerr << "Semantic";
+        break;
+    case ErrorStage::Tokenization:
+        std::cerr << "Tokenization";
+        break;
+    }
+}
+
 void CompilationError::printErr(std::string filePath)
 {
-    std::cerr << "File \"" << filePath << "\"" << "\n";
-    std::cerr << this->what() << "\n\n";
+    printErrStage(this->stage);
+    std::cerr << " error: " << this->what() << "\n";
     std::ifstream file(filePath);
 
     size_t lineCount = 0;
     std::string line;
+    std::cerr << "  ";
+    printPadding();
+    std::cerr << "--> "
+              << filePath << ":"
+              << this->begin.line + 1 << ":"
+              << this->begin.column + 1
+              << "\n";
+
+    printLeftSidePrefix();
+    std::cerr << "\n";
     while (std::getline(file, line))
     {
         if (
@@ -80,25 +109,33 @@ int countDigits(size_t num)
     return static_cast<int>(std::log10(num)) + 1;
 }
 
-void CompilationError::printLeftSidePrefix()
+size_t CompilationError::getPaddingSize()
 {
-    std::cerr << "  ";
     size_t maxLineNumber = this->end.line + 3;
     size_t maxLineNumberDigits = countDigits(maxLineNumber);
-    for (size_t i = 0; i < maxLineNumberDigits; i++)
+    return maxLineNumberDigits;
+}
+
+void CompilationError::printPadding()
+{
+    size_t paddingSize = getPaddingSize();
+    for (size_t i = 0; i < paddingSize; i++)
     {
         std::cerr << " ";
     }
+}
+
+void CompilationError::printLeftSidePrefix()
+{
+    std::cerr << "  ";
+    printPadding();
     std::cerr << " |  ";
 }
 void CompilationError::printLeftSidePrefix(size_t n)
 {
     std::cerr << "  ";
     n++;
-    size_t maxLineNumber = this->end.line + 3;
-    size_t maxLineNumberDigits = countDigits(maxLineNumber);
-    size_t nLineNumberDigits = countDigits(n);
-    size_t padding = maxLineNumberDigits - nLineNumberDigits;
+    size_t padding = getPaddingSize() - countDigits(n);
     for (size_t i = 0; i < padding; i++)
     {
         std::cerr << " ";
