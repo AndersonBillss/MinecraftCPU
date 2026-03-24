@@ -216,3 +216,14 @@ TEST_CASE("MacroSystem evaluates lines after returning from function", "[macroSy
     std::string result = "6\nLDI R1 1\n";
     REQUIRE(evaluateMacroHelper(sourceCode) == result);
 }
+
+TEST_CASE("MacroSystem evaluates functions inside expressions", "[macroSystem][only]")
+{
+    std::string sourceCode = R"(
+    $mul = $a $b => $a * $b
+    LDI R1 $mul 2 3
+    LDI R2 1
+    )";
+    std::string result = "LDI R1 6\nLDI R2 1\n";
+    REQUIRE(evaluateMacroHelper(sourceCode) == result);
+}

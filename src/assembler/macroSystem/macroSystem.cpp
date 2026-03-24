@@ -105,13 +105,11 @@ std::string MacroSystem::_getLineHelper(AST::Node *currNode)
     {
         _evaluateAssignment(firstChild);
         _nextNode();
-
         return _getLineHelper(_getCurrNode());
     }
     if (firstChild->nodeType == AST::NodeType::CALL)
     {
         auto result = _evaluateFunction(firstChild);
-        _nextNode();
         return operandToString(result);
     }
 
@@ -218,6 +216,7 @@ Operand MacroSystem::_evaluateFunction(AST::Node *node)
     }
 
     auto result = _evaluateExpression(functionBody);
+    _nextNode();
     _nextNode();
     return result;
 }
