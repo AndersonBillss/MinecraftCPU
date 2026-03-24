@@ -120,7 +120,7 @@ std::unique_ptr<AST::Node> Parser::_handleFunctionCall()
 
     auto functionIdentifier = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
-        {0, 0},
+        _tokens[_currIndex].end,
         AST::NodeType::IDENTIFIER,
         {},
         _tokens[_currIndex].data,
@@ -132,7 +132,7 @@ std::unique_ptr<AST::Node> Parser::_handleFunctionCall()
 
     auto argList = std::make_unique<AST::Node>(AST::Node{
         _tokens[_currIndex].begin,
-        {0, 0},
+        _tokens[_currIndex].end,
         AST::NodeType::ARGUMENT_LIST,
         {},
         "",
