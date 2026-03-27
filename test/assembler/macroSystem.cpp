@@ -1,5 +1,5 @@
 #include "catch_amalgamated.hpp"
-#include "../../src/assembler/macroSystem/MacroSystem.hpp"
+#include "../../src/assembler/macroSystem/macroSystem.hpp"
 #include "../../src/assembler/macroSystem/lexer.hpp"
 #include "../../src/assembler/macroSystem/parser.hpp"
 #include "../../src/utils/runtimeError.hpp"
