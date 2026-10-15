@@ -328,7 +328,16 @@ std::unique_ptr<AST::Node> Parser::_parseAtom()
     }
     if (token.type == Lexer::TokenType::OPENINGPARENTHESE)
     {
-        return _handleParentheses();
+        auto result = _handleParentheses();
+        if (result->children.size() == 0)
+        {
+            throw CompilationError(
+                ErrorStage::Parsing,
+                token.begin,
+                token.end,
+                "Cannot have empty parentheses");
+        }
+        return result;
     }
 
     AST::NodeType nodeType;
