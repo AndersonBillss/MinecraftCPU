@@ -231,8 +231,8 @@ std::unique_ptr<AST::Node> Parser::_handleParentheses()
         {
             throw CompilationError(
                 ErrorStage::Parsing,
-                _tokens[_currIndex].begin,
-                _tokens[_currIndex].end,
+                blockNode->begin,
+                blockNode->begin,
                 "Unmatched parentheses");
         }
         if (_tokens[_currIndex].type == Lexer::TokenType::ENDLINE)
