@@ -96,9 +96,9 @@ void Lexer::_handleComment()
     {
         if (_sourceCode[i] == '\n')
         {
-            _advanceIndex(1);
             return;
         }
+        _advanceIndex(1);
     }
 }
 
